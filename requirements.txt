@@ -1,97 +1,22 @@
-# requirements.txt - Updated for real API integrations
+# requirements.txt - Railway-tested minimal version
 
-# Core FastAPI and web framework
+# Core FastAPI (known to work on Railway)
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
+
+# Templates and forms
 jinja2==3.1.2
 python-multipart==0.0.6
-aiofiles==23.2.1
 
-# HTTP client for API calls
+# HTTP requests (essential for API calls)
 aiohttp==3.9.1
 requests==2.31.0
 
-# Data validation and serialization
+# Data validation
 pydantic==2.5.0
 
-# Logging and monitoring
-structlog==23.2.0
+# Basic logging (no external dependencies)
 python-dotenv==1.0.0
 
-# SOAP client for UKRLP API
-zeep==4.2.1
-lxml==4.9.3
-
-# XML parsing
-xmltodict==0.13.0
-
-# Date and time utilities
+# Date utilities (pure Python)
 python-dateutil==2.8.2
-
-# UUID generation
-uuid==1.30
-
-# Regular expressions (built-in but ensuring compatibility)
-regex==2023.10.3
-
-# CSV parsing for sanctions lists
-pandas==2.1.4
-openpyxl==3.1.2
-
-# Additional security and encoding
-cryptography==41.0.8
-python-jose[cryptography]==3.3.0
-
-# Background task processing (for future scaling)
-celery==5.3.4
-redis==5.0.1
-
-# Database support (for future PostgreSQL integration)
-sqlalchemy==2.0.23
-alembic==1.12.1
-psycopg2-binary==2.9.9
-
-# Password hashing
-passlib[bcrypt]==1.7.4
-
-# Monitoring and metrics
-prometheus-client==0.19.0
-
-# Rate limiting
-slowapi==0.1.9
-limits==3.6.0
-
-# Email validation
-email-validator==2.1.0
-
-# Phone number validation
-phonenumbers==8.13.25
-
-# UK postcode validation
-ukpostcodeutils==1.1.1
-
-# Fuzzy string matching for name comparison
-fuzzywuzzy==0.18.0
-python-levenshtein==0.23.0
-
-# HTML parsing for web scraping (Ofsted, etc)
-beautifulsoup4==4.12.2
-selenium==4.15.2
-
-# HTTP status codes
-httpx==0.25.2
-
-# Timezone handling
-pytz==2023.3
-
-# Configuration management
-pydantic-settings==2.1.0
-
-# Testing framework (for development)
-pytest==7.4.3
-pytest-asyncio==0.21.1
-
-# Development dependencies
-black==23.11.0
-flake8==6.1.0
-isort==5.12.0
