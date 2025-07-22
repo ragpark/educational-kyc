@@ -1,14 +1,22 @@
-from fastapi import FastAPI, Request, HTTPException
+from fastapi import FastAPI, Request, HTTPException, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from contextlib import asynccontextmanager
 import structlog
 import os
-from typing import Dict, List
+from typing import Dict, List, Optional
 from datetime import datetime
 import json
+import asyncio
+
+# Import our real KYC system
+from app.services.real_kyc_orchestrator import (
+    RealEducationalKYCOrchestrator,
+    VerificationResult,
+    VerificationStatus
+)
 
 # Configure logging
 structlog.configure(
