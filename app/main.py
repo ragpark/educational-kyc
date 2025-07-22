@@ -38,9 +38,13 @@ structlog.configure(
 
 logger = structlog.get_logger()
 
-# Simple in-memory storage for demo (Railway will provide PostgreSQL)
+# In-memory storage for demo (Railway will provide PostgreSQL later)
 providers_db = []
 verification_logs = []
+processing_queue = {}
+
+# Initialize KYC orchestrator
+kyc_orchestrator = RealEducationalKYCOrchestrator()
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
