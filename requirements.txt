@@ -1,4 +1,4 @@
-# requirements.txt - Updated for real API integrations including JCQ
+# requirements.txt - Updated for real API integrations
 
 # Core FastAPI and web framework
 fastapi==0.104.1
@@ -17,17 +17,13 @@ pydantic==2.5.0
 # Logging and monitoring
 structlog==23.2.0
 python-dotenv==1.0.0
- 
+
 # SOAP client for UKRLP API
 zeep==4.2.1
 lxml==4.9.3
 
 # XML parsing
 xmltodict==0.13.0
-
-# HTML parsing for web scraping (JCQ, Ofsted, etc)
-beautifulsoup4==4.12.2
-selenium==4.15.2
 
 # Date and time utilities
 python-dateutil==2.8.2
@@ -77,6 +73,10 @@ ukpostcodeutils==1.1.1
 # Fuzzy string matching for name comparison
 fuzzywuzzy==0.18.0
 python-levenshtein==0.23.0
+
+# HTML parsing for web scraping (Ofsted, etc)
+beautifulsoup4==4.12.2
+selenium==4.15.2
 
 # HTTP status codes
 httpx==0.25.2
