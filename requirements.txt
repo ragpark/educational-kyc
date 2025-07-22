@@ -17,7 +17,7 @@ pydantic==2.5.0
 # Logging and monitoring
 structlog==23.2.0
 python-dotenv==1.0.0
-
+ 
 # SOAP client for UKRLP API
 zeep==4.2.1
 lxml==4.9.3
