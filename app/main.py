@@ -22,7 +22,7 @@ processing_queue = {}
 def check_api_configuration() -> Dict[str, bool]:
     """Check which APIs are properly configured"""
     return {
-        "companies_house_api": bool(os.getenv('COMPANIES_HOUSE_API_KEY')) and os.getenv('COMPANIES_HOUSE_API_KEY') != 'your_key_here',
+        "companies_house_api": bool(os.getenv('COMPANIES_HOUSE_API_KEY')) and os.getenv('COMPANIES_HOUSE_API_KEY') != 'af64d22b-200a-45cb-91d8-5446fcf4f57e',
         "basic_verification": True,  # Always available
         "jcq_simulation": True,      # Simulated JCQ checks
     }
