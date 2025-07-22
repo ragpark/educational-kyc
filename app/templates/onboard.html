@@ -1,0 +1,153 @@
+{% extends "base.html" %}
+
+{% block title %}Add Provider - Educational Provider KYC{% endblock %}
+
+{% block content %}
+<div class="max-w-2xl mx-auto">
+    <div class="mb-8">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">Add New Educational Provider</h2>
+        <p class="text-gray-600">Start the KYC verification process for a new educational provider</p>
+    </div>
+    
+    <div class="bg-white rounded-lg shadow-md p-8">
+        <form method="POST" action="/onboard" class="space-y-6">
+            <!-- Organisation Details -->
+            <div class="border-b border-gray-200 pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Organisation Information</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="organisation_name" class="block text-sm font-medium text-gray-700 mb-2">
+                            Organisation Name *
+                        </label>
+                        <input type="text" 
+                               id="organisation_name" 
+                               name="organisation_name" 
+                               required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="Excellence Training Academy Ltd">
+                    </div>
+                    
+                    <div>
+                        <label for="provider_type" class="block text-sm font-medium text-gray-700 mb-2">
+                            Provider Type *
+                        </label>
+                        <select id="provider_type" 
+                                name="provider_type" 
+                                required
+                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                            <option value="">Select provider type...</option>
+                            <option value="Training Provider">Training Provider</option>
+                            <option value="Further Education College">Further Education College</option>
+                            <option value="Higher Education Institution">Higher Education Institution</option>
+                            <option value="Apprenticeship Provider">Apprenticeship Provider</option>
+                            <option value="Private Training Provider">Private Training Provider</option>
+                            <option value="Adult Community Learning">Adult Community Learning</option>
+                        </select>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Registration Details -->
+            <div class="border-b border-gray-200 pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Registration Details</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="company_number" class="block text-sm font-medium text-gray-700 mb-2">
+                            Companies House Number
+                        </label>
+                        <input type="text" 
+                               id="company_number" 
+                               name="company_number"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="12345678">
+                        <p class="text-xs text-gray-500 mt-1">8-digit company registration number</p>
+                    </div>
+                    
+                    <div>
+                        <label for="ukprn" class="block text-sm font-medium text-gray-700 mb-2">
+                            UKPRN
+                        </label>
+                        <input type="text" 
+                               id="ukprn" 
+                               name="ukprn"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="10012345">
+                        <p class="text-xs text-gray-500 mt-1">UK Provider Reference Number (if applicable)</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Contact Information -->
+            <div class="pb-6">
+                <h3 class="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
+                
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div>
+                        <label for="postcode" class="block text-sm font-medium text-gray-700 mb-2">
+                            Postcode *
+                        </label>
+                        <input type="text" 
+                               id="postcode" 
+                               name="postcode" 
+                               required
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="M1 1AA">
+                    </div>
+                    
+                    <div>
+                        <label for="contact_email" class="block text-sm font-medium text-gray-700 mb-2">
+                            Contact Email
+                        </label>
+                        <input type="email" 
+                               id="contact_email" 
+                               name="contact_email"
+                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="contact@provider.co.uk">
+                    </div>
+                </div>
+                
+                <div class="mt-4">
+                    <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                        Full Address
+                    </label>
+                    <textarea id="address" 
+                              name="address"
+                              rows="3"
+                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="123 Training Street, Manchester"></textarea>
+                </div>
+            </div>
+            
+            <!-- Submit Button -->
+            <div class="flex justify-between items-center pt-6">
+                <a href="/" class="text-gray-600 hover:text-gray-800 transition-colors">
+                    ← Back to Dashboard
+                </a>
+                <button type="submit" 
+                        class="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
+                    Start KYC Verification
+                </button>
+            </div>
+        </form>
+        
+        <!-- Information Box -->
+        <div class="mt-8 p-4 bg-blue-50 rounded-lg border border-blue-200">
+            <div class="flex items-start">
+                <span class="text-blue-600 text-xl mr-3">ℹ️</span>
+                <div>
+                    <h4 class="text-sm font-medium text-blue-900 mb-2">What happens next?</h4>
+                    <ul class="text-sm text-blue-800 space-y-1">
+                        <li>• Automatic verification against UK educational databases</li>
+                        <li>• Companies House registration check</li>
+                        <li>• UKPRN validation (if provided)</li>
+                        <li>• Risk assessment and compliance review</li>
+                        <li>• Results available immediately</li>
+                    </ul>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}
