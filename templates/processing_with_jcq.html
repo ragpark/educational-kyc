@@ -1,0 +1,307 @@
+
+<!-- templates/processing_with_jcq.html -->
+{% extends "base.html" %}
+
+{% block title %}Processing with JCQ Verification - Educational Provider KYC{% endblock %}
+
+{% block content %}
+<div class="max-w-4xl mx-auto">
+    <div class="mb-8">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">Enhanced KYC Verification in Progress</h2>
+        <p class="text-gray-600">Real-time verification for {{ provider.organisation_name }} including JCQ centre validation</p>
+    </div>
+    
+    <!-- Progress Indicator -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <div class="flex items-center justify-between mb-4">
+            <h3 class="text-lg font-semibold text-gray-900">Enhanced Verification Progress</h3>
+            <div id="verification-status" class="px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800">
+                Processing...
+            </div>
+        </div>
+        
+        <!-- Progress Bar -->
+        <div class="w-full bg-gray-200 rounded-full h-2 mb-4">
+            <div id="progress-bar" class="bg-blue-600 h-2 rounded-full transition-all duration-500" style="width: 10%"></div>
+        </div>
+        
+        <!-- Verification Steps -->
+        <div id="verification-steps" class="space-y-3">
+            <div class="flex items-center p-3 bg-gray-50 rounded">
+                <div class="w-6 h-6 bg-blue-500 rounded-full flex items-center justify-center mr-3">
+                    <div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900">Initializing enhanced verification process</p>
+                    <p class="text-sm text-gray-600">Connecting to UK regulatory APIs including JCQ</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Provider Summary -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Provider Summary</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <dl class="space-y-3">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Organisation Name</dt>
+                        <dd class="text-sm text-gray-900">{{ provider.organisation_name }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Provider Type</dt>
+                        <dd class="text-sm text-gray-900">{{ provider.provider_type }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Companies House Number</dt>
+                        <dd class="text-sm text-gray-900">{{ provider.company_number or 'Not provided' }}</dd>
+                    </div>
+                </dl>
+            </div>
+            <div>
+                <dl class="space-y-3">
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">UKPRN</dt>
+                        <dd class="text-sm text-gray-900">{{ provider.ukprn or 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">
+                            JCQ Centre Number 
+                            <span class="text-blue-600 text-xs font-semibold">NEW</span>
+                        </dt>
+                        <dd class="text-sm text-gray-900">{{ provider.jcq_centre_number or 'Not provided' }}</dd>
+                    </div>
+                    <div>
+                        <dt class="text-sm font-medium text-gray-500">Verification ID</dt>
+                        <dd class="text-sm text-gray-900 font-mono">{{ verification_id }}</dd>
+                    </div>
+                </dl>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Enhanced Data Sources -->
+    <div class="bg-white rounded-lg shadow-md p-6">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Enhanced Data Sources</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
+            <div class="flex items-center p-3 border border-gray-200 rounded">
+                <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                <div>
+                    <p class="font-medium text-gray-900">Companies House</p>
+                    <p class="text-sm text-gray-600">Company verification</p>
+                </div>
+            </div>
+            <div class="flex items-center p-3 border border-gray-200 rounded">
+                <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                <div>
+                    <p class="font-medium text-gray-900">UK Sanctions Lists</p>
+                    <p class="text-sm text-gray-600">Security screening</p>
+                </div>
+            </div>
+            <div class="flex items-center p-3 border border-gray-200 rounded">
+                <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                <div>
+                    <p class="font-medium text-gray-900">UKRLP Database</p>
+                    <p class="text-sm text-gray-600">Provider registration</p>
+                </div>
+            </div>
+            <div class="flex items-center p-3 border border-gray-200 rounded">
+                <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                <div>
+                    <p class="font-medium text-gray-900">Ofqual Register</p>
+                    <p class="text-sm text-gray-600">Qualification recognition</p>
+                </div>
+            </div>
+            <div class="flex items-center p-3 border border-blue-200 rounded bg-blue-50">
+                <div class="w-3 h-3 bg-blue-500 rounded-full mr-3"></div>
+                <div>
+                    <p class="font-medium text-blue-900">JCQ Centre Directory</p>
+                    <p class="text-sm text-blue-700">Examination centre verification</p>
+                </div>
+            </div>
+            <div class="flex items-center p-3 border border-gray-200 rounded">
+                <div class="w-3 h-3 bg-green-500 rounded-full mr-3"></div>
+                <div>
+                    <p class="font-medium text-gray-900">Risk Assessment</p>
+                    <p class="text-sm text-gray-600">Enhanced educational scoring</p>
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- Action Buttons -->
+    <div class="flex justify-between items-center mt-8">
+        <a href="/" class="text-gray-600 hover:text-gray-800 transition-colors">
+            ← Back to Dashboard
+        </a>
+        <div class="space-x-4">
+            <button id="refresh-btn" 
+                    onclick="checkVerificationStatus()"
+                    class="bg-gray-600 text-white px-4 py-2 rounded-md hover:bg-gray-700 transition-colors">
+                Refresh Status
+            </button>
+            <button id="view-results-btn" 
+                    onclick="viewResults()" 
+                    disabled
+                    class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700 transition-colors disabled:opacity-50 disabled:cursor-not-allowed">
+                View Results
+            </button>
+        </div>
+    </div>
+</div>
+
+<script>
+const verificationId = '{{ verification_id }}';
+let checkInterval;
+
+// Enhanced verification steps including JCQ
+const verificationSteps = [
+    { name: 'Companies House Verification', description: 'Checking company registration status' },
+    { name: 'UKPRN Validation', description: 'Verifying provider registration' },
+    { name: 'JCQ Centre Verification', description: 'Validating JCQ National Centre Number', highlight: true },
+    { name: 'Sanctions Screening', description: 'Checking against UK and international sanctions' },
+    { name: 'Ofqual Recognition Check', description: 'Verifying awarding organisation status' },
+    { name: 'Enhanced Risk Assessment', description: 'Calculating comprehensive risk score' }
+];
+
+let currentStep = 0;
+
+function updateProgressDisplay(data) {
+    const statusElement = document.getElementById('verification-status');
+    const progressBar = document.getElementById('progress-bar');
+    const stepsContainer = document.getElementById('verification-steps');
+    const viewResultsBtn = document.getElementById('view-results-btn');
+    
+    if (data.processing_status === 'completed') {
+        statusElement.textContent = 'Completed';
+        statusElement.className = 'px-3 py-1 rounded-full text-sm font-semibold bg-green-100 text-green-800';
+        progressBar.style.width = '100%';
+        viewResultsBtn.disabled = false;
+        clearInterval(checkInterval);
+        
+        // Show completion message with JCQ status
+        const jcqStatus = data.kyc_results.jcq_centre_verification ? 
+            ` | JCQ: ${data.kyc_results.jcq_centre_verification.status}` : '';
+        
+        stepsContainer.innerHTML = `
+            <div class="flex items-center p-4 bg-green-50 rounded-lg">
+                <div class="w-8 h-8 bg-green-500 rounded-full flex items-center justify-center mr-3">
+                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-medium text-green-900">Enhanced Verification Complete!</p>
+                    <p class="text-sm text-green-700">Status: ${data.status} | Risk Level: ${data.risk_level}${jcqStatus}</p>
+                </div>
+            </div>
+        `;
+        
+    } else if (data.processing_status === 'error') {
+        statusElement.textContent = 'Error';
+        statusElement.className = 'px-3 py-1 rounded-full text-sm font-semibold bg-red-100 text-red-800';
+        clearInterval(checkInterval);
+        
+        stepsContainer.innerHTML = `
+            <div class="flex items-center p-4 bg-red-50 rounded-lg">
+                <div class="w-8 h-8 bg-red-500 rounded-full flex items-center justify-center mr-3">
+                    <svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                </div>
+                <div>
+                    <p class="font-medium text-red-900">Verification Failed</p>
+                    <p class="text-sm text-red-700">An error occurred during verification. Please try again.</p>
+                </div>
+            </div>
+        `;
+        
+    } else if (data.processing_status === 'in_progress') {
+        statusElement.textContent = 'In Progress';
+        statusElement.className = 'px-3 py-1 rounded-full text-sm font-semibold bg-blue-100 text-blue-800';
+        
+        // Update progress based on completed checks
+        const completedChecks = Object.keys(data.kyc_results || {}).length;
+        const progress = Math.min((completedChecks / 6) * 100, 90); // Max 90% until fully complete
+        progressBar.style.width = progress + '%';
+        
+        // Update steps display
+        updateStepsDisplay(data.kyc_results || {});
+    }
+}
+
+function updateStepsDisplay(kycResults) {
+    const stepsContainer = document.getElementById('verification-steps');
+    const completedChecks = Object.keys(kycResults);
+    
+    let stepsHtml = '';
+    
+    verificationSteps.forEach((step, index) => {
+        const isCompleted = index < completedChecks.length;
+        const isActive = index === completedChecks.length;
+        const isJCQStep = step.highlight;
+        
+        let statusIcon, statusClass, containerClass;
+        
+        if (isCompleted) {
+            statusIcon = `<svg class="w-4 h-4 text-white" fill="currentColor" viewBox="0 0 20 20">
+                <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+            </svg>`;
+            statusClass = 'bg-green-500';
+            containerClass = isJCQStep ? 'bg-green-50 border border-green-200' : 'bg-gray-50';
+        } else if (isActive) {
+            statusIcon = '<div class="w-2 h-2 bg-white rounded-full animate-pulse"></div>';
+            statusClass = isJCQStep ? 'bg-blue-500' : 'bg-blue-500';
+            containerClass = isJCQStep ? 'bg-blue-50 border border-blue-200' : 'bg-blue-50';
+        } else {
+            statusIcon = '<div class="w-2 h-2 bg-white rounded-full opacity-50"></div>';
+            statusClass = 'bg-gray-400';
+            containerClass = 'bg-gray-50';
+        }
+        
+        stepsHtml += `
+            <div class="flex items-center p-3 ${containerClass} rounded">
+                <div class="w-6 h-6 ${statusClass} rounded-full flex items-center justify-center mr-3">
+                    ${statusIcon}
+                </div>
+                <div>
+                    <p class="font-medium text-gray-900">
+                        ${step.name}
+                        ${isJCQStep ? '<span class="text-blue-600 text-xs font-semibold ml-2">NEW</span>' : ''}
+                    </p>
+                    <p class="text-sm text-gray-600">${step.description}</p>
+                </div>
+            </div>
+        `;
+    });
+    
+    stepsContainer.innerHTML = stepsHtml;
+}
+
+async function checkVerificationStatus() {
+    try {
+        const response = await fetch(`/verification/${verificationId}`);
+        const data = await response.json();
+        updateProgressDisplay(data);
+    } catch (error) {
+        console.error('Error checking verification status:', error);
+    }
+}
+
+function viewResults() {
+    window.location.href = `/results/${verificationId}`;
+}
+
+// Start checking status immediately and then every 3 seconds
+checkVerificationStatus();
+checkInterval = setInterval(checkVerificationStatus, 3000);
+
+// Clean up interval when page is unloaded
+window.addEventListener('beforeunload', () => {
+    if (checkInterval) {
+        clearInterval(checkInterval);
+    }
+});
+</script>
+{% endblock %}
