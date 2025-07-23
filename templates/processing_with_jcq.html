@@ -96,7 +96,9 @@
             <p class="text-xs text-gray-600">
                 <strong>Bookmark this link:</strong> 
                 <span class="font-mono text-xs break-all">
-                    {{ request.url.replace(request.url.path, '') }}/provider-status/{{ verification_id }}
+
+                    {{ request.base_url }}provider-status/{{ verification_id }}
+
                 </span>
             </p>
         </div>
