@@ -1,4 +1,4 @@
-# app/main.py - Simplified version for Railway deployment
+# app/main.py - Updated with Enhanced Companies House Integration
 
 from fastapi import FastAPI, Request, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
@@ -15,14 +15,19 @@ import uuid
 import aiohttp
 import requests
 
+# Import the enhanced Companies House service
+from app.services.companies_house_enhanced import EnhancedCompaniesHouseAPI, get_enhanced_companies_house_result
+
 # In-memory storage for demo
 providers_db = []
 processing_queue = {}
 
 def check_api_configuration() -> Dict[str, bool]:
     """Check which APIs are properly configured"""
+    companies_house_api = EnhancedCompaniesHouseAPI()
+    
     return {
-        "companies_house_api": bool(os.getenv('COMPANIES_HOUSE_API_KEY')) and os.getenv('COMPANIES_HOUSE_API_KEY') != 'af64d22b-200a-45cb-91d8-5446fcf4f57e',
+        "companies_house_api": companies_house_api.is_configured(),
         "basic_verification": True,  # Always available
         "jcq_simulation": True,      # Simulated JCQ checks
     }
@@ -30,6 +35,13 @@ def check_api_configuration() -> Dict[str, bool]:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting Educational KYC application (Railway-safe version)")
+    
+    # Check Companies House API configuration
+    api_status = check_api_configuration()
+    if api_status["companies_house_api"]:
+        print("✓ Companies House API configured")
+    else:
+        print("⚠ Companies House API not configured - using limited verification")
     
     # Add sample data
     sample_providers = [
@@ -61,8 +73,8 @@ async def lifespan(app: FastAPI):
 
 app = FastAPI(
     title="UK Educational Provider KYC (Railway-Safe)",
-    description="Simplified KYC verification for UK educational providers",
-    version="2.0-safe",
+    description="Enhanced KYC verification for UK educational providers with Companies House integration",
+    version="2.1-enhanced",
     lifespan=lifespan
 )
 
@@ -110,7 +122,7 @@ async def onboard_form(request: Request):
 
 @app.post("/onboard")
 async def onboard_provider(request: Request, background_tasks: BackgroundTasks):
-    """Process provider onboarding with simplified verification"""
+    """Process provider onboarding with enhanced verification"""
     form_data = await request.form()
     
     verification_id = str(uuid.uuid4())
@@ -146,8 +158,8 @@ async def onboard_provider(request: Request, background_tasks: BackgroundTasks):
     providers_db.append(new_provider)
     processing_queue[verification_id] = "started"
     
-    # Start simplified KYC verification
-    background_tasks.add_task(process_simplified_kyc, verification_id, provider_data)
+    # Start enhanced KYC verification
+    background_tasks.add_task(process_enhanced_kyc, verification_id, provider_data)
     
     return templates.TemplateResponse(
         "processing_with_jcq.html", 
@@ -158,21 +170,21 @@ async def onboard_provider(request: Request, background_tasks: BackgroundTasks):
         }
     )
 
-async def process_simplified_kyc(verification_id: str, provider_data: Dict):
-    """Simplified KYC verification that works without external dependencies"""
-    print(f"Starting simplified KYC verification: {verification_id}")
+async def process_enhanced_kyc(verification_id: str, provider_data: Dict):
+    """Enhanced KYC verification with comprehensive Companies House checks"""
+    print(f"Starting enhanced KYC verification: {verification_id}")
     
     try:
         processing_queue[verification_id] = "in_progress"
         
-        # Simulate processing delay
-        await asyncio.sleep(3)
+        # Simulate initial processing
+        await asyncio.sleep(2)
         
         # Find provider
         provider = next((p for p in providers_db if p.get("verification_id") == verification_id), None)
         
         if provider:
-            # Simplified verification results
+            # Enhanced verification results
             kyc_results = {}
             
             # Basic format validation
@@ -184,10 +196,28 @@ async def process_simplified_kyc(verification_id: str, provider_data: Dict):
                 "timestamp": datetime.now().isoformat()
             }
             
-            # Companies House check (if API key available)
-            if os.getenv('COMPANIES_HOUSE_API_KEY') and provider_data.get("company_number"):
-                ch_result = await check_companies_house_simple(provider_data["company_number"])
-                kyc_results["companies_house"] = ch_result
+            # Enhanced Companies House check
+            if provider_data.get("company_number"):
+                print(f"Running enhanced Companies House check for: {provider_data['company_number']}")
+                ch_result = await get_enhanced_companies_house_result(
+                    provider_data["company_number"],
+                    provider_data.get("organisation_name")
+                )
+                
+                # Transform the enhanced result to fit our schema
+                kyc_results["companies_house"] = {
+                    "status": ch_result.get("status", "error"),
+                    "risk_score": ch_result.get("risk_score", 0.5),
+                    "data_source": ch_result.get("data_source", "Companies House API"),
+                    "confidence": ch_result.get("confidence", 0.0),
+                    "details": ch_result.get("details", {}),
+                    "recommendations": ch_result.get("recommendations", []),
+                    "timestamp": ch_result.get("timestamp", datetime.now().isoformat())
+                }
+                
+                # Add any specific risk factors from Companies House
+                if ch_result.get("details", {}).get("risk_factors"):
+                    print(f"Risk factors identified: {ch_result['details']['risk_factors']}")
             
             # JCQ simulation
             if provider_data.get("jcq_centre_number"):
@@ -203,13 +233,28 @@ async def process_simplified_kyc(verification_id: str, provider_data: Dict):
             sanctions_result = simulate_sanctions_check(provider_data["organisation_name"])
             kyc_results["sanctions_screening"] = sanctions_result
             
-            # Calculate overall risk
-            total_checks = len(kyc_results)
-            failed_checks = len([r for r in kyc_results.values() if r["status"] == "failed"])
-            flagged_checks = len([r for r in kyc_results.values() if r["status"] == "flagged"])
+            # Calculate overall risk using weighted scoring
+            risk_scores = []
+            risk_weights = {
+                "companies_house": 0.35,  # Higher weight for Companies House
+                "jcq_verification": 0.25,
+                "ukprn_validation": 0.15,
+                "sanctions_screening": 0.15,
+                "basic_validation": 0.10
+            }
             
-            overall_risk_score = (failed_checks * 0.3 + flagged_checks * 0.2) / max(total_checks, 1)
+            weighted_risk = 0.0
+            total_weight = 0.0
             
+            for check_name, result in kyc_results.items():
+                weight = risk_weights.get(check_name, 0.1)
+                if "risk_score" in result:
+                    weighted_risk += result["risk_score"] * weight
+                    total_weight += weight
+            
+            overall_risk_score = weighted_risk / total_weight if total_weight > 0 else 0.5
+            
+            # Determine status based on risk and Companies House result
             if overall_risk_score < 0.3:
                 overall_status = "approved"
                 risk_level = "low"
@@ -220,19 +265,29 @@ async def process_simplified_kyc(verification_id: str, provider_data: Dict):
                 overall_status = "rejected"
                 risk_level = "high"
             
-            # Risk assessment
+            # Override if Companies House check failed completely
+            if kyc_results.get("companies_house", {}).get("status") == "failed":
+                overall_status = "review_required"
+                risk_level = "medium" if risk_level == "low" else risk_level
+            
+            # Risk assessment summary
             kyc_results["risk_assessment"] = {
                 "status": "completed",
                 "risk_score": overall_risk_score,
-                "data_source": "Simplified Risk Engine",
+                "data_source": "Enhanced Risk Engine",
                 "details": {
-                    "total_checks": total_checks,
-                    "failed_checks": failed_checks,
-                    "flagged_checks": flagged_checks,
-                    "overall_status": overall_status
+                    "total_checks": len(kyc_results) - 1,  # Exclude risk_assessment itself
+                    "risk_calculation": "weighted_average",
+                    "primary_factors": []
                 },
                 "timestamp": datetime.now().isoformat()
             }
+            
+            # Add primary risk factors from Companies House
+            if kyc_results.get("companies_house", {}).get("recommendations"):
+                kyc_results["risk_assessment"]["details"]["primary_factors"].extend(
+                    kyc_results["companies_house"]["recommendations"]
+                )
             
             # Update provider
             provider.update({
@@ -242,16 +297,15 @@ async def process_simplified_kyc(verification_id: str, provider_data: Dict):
                 "overall_risk_score": overall_risk_score,
                 "processing_completed": datetime.now().isoformat(),
                 "verification_summary": {
-                    "total_checks": total_checks,
-                    "passed": total_checks - failed_checks - flagged_checks,
-                    "flagged": flagged_checks,
-                    "failed": failed_checks,
-                    "includes_jcq": bool(provider_data.get("jcq_centre_number"))
+                    "total_checks": len(kyc_results) - 1,
+                    "includes_jcq": bool(provider_data.get("jcq_centre_number")),
+                    "includes_companies_house": bool(provider_data.get("company_number")),
+                    "enhanced_verification": True
                 }
             })
             
             processing_queue[verification_id] = "completed"
-            print(f"Simplified KYC completed: {verification_id} - Status: {overall_status}")
+            print(f"Enhanced KYC completed: {verification_id} - Status: {overall_status}, Risk: {risk_level}")
         
     except Exception as e:
         print(f"KYC verification error: {verification_id} - {str(e)}")
@@ -267,59 +321,20 @@ async def process_simplified_kyc(verification_id: str, provider_data: Dict):
         
         processing_queue[verification_id] = "error"
 
-async def check_companies_house_simple(company_number: str) -> Dict:
-    """Simplified Companies House check"""
-    try:
-        api_key = os.getenv('COMPANIES_HOUSE_API_KEY')
-        if not api_key or api_key == 'your_key_here':
-            return {
-                "status": "not_configured",
-                "risk_score": 0.3,
-                "data_source": "Companies House API",
-                "details": {"message": "API key not configured"},
-                "timestamp": datetime.now().isoformat()
-            }
-        
-        import base64
-        auth = base64.b64encode(f"{api_key}:".encode()).decode()
-        
-        async with aiohttp.ClientSession() as session:
-            async with session.get(
-                f"https://api.company-information.service.gov.uk/company/{company_number}",
-                headers={"Authorization": f"Basic {auth}"}
-            ) as response:
-                if response.status == 200:
-                    data = await response.json()
-                    is_active = data.get("company_status") == "active"
-                    
-                    return {
-                        "status": "passed" if is_active else "flagged",
-                        "risk_score": 0.1 if is_active else 0.5,
-                        "data_source": "Companies House API",
-                        "details": {
-                            "company_name": data.get("company_name"),
-                            "company_status": data.get("company_status"),
-                            "active": is_active
-                        },
-                        "timestamp": datetime.now().isoformat()
-                    }
-                else:
-                    return {
-                        "status": "failed",
-                        "risk_score": 0.7,
-                        "data_source": "Companies House API",
-                        "details": {"error": f"HTTP {response.status}"},
-                        "timestamp": datetime.now().isoformat()
-                    }
+@app.get("/companies-house/quick-check/{company_number}")
+async def quick_companies_house_check(company_number: str):
+    """Quick Companies House check endpoint"""
+    api = EnhancedCompaniesHouseAPI()
     
-    except Exception as e:
+    if not api.is_configured():
         return {
-            "status": "error",
-            "risk_score": 0.5,
-            "data_source": "Companies House API",
-            "details": {"error": str(e)},
-            "timestamp": datetime.now().isoformat()
+            "error": "Companies House API not configured",
+            "exists": False,
+            "active": False
         }
+    
+    result = await api.quick_company_check(company_number)
+    return result
 
 def simulate_jcq_check(centre_number: str) -> Dict:
     """Simulate JCQ centre verification"""
@@ -467,17 +482,20 @@ async def get_stats():
         "processing": len([p for p in providers_db if p["status"] == "processing"]),
         "api_status": api_status,
         "verification_queue": len(processing_queue),
-        "version": "simplified"
+        "version": "enhanced"
     }
 
 @app.get("/health")
 async def health_check():
-    """Health check"""
+    """Health check with enhanced status"""
+    api_status = check_api_configuration()
+    
     return {
         "status": "healthy",
-        "service": "educational-kyc-simplified",
-        "version": "2.0-safe",
+        "service": "educational-kyc-enhanced",
+        "version": "2.1-enhanced",
         "providers_count": len(providers_db),
+        "api_configurations": api_status,
         "timestamp": datetime.now().isoformat()
     }
 
