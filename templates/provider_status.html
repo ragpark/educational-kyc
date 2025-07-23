@@ -1,0 +1,441 @@
+{% extends "base.html" %}
+{% block title %}Application Status - {{ provider.organisation_name }}{% endblock %}
+{% block content %}
+<div class="max-w-5xl mx-auto">
+    <!-- Header -->
+    <div class="mb-8">
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">Application Status</h2>
+        <p class="text-gray-600">Track your verification progress for {{ provider.organisation_name }}</p>
+        <div class="mt-2 p-3 bg-gray-50 rounded-lg">
+            <p class="text-sm text-gray-600">
+                <span class="font-medium">Verification ID:</span> 
+                <code class="bg-white px-2 py-1 rounded text-gray-800 font-mono">{{ provider.verification_id }}</code>
+            </p>
+            <p class="text-sm text-gray-600 mt-1">
+                <span class="font-medium">Submitted:</span> {{ provider.created_at }}
+            </p>
+        </div>
+    </div>
+
+    <!-- 3-Stage Progress Indicator -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-6">Verification Progress</h3>
+        
+        <div class="flex items-center justify-between relative">
+            <!-- Progress Line -->
+            <div class="absolute top-1/2 left-0 right-0 h-1 bg-gray-200 -translate-y-1/2 z-0"></div>
+            <div class="absolute top-1/2 left-0 h-1 bg-blue-600 -translate-y-1/2 z-0 transition-all duration-500
+                {% if provider.status in ['processing', 'review_required', 'approved', 'rejected'] %}w-1/2{% else %}w-0{% endif %}"></div>
+            <div class="absolute top-1/2 left-1/2 h-1 bg-blue-600 -translate-y-1/2 z-0 transition-all duration-500
+                {% if provider.status in ['approved', 'rejected'] %}w-1/2{% else %}w-0{% endif %}"></div>
+
+            <!-- Stage 1: Initial Application -->
+            <div class="relative z-10 flex flex-col items-center">
+                <div class="w-12 h-12 rounded-full border-4 flex items-center justify-center
+                    {% if provider.status in ['processing', 'review_required', 'approved', 'rejected'] %}
+                        bg-blue-600 border-blue-600 text-white
+                    {% else %}
+                        bg-white border-gray-300 text-gray-400
+                    {% endif %}">
+                    {% if provider.status in ['processing', 'review_required', 'approved', 'rejected'] %}
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                    {% else %}
+                        <span class="text-sm font-semibold">1</span>
+                    {% endif %}
+                </div>
+                <div class="mt-2 text-center">
+                    <p class="text-sm font-medium text-gray-900">Initial Application</p>
+                    <p class="text-xs text-gray-500">Form submitted</p>
+                </div>
+            </div>
+
+            <!-- Stage 2: Preliminary Verification -->
+            <div class="relative z-10 flex flex-col items-center">
+                <div class="w-12 h-12 rounded-full border-4 flex items-center justify-center
+                    {% if provider.status == 'processing' %}
+                        bg-yellow-500 border-yellow-500 text-white animate-pulse
+                    {% elif provider.status in ['review_required', 'approved', 'rejected'] %}
+                        bg-blue-600 border-blue-600 text-white
+                    {% else %}
+                        bg-white border-gray-300 text-gray-400
+                    {% endif %}">
+                    {% if provider.status == 'processing' %}
+                        <svg class="w-6 h-6 animate-spin" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                        </svg>
+                    {% elif provider.status in ['review_required', 'approved', 'rejected'] %}
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                    {% else %}
+                        <span class="text-sm font-semibold">2</span>
+                    {% endif %}
+                </div>
+                <div class="mt-2 text-center">
+                    <p class="text-sm font-medium text-gray-900">Preliminary Verification</p>
+                    <p class="text-xs text-gray-500">
+                        {% if provider.status == 'processing' %}
+                            In progress...
+                        {% elif provider.status in ['review_required', 'approved', 'rejected'] %}
+                            Completed
+                        {% else %}
+                            Pending
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+
+            <!-- Stage 3: Final Approval -->
+            <div class="relative z-10 flex flex-col items-center">
+                <div class="w-12 h-12 rounded-full border-4 flex items-center justify-center
+                    {% if provider.status == 'approved' %}
+                        bg-green-600 border-green-600 text-white
+                    {% elif provider.status == 'rejected' %}
+                        bg-red-600 border-red-600 text-white
+                    {% elif provider.status == 'review_required' %}
+                        bg-yellow-500 border-yellow-500 text-white animate-pulse
+                    {% else %}
+                        bg-white border-gray-300 text-gray-400
+                    {% endif %}">
+                    {% if provider.status == 'approved' %}
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                        </svg>
+                    {% elif provider.status == 'rejected' %}
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                        </svg>
+                    {% elif provider.status == 'review_required' %}
+                        <svg class="w-6 h-6" fill="currentColor" viewBox="0 0 20 20">
+                            <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                        </svg>
+                    {% else %}
+                        <span class="text-sm font-semibold">3</span>
+                    {% endif %}
+                </div>
+                <div class="mt-2 text-center">
+                    <p class="text-sm font-medium text-gray-900">Final Approval</p>
+                    <p class="text-xs text-gray-500">
+                        {% if provider.status == 'approved' %}
+                            Approved ✓
+                        {% elif provider.status == 'rejected' %}
+                            Rejected
+                        {% elif provider.status == 'review_required' %}
+                            Under review
+                        {% else %}
+                            Pending
+                        {% endif %}
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Current Status Card -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Current Status</h3>
+        
+        {% if provider.status == 'processing' %}
+        <div class="bg-blue-50 border border-blue-200 p-4 rounded-lg">
+            <div class="flex items-center">
+                <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
+                <div>
+                    <h4 class="text-blue-900 font-medium">Verification in Progress</h4>
+                    <p class="text-blue-700 text-sm">We're currently verifying your application. This typically takes 2-5 business days.</p>
+                </div>
+            </div>
+        </div>
+        {% elif provider.status == 'review_required' %}
+        <div class="bg-yellow-50 border border-yellow-200 p-4 rounded-lg">
+            <div class="flex items-center">
+                <svg class="h-5 w-5 text-yellow-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+                <div>
+                    <h4 class="text-yellow-900 font-medium">Additional Information Required</h4>
+                    <p class="text-yellow-700 text-sm">We need some additional documentation to complete your verification. Please see requirements below.</p>
+                </div>
+            </div>
+        </div>
+        {% elif provider.status == 'approved' %}
+        <div class="bg-green-50 border border-green-200 p-4 rounded-lg">
+            <div class="flex items-center">
+                <svg class="h-5 w-5 text-green-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                </svg>
+                <div>
+                    <h4 class="text-green-900 font-medium">Congratulations! Application Approved</h4>
+                    <p class="text-green-700 text-sm">Your organization has been successfully verified and approved as an education provider.</p>
+                </div>
+            </div>
+        </div>
+        {% elif provider.status == 'rejected' %}
+        <div class="bg-red-50 border border-red-200 p-4 rounded-lg">
+            <div class="flex items-center">
+                <svg class="h-5 w-5 text-red-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                </svg>
+                <div>
+                    <h4 class="text-red-900 font-medium">Application Not Approved</h4>
+                    <p class="text-red-700 text-sm">Unfortunately, your application did not meet our verification requirements. Please see details below.</p>
+                </div>
+            </div>
+        </div>
+        {% else %}
+        <div class="bg-gray-50 border border-gray-200 p-4 rounded-lg">
+            <div class="flex items-center">
+                <svg class="h-5 w-5 text-gray-600 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                </svg>
+                <div>
+                    <h4 class="text-gray-900 font-medium">Status: {{ provider.status|title }}</h4>
+                    <p class="text-gray-700 text-sm">Your application is being processed.</p>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+    </div>
+
+    <!-- Application Summary -->
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Application Summary</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div class="space-y-3">
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Organisation Name</label>
+                    <p class="text-gray-900">{{ provider.organisation_name }}</p>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Provider Type</label>
+                    <p class="text-gray-900">{{ provider.provider_type or 'Not specified' }}</p>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Company Number</label>
+                    <p class="text-gray-900 font-mono">{{ provider.company_number or 'Not provided' }}</p>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-sm font-medium text-gray-500">UKPRN</label>
+                    <p class="text-gray-900 font-mono">{{ provider.ukprn or 'Not provided' }}</p>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Risk Level</label>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        {% if provider.risk_level == 'low' %}bg-green-100 text-green-800{% elif provider.risk_level == 'medium' %}bg-yellow-100 text-yellow-800{% elif provider.risk_level == 'high' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ provider.risk_level|title }}
+                    </span>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Contact Email</label>
+                    <p class="text-gray-900">{{ provider.contact_email or 'Not provided' }}</p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Document Upload Section -->
+    {% if provider.status in ['review_required', 'processing'] %}
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Upload Additional Documents</h3>
+        <p class="text-gray-600 mb-4">If you have additional documentation that may help with your verification, please upload it here.</p>
+        
+        <form id="documentUploadForm" class="space-y-4">
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Document Type</label>
+                <select name="document_type" class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                    <option value="">Select document type...</option>
+                    <option value="company_registration">Company Registration Certificate</option>
+                    <option value="insurance">Professional Indemnity Insurance</option>
+                    <option value="qualifications">Staff Qualifications</option>
+                    <option value="ofsted_report">Ofsted Inspection Report</option>
+                    <option value="esfa_certificate">ESFA Provider Certificate</option>
+                    <option value="awarding_body">Awarding Body Agreements</option>
+                    <option value="safeguarding_policy">Safeguarding Policy</option>
+                    <option value="financial_statements">Financial Statements</option>
+                    <option value="other">Other Supporting Documents</option>
+                </select>
+            </div>
+            
+            <div>
+                <label class="block text-sm font-medium text-gray-700 mb-2">Document Description</label>
+                <input type="text" name="document_description" placeholder="Brief description of the document..." 
+                       class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+            </div>
+            
+            <div class="border-2 border-dashed border-gray-300 rounded-lg p-6 text-center hover:border-gray-400 transition-colors">
+                <input type="file" id="fileInput" name="document" multiple accept=".pdf,.doc,.docx,.jpg,.jpeg,.png,.gif" class="hidden">
+                <label for="fileInput" class="cursor-pointer">
+                    <svg class="mx-auto h-12 w-12 text-gray-400" stroke="currentColor" fill="none" viewBox="0 0 48 48">
+                        <path d="M28 8H12a4 4 0 00-4 4v20m32-12v8m0 0v8a4 4 0 01-4 4H12a4 4 0 01-4-4v-4m32-4l-3.172-3.172a4 4 0 00-5.656 0L28 28M8 32l9.172-9.172a4 4 0 015.656 0L28 28m0 0l4 4m4-24h8m-4-4v8m-12 4h.02" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" />
+                    </svg>
+                    <div class="mt-4">
+                        <p class="text-sm text-gray-600">
+                            <span class="font-medium text-blue-600 hover:text-blue-500">Click to upload</span>
+                            or drag and drop
+                        </p>
+                        <p class="text-xs text-gray-500">PDF, DOC, DOCX, JPG, PNG, GIF up to 10MB each</p>
+                    </div>
+                </label>
+            </div>
+            
+            <div id="selectedFiles" class="hidden">
+                <h4 class="text-sm font-medium text-gray-700 mb-2">Selected Files:</h4>
+                <ul id="fileList" class="text-sm text-gray-600"></ul>
+            </div>
+            
+            <button type="submit" class="w-full bg-blue-600 text-white px-4 py-2 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                Upload Documents
+            </button>
+        </form>
+    </div>
+    {% endif %}
+
+    <!-- Uploaded Documents -->
+    {% if provider.uploaded_documents %}
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Uploaded Documents</h3>
+        <div class="space-y-3">
+            {% for doc in provider.uploaded_documents %}
+            <div class="flex items-center justify-between p-3 bg-gray-50 rounded-lg">
+                <div class="flex items-center">
+                    <svg class="h-5 w-5 text-gray-400 mr-3" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4 4a2 2 0 012-2h4.586A2 2 0 0112 2.586L15.414 6A2 2 0 0116 7.414V16a2 2 0 01-2 2H6a2 2 0 01-2-2V4zm2 6a1 1 0 011-1h6a1 1 0 110 2H7a1 1 0 01-1-1zm1 3a1 1 0 100 2h6a1 1 0 100-2H7z" clip-rule="evenodd"></path>
+                    </svg>
+                    <div>
+                        <p class="text-sm font-medium text-gray-900">{{ doc.name }}</p>
+                        <p class="text-xs text-gray-500">{{ doc.type }} • Uploaded {{ doc.uploaded_at }}</p>
+                    </div>
+                </div>
+                <span class="text-xs px-2 py-1 bg-green-100 text-green-800 rounded-full">Received</span>
+            </div>
+            {% endfor %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Verification Details -->
+    {% if provider.kyc_results and provider.status != 'processing' %}
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Verification Checks</h3>
+        <div class="space-y-3">
+            {% for check_name, check in provider.kyc_results.items() %}
+            {% if check_name != 'verification_summary' %}
+            <div class="flex items-center justify-between p-3 border rounded-lg">
+                <div>
+                    <p class="text-sm font-medium text-gray-900">{{ check_name.replace('_', ' ')|title }}</p>
+                    <p class="text-xs text-gray-500">{{ check.data_source or 'System Check' }}</p>
+                </div>
+                <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                    {% if check.status == 'passed' %}bg-green-100 text-green-800{% elif check.status == 'flagged' %}bg-yellow-100 text-yellow-800{% elif check.status == 'failed' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                    {{ check.status|title }}
+                </span>
+            </div>
+            {% endif %}
+            {% endfor %}
+        </div>
+        
+        {% if provider.status != 'processing' %}
+        <div class="mt-4 pt-4 border-t">
+            <a href="/results/{{ provider.verification_id }}" class="text-blue-600 hover:text-blue-800 text-sm font-medium">
+                View Detailed Results →
+            </a>
+        </div>
+        {% endif %}
+    </div>
+    {% endif %}
+
+    <!-- Contact Information -->
+    <div class="bg-gray-50 rounded-lg p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Need Help?</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+            <div>
+                <h4 class="text-sm font-medium text-gray-900 mb-2">Application Support</h4>
+                <p class="text-sm text-gray-600 mb-2">If you have questions about your application or need to submit additional information:</p>
+                <p class="text-sm text-blue-600">support@educationkyc.gov.uk</p>
+            </div>
+            <div>
+                <h4 class="text-sm font-medium text-gray-900 mb-2">Technical Support</h4>
+                <p class="text-sm text-gray-600 mb-2">For technical issues with this portal:</p>
+                <p class="text-sm text-blue-600">tech-support@educationkyc.gov.uk</p>
+            </div>
+        </div>
+    </div>
+
+    <!-- Navigation -->
+    <div class="flex justify-center">
+        <a href="/" class="text-gray-600 hover:text-gray-800 flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back to Dashboard
+        </a>
+    </div>
+</div>
+
+<script>
+// File upload functionality
+document.getElementById('fileInput').addEventListener('change', function(e) {
+    const files = e.target.files;
+    const fileList = document.getElementById('fileList');
+    const selectedFiles = document.getElementById('selectedFiles');
+    
+    if (files.length > 0) {
+        selectedFiles.classList.remove('hidden');
+        fileList.innerHTML = '';
+        
+        for (let i = 0; i < files.length; i++) {
+            const li = document.createElement('li');
+            li.textContent = `${files[i].name} (${(files[i].size / 1024 / 1024).toFixed(2)} MB)`;
+            fileList.appendChild(li);
+        }
+    } else {
+        selectedFiles.classList.add('hidden');
+    }
+});
+
+// Form submission
+document.getElementById('documentUploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    
+    const formData = new FormData(this);
+    const submitButton = this.querySelector('button[type="submit"]');
+    
+    // Disable button and show loading
+    submitButton.disabled = true;
+    submitButton.textContent = 'Uploading...';
+    
+    // Simulate upload (replace with actual upload logic)
+    setTimeout(() => {
+        alert('Documents uploaded successfully! We will review them and update your application status.');
+        
+        // Reset form
+        this.reset();
+        document.getElementById('selectedFiles').classList.add('hidden');
+        
+        // Re-enable button
+        submitButton.disabled = false;
+        submitButton.textContent = 'Upload Documents';
+        
+        // Refresh page to show uploaded documents
+        window.location.reload();
+    }, 2000);
+});
+
+// Auto-refresh status every 30 seconds if processing
+{% if provider.status == 'processing' %}
+setInterval(function() {
+    fetch(`/verification/{{ provider.verification_id }}`)
+        .then(response => response.json())
+        .then(data => {
+            if (data.status !== 'processing') {
+                window.location.reload();
+            }
+        })
+        .catch(error => console.log('Status check failed:', error));
+}, 30000);
+{% endif %}
+</script>
+{% endblock %}
