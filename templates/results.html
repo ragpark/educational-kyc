@@ -1,46 +1,536 @@
 {% extends "base.html" %}
-
-{% block title %}Verification Results{% endblock %}
-
+{% block title %}Verification Results - {{ provider.organisation_name }}{% endblock %}
 {% block content %}
-<div class="max-w-4xl mx-auto">
+<div class="max-w-6xl mx-auto">
+    <!-- Header -->
     <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-900 mb-2">KYC Verification Results</h2>
-        <p class="text-gray-600">Verification completed for {{ provider.organisation_name }}</p>
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">UK Quals A&O Verification Results</h2>
+        <p class="text-gray-600">Comprehensive verification completed for {{ provider.organisation_name }}</p>
+        <div class="mt-2 text-sm text-gray-500">
+            Verification ID: {{ provider.verification_id }} | 
+            Completed: {{ provider.processing_completed or provider.created_at }}
+        </div>
     </div>
     
+    <!-- Overall Status -->
+    {% if provider.status == 'approved' %}
     <div class="bg-green-50 border border-green-200 p-6 rounded-lg mb-8">
         <div class="flex items-center">
             <span class="text-4xl">✅</span>
             <div class="ml-4">
                 <h3 class="text-lg font-medium text-green-900">Provider Approved</h3>
-                <p class="text-green-800">KYC verification completed successfully.</p>
+                <p class="text-green-800">KYC verification completed successfully with {{ provider.risk_level }} risk profile.</p>
+                <p class="text-sm text-green-700 mt-1">Overall Risk Score: {{ "%.2f"|format(provider.overall_risk_score or 0) }}</p>
             </div>
         </div>
     </div>
-    
+    {% elif provider.status == 'review_required' %}
+    <div class="bg-yellow-50 border border-yellow-200 p-6 rounded-lg mb-8">
+        <div class="flex items-center">
+            <span class="text-4xl">⚠️</span>
+            <div class="ml-4">
+                <h3 class="text-lg font-medium text-yellow-900">Review Required</h3>
+                <p class="text-yellow-800">Additional review needed before approval. Risk level: {{ provider.risk_level }}.</p>
+                <p class="text-sm text-yellow-700 mt-1">Overall Risk Score: {{ "%.2f"|format(provider.overall_risk_score or 0) }}</p>
+            </div>
+        </div>
+    </div>
+    {% elif provider.status == 'rejected' %}
+    <div class="bg-red-50 border border-red-200 p-6 rounded-lg mb-8">
+        <div class="flex items-center">
+            <span class="text-4xl">❌</span>
+            <div class="ml-4">
+                <h3 class="text-lg font-medium text-red-900">Provider Rejected</h3>
+                <p class="text-red-800">KYC verification failed. Risk level: {{ provider.risk_level }}.</p>
+                <p class="text-sm text-red-700 mt-1">Overall Risk Score: {{ "%.2f"|format(provider.overall_risk_score or 0) }}</p>
+            </div>
+        </div>
+    </div>
+    {% else %}
+    <div class="bg-blue-50 border border-blue-200 p-6 rounded-lg mb-8">
+        <div class="flex items-center">
+            <span class="text-4xl">🔄</span>
+            <div class="ml-4">
+                <h3 class="text-lg font-medium text-blue-900">{{ provider.status|title }}</h3>
+                <p class="text-blue-800">Verification status: {{ provider.status }}.</p>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Provider Summary -->
     <div class="bg-white rounded-lg shadow-md p-6 mb-8">
         <h3 class="text-lg font-semibold text-gray-900 mb-4">Provider Summary</h3>
-        <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div>
-                <p><strong>Organisation:</strong> {{ provider.organisation_name }}</p>
-                <p><strong>Type:</strong> {{ provider.provider_type }}</p>
-                <p><strong>Status:</strong> {{ provider.status }}</p>
+        <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            <div class="space-y-3">
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Organisation Name</label>
+                    <p class="text-gray-900">{{ provider.organisation_name }}</p>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Provider Type</label>
+                    <p class="text-gray-900">{{ provider.provider_type or 'Not specified' }}</p>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Trading Name</label>
+                    <p class="text-gray-900">{{ provider.trading_name or 'Not provided' }}</p>
+                </div>
             </div>
-            <div>
-                <p><strong>Risk Level:</strong> {{ provider.risk_level }}</p>
-                <p><strong>Date:</strong> {{ provider.created_at }}</p>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Company Number</label>
+                    <p class="text-gray-900 font-mono">{{ provider.company_number or 'Not provided' }}</p>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-500">UKPRN</label>
+                    <p class="text-gray-900 font-mono">{{ provider.ukprn or 'Not provided' }}</p>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-500">JCQ Centre Number</label>
+                    <p class="text-gray-900 font-mono">{{ provider.jcq_centre_number or 'Not provided' }}</p>
+                </div>
+            </div>
+            <div class="space-y-3">
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Risk Level</label>
+                    <span class="inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                        {% if provider.risk_level == 'low' %}bg-green-100 text-green-800{% elif provider.risk_level == 'medium' %}bg-yellow-100 text-yellow-800{% elif provider.risk_level == 'high' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                        {{ provider.risk_level|title }}
+                    </span>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Verification Date</label>
+                    <p class="text-gray-900">{{ provider.created_at }}</p>
+                </div>
+                <div>
+                    <label class="text-sm font-medium text-gray-500">Contact Email</label>
+                    <p class="text-gray-900">{{ provider.contact_email or 'Not provided' }}</p>
+                </div>
             </div>
         </div>
     </div>
-    
+
+    <!-- Verification Checks Results -->
+    {% if provider.kyc_results %}
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-6">Verification Check Results</h3>
+        
+        <!-- Risk Score Summary -->
+        {% if provider.overall_risk_score is defined %}
+        <div class="mb-6 p-4 bg-gray-50 rounded-lg">
+            <div class="flex items-center justify-between mb-2">
+                <span class="text-sm font-medium text-gray-600">Overall Risk Score</span>
+                <span class="text-lg font-bold text-gray-900">{{ "%.1f%%"|format((provider.overall_risk_score or 0) * 100) }}</span>
+            </div>
+            <div class="w-full bg-gray-200 rounded-full h-2.5">
+                <div class="bg-gradient-to-r 
+                    {% if (provider.overall_risk_score or 0) < 0.3 %}from-green-400 to-green-600{% elif (provider.overall_risk_score or 0) < 0.6 %}from-yellow-400 to-yellow-600{% else %}from-red-400 to-red-600{% endif %} 
+                    h-2.5 rounded-full transition-all duration-300" 
+                    style="width: {{ ((provider.overall_risk_score or 0) * 100)|round(1) }}%"></div>
+            </div>
+        </div>
+        {% endif %}
+
+        <!-- Individual Check Results -->
+        <div class="space-y-4">
+            
+            <!-- Company Registration (Companies House) -->
+            {% if provider.kyc_results.company_registration %}
+            {% set check = provider.kyc_results.company_registration %}
+            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h4 class="text-base font-medium text-gray-900">Companies House Verification</h4>
+                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if check.status == 'passed' %}bg-green-100 text-green-800{% elif check.status == 'flagged' %}bg-yellow-100 text-yellow-800{% elif check.status == 'failed' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ check.status|title }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">{{ check.data_source }}</p>
+                        
+                        {% if check.details %}
+                        <div class="text-sm space-y-1">
+                            {% if check.details.company_name %}
+                            <p><span class="font-medium">Company Name:</span> {{ check.details.company_name }}</p>
+                            {% endif %}
+                            {% if check.details.company_status %}
+                            <p><span class="font-medium">Status:</span> {{ check.details.company_status|title }}</p>
+                            {% endif %}
+                            {% if check.details.incorporation_date %}
+                            <p><span class="font-medium">Incorporated:</span> {{ check.details.incorporation_date }}</p>
+                            {% endif %}
+                            {% if check.details.company_type %}
+                            <p><span class="font-medium">Type:</span> {{ check.details.company_type }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if check.recommendations %}
+                        <div class="mt-2">
+                            <p class="text-xs font-medium text-gray-500 mb-1">Recommendations:</p>
+                            <ul class="text-xs text-gray-600 space-y-1">
+                                {% for rec in check.recommendations %}
+                                <li>• {{ rec }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="ml-4 text-right">
+                        <div class="text-lg font-bold text-gray-900">{{ "%.1f%%"|format((check.risk_score or 0) * 100) }}</div>
+                        <div class="text-xs text-gray-500">Risk Score</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- UKPRN Validation -->
+            {% if provider.kyc_results.ukprn_validation %}
+            {% set check = provider.kyc_results.ukprn_validation %}
+            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h4 class="text-base font-medium text-gray-900">UKPRN Validation</h4>
+                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if check.status == 'passed' %}bg-green-100 text-green-800{% elif check.status == 'flagged' %}bg-yellow-100 text-yellow-800{% elif check.status == 'failed' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ check.status|title }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">{{ check.data_source }}</p>
+                        
+                        {% if check.details %}
+                        <div class="text-sm space-y-1">
+                            {% if check.details.provider_name %}
+                            <p><span class="font-medium">Provider Name:</span> {{ check.details.provider_name }}</p>
+                            {% endif %}
+                            {% if check.details.verification_status %}
+                            <p><span class="font-medium">Verification Status:</span> {{ check.details.verification_status }}</p>
+                            {% endif %}
+                            {% if check.details.provider_status %}
+                            <p><span class="font-medium">Provider Status:</span> {{ check.details.provider_status }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if check.recommendations %}
+                        <div class="mt-2">
+                            <p class="text-xs font-medium text-gray-500 mb-1">Recommendations:</p>
+                            <ul class="text-xs text-gray-600 space-y-1">
+                                {% for rec in check.recommendations %}
+                                <li>• {{ rec }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="ml-4 text-right">
+                        <div class="text-lg font-bold text-gray-900">{{ "%.1f%%"|format((check.risk_score or 0) * 100) }}</div>
+                        <div class="text-xs text-gray-500">Risk Score</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Ofqual Recognition -->
+            {% if provider.kyc_results.ofqual_recognition %}
+            {% set check = provider.kyc_results.ofqual_recognition %}
+            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h4 class="text-base font-medium text-gray-900">Ofqual Recognition</h4>
+                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if check.status == 'passed' %}bg-green-100 text-green-800{% elif check.status == 'flagged' %}bg-yellow-100 text-yellow-800{% elif check.status == 'failed' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ check.status|title }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">{{ check.data_source }}</p>
+                        
+                        {% if check.details %}
+                        <div class="text-sm space-y-1">
+                            {% if check.details.recognised is defined %}
+                            <p><span class="font-medium">Recognised Awarding Organisation:</span> {{ 'Yes' if check.details.recognised else 'No' }}</p>
+                            {% endif %}
+                            {% if check.details.note %}
+                            <p><span class="font-medium">Note:</span> {{ check.details.note }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if check.recommendations %}
+                        <div class="mt-2">
+                            <p class="text-xs font-medium text-gray-500 mb-1">Recommendations:</p>
+                            <ul class="text-xs text-gray-600 space-y-1">
+                                {% for rec in check.recommendations %}
+                                <li>• {{ rec }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="ml-4 text-right">
+                        <div class="text-lg font-bold text-gray-900">{{ "%.1f%%"|format((check.risk_score or 0) * 100) }}</div>
+                        <div class="text-xs text-gray-500">Risk Score</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Ofsted Rating -->
+            {% if provider.kyc_results.ofsted_rating %}
+            {% set check = provider.kyc_results.ofsted_rating %}
+            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h4 class="text-base font-medium text-gray-900">Ofsted Rating</h4>
+                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if check.status == 'passed' %}bg-green-100 text-green-800{% elif check.status == 'flagged' %}bg-yellow-100 text-yellow-800{% elif check.status == 'failed' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ check.status|title }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">{{ check.data_source }}</p>
+                        
+                        {% if check.details %}
+                        <div class="text-sm space-y-1">
+                            {% if check.details.latest_overall_effectiveness %}
+                            <p><span class="font-medium">Overall Effectiveness:</span> {{ check.details.latest_overall_effectiveness }}</p>
+                            {% endif %}
+                            {% if check.details.safeguarding_effectiveness %}
+                            <p><span class="font-medium">Safeguarding:</span> {{ check.details.safeguarding_effectiveness }}</p>
+                            {% endif %}
+                            {% if check.details.latest_inspection_date %}
+                            <p><span class="font-medium">Last Inspection:</span> {{ check.details.latest_inspection_date }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if check.recommendations %}
+                        <div class="mt-2">
+                            <p class="text-xs font-medium text-gray-500 mb-1">Recommendations:</p>
+                            <ul class="text-xs text-gray-600 space-y-1">
+                                {% for rec in check.recommendations %}
+                                <li>• {{ rec }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="ml-4 text-right">
+                        <div class="text-lg font-bold text-gray-900">{{ "%.1f%%"|format((check.risk_score or 0) * 100) }}</div>
+                        <div class="text-xs text-gray-500">Risk Score</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- ESFA Funding Status -->
+            {% if provider.kyc_results.esfa_funding_status %}
+            {% set check = provider.kyc_results.esfa_funding_status %}
+            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h4 class="text-base font-medium text-gray-900">ESFA Funding Status</h4>
+                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if check.status == 'passed' %}bg-green-100 text-green-800{% elif check.status == 'flagged' %}bg-yellow-100 text-yellow-800{% elif check.status == 'failed' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ check.status|title }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">{{ check.data_source }}</p>
+                        
+                        {% if check.details %}
+                        <div class="text-sm space-y-1">
+                            {% if check.details.provider_status %}
+                            <p><span class="font-medium">RoATP Status:</span> {{ check.details.provider_status }}</p>
+                            {% endif %}
+                            {% if check.details.funding_restrictions %}
+                            <p><span class="font-medium">Funding Restrictions:</span> {{ check.details.funding_restrictions|length if check.details.funding_restrictions else 'None' }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if check.recommendations %}
+                        <div class="mt-2">
+                            <p class="text-xs font-medium text-gray-500 mb-1">Recommendations:</p>
+                            <ul class="text-xs text-gray-600 space-y-1">
+                                {% for rec in check.recommendations %}
+                                <li>• {{ rec }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="ml-4 text-right">
+                        <div class="text-lg font-bold text-gray-900">{{ "%.1f%%"|format((check.risk_score or 0) * 100) }}</div>
+                        <div class="text-xs text-gray-500">Risk Score</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Sanctions Screening -->
+            {% if provider.kyc_results.sanctions_screening %}
+            {% set check = provider.kyc_results.sanctions_screening %}
+            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h4 class="text-base font-medium text-gray-900">Sanctions Screening</h4>
+                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if check.status == 'passed' %}bg-green-100 text-green-800{% elif check.status == 'flagged' %}bg-yellow-100 text-yellow-800{% elif check.status == 'failed' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ check.status|title }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">{{ check.data_source }}</p>
+                        
+                        {% if check.details %}
+                        <div class="text-sm space-y-1">
+                            {% if check.details.matches is defined %}
+                            <p><span class="font-medium">Sanctions Matches:</span> {{ 'Yes' if check.details.matches else 'No' }}</p>
+                            {% endif %}
+                            {% if check.details.checked_lists %}
+                            <p><span class="font-medium">Lists Checked:</span> {{ check.details.checked_lists|join(', ') }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if check.recommendations %}
+                        <div class="mt-2">
+                            <p class="text-xs font-medium text-gray-500 mb-1">Recommendations:</p>
+                            <ul class="text-xs text-gray-600 space-y-1">
+                                {% for rec in check.recommendations %}
+                                <li>• {{ rec }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="ml-4 text-right">
+                        <div class="text-lg font-bold text-gray-900">{{ "%.1f%%"|format((check.risk_score or 0) * 100) }}</div>
+                        <div class="text-xs text-gray-500">Risk Score</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Educational Risk Assessment -->
+            {% if provider.kyc_results.educational_risk_assessment %}
+            {% set check = provider.kyc_results.educational_risk_assessment %}
+            <div class="border-2 border-blue-200 rounded-lg p-4 bg-blue-50">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h4 class="text-base font-medium text-blue-900">Educational Risk Assessment</h4>
+                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium bg-blue-100 text-blue-800">
+                                {{ check.status|title }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-blue-600 mb-2">{{ check.data_source }}</p>
+                        
+                        {% if check.details %}
+                        <div class="text-sm space-y-1">
+                            {% if check.details.risk_level %}
+                            <p><span class="font-medium">Risk Level:</span> {{ check.details.risk_level|title }}</p>
+                            {% endif %}
+                            {% if check.details.total_checks %}
+                            <p><span class="font-medium">Total Checks:</span> {{ check.details.total_checks }}</p>
+                            {% endif %}
+                            {% if check.details.risk_factors %}
+                            <p><span class="font-medium">Risk Factors:</span> {{ check.details.risk_factors|join(', ') if check.details.risk_factors else 'None identified' }}</p>
+                            {% endif %}
+                            {% if check.details.critical_issues %}
+                            <p><span class="font-medium">Critical Issues:</span> {{ check.details.critical_issues|join(', ') if check.details.critical_issues else 'None identified' }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if check.recommendations %}
+                        <div class="mt-2">
+                            <p class="text-xs font-medium text-blue-600 mb-1">Recommendations:</p>
+                            <ul class="text-xs text-blue-700 space-y-1">
+                                {% for rec in check.recommendations %}
+                                <li>• {{ rec }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="ml-4 text-right">
+                        <div class="text-lg font-bold text-blue-900">{{ "%.1f%%"|format((check.risk_score or 0) * 100) }}</div>
+                        <div class="text-xs text-blue-600">Risk Score</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Technical Details -->
+    {% if provider.verification_summary %}
+    <div class="bg-white rounded-lg shadow-md p-6 mb-8">
+        <h3 class="text-lg font-semibold text-gray-900 mb-4">Technical Details</h3>
+        <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 text-sm">
+            {% if provider.verification_summary.total_checks %}
+            <div>
+                <label class="text-xs font-medium text-gray-500">Total Checks</label>
+                <p class="text-gray-900 font-semibold">{{ provider.verification_summary.total_checks }}</p>
+            </div>
+            {% endif %}
+            {% if provider.verification_summary.orchestrator_used is defined %}
+            <div>
+                <label class="text-xs font-medium text-gray-500">Orchestrator Used</label>
+                <p class="text-gray-900 font-semibold">{{ 'Yes' if provider.verification_summary.orchestrator_used else 'No' }}</p>
+            </div>
+            {% endif %}
+            {% if provider.verification_summary.risk_factors_count is defined %}
+            <div>
+                <label class="text-xs font-medium text-gray-500">Risk Factors</label>
+                <p class="text-gray-900 font-semibold">{{ provider.verification_summary.risk_factors_count }}</p>
+            </div>
+            {% endif %}
+            {% if provider.verification_summary.recommendations_count is defined %}
+            <div>
+                <label class="text-xs font-medium text-gray-500">Recommendations</label>
+                <p class="text-gray-900 font-semibold">{{ provider.verification_summary.recommendations_count }}</p>
+            </div>
+            {% endif %}
+        </div>
+    </div>
+    {% endif %}
+
+    <!-- Action Buttons -->
     <div class="flex justify-between items-center">
-        <a href="/" class="text-gray-600 hover:text-gray-800">
-            ← Back to Dashboard
+        <a href="/" class="text-gray-600 hover:text-gray-800 flex items-center">
+            <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M15 19l-7-7 7-7"></path>
+            </svg>
+            Back to Dashboard
         </a>
-        <a href="/onboard" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
-            Add Another Provider
-        </a>
+        <div class="space-x-4">
+            <button onclick="window.print()" class="bg-gray-600 text-white px-6 py-2 rounded-md hover:bg-gray-700">
+                Print Results
+            </button>
+            <a href="/onboard" class="bg-blue-600 text-white px-6 py-2 rounded-md hover:bg-blue-700">
+                Add Another Provider
+            </a>
+        </div>
     </div>
 </div>
+
+<style>
+@media print {
+    .no-print {
+        display: none !important;
+    }
+    body {
+        -webkit-print-color-adjust: exact;
+        color-adjust: exact;
+    }
+}
+</style>
 {% endblock %}
