@@ -1,4 +1,4 @@
-# app/main.py - Updated with Educational KYC Orchestrator Integration.
+# app/main.py - Updated with Educational KYC Orchestrator Integration
 
 from fastapi import FastAPI, Request, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
@@ -431,6 +431,88 @@ async def get_stats():
         "verification_queue": len(processing_queue),
         "orchestrator_enabled": True,
         "version": "3.0-orchestrator"
+    }
+
+@app.get("/provider-status/{verification_id}", response_class=HTMLResponse)
+async def provider_status_page(verification_id: str, request: Request):
+    """Provider status tracking page"""
+    provider = next((p for p in providers_db if p.get("verification_id") == verification_id), None)
+    
+    if not provider:
+        return templates.TemplateResponse(
+            "error.html", 
+            {"request": request, "message": f"Application not found for verification ID: {verification_id}"}
+        )
+    
+    return templates.TemplateResponse(
+        "provider_status.html", 
+        {"request": request, "provider": provider}
+    )
+
+@app.post("/provider-status/{verification_id}/upload")
+async def upload_documents(verification_id: str, request: Request):
+    """Handle document uploads for providers"""
+    provider = next((p for p in providers_db if p.get("verification_id") == verification_id), None)
+    
+    if not provider:
+        return {"error": "Application not found"}
+    
+    try:
+        form_data = await request.form()
+        document_type = form_data.get("document_type")
+        document_description = form_data.get("document_description")
+        uploaded_files = form_data.getlist("document")
+        
+        # Initialize uploaded_documents if not exists
+        if "uploaded_documents" not in provider:
+            provider["uploaded_documents"] = []
+        
+        # Process each uploaded file
+        for file in uploaded_files:
+            if hasattr(file, 'filename') and file.filename:
+                # In a real implementation, you would save the file to storage
+                # For now, we'll just store metadata
+                document_info = {
+                    "name": file.filename,
+                    "type": document_type or "Other",
+                    "description": document_description or "",
+                    "uploaded_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+                    "size": getattr(file, 'size', 0),
+                    "verification_id": verification_id
+                }
+                provider["uploaded_documents"].append(document_info)
+        
+        # Update provider status if needed
+        if provider.get("status") == "review_required" and len(provider["uploaded_documents"]) > 0:
+            provider["status"] = "processing"
+            provider["document_upload_timestamp"] = datetime.now().isoformat()
+        
+        return {
+            "success": True,
+            "message": f"Successfully uploaded {len(uploaded_files)} document(s)",
+            "uploaded_count": len(uploaded_files)
+        }
+        
+    except Exception as e:
+        return {"error": f"Upload failed: {str(e)}"}
+
+@app.get("/api/provider-status/{verification_id}")
+async def get_provider_status_api(verification_id: str):
+    """API endpoint for provider status (for AJAX polling)"""
+    provider = next((p for p in providers_db if p.get("verification_id") == verification_id), None)
+    
+    if not provider:
+        return {"error": "Application not found"}
+    
+    return {
+        "verification_id": verification_id,
+        "status": provider["status"],
+        "risk_level": provider.get("risk_level", "unknown"),
+        "organisation_name": provider["organisation_name"],
+        "created_at": provider["created_at"],
+        "processing_completed": provider.get("processing_completed"),
+        "uploaded_documents_count": len(provider.get("uploaded_documents", [])),
+        "last_updated": datetime.now().isoformat()
     }
 
 @app.get("/health")
