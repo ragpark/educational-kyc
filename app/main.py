@@ -465,7 +465,7 @@ async def verification_results(verification_id: str, request: Request):
         )
     
     return templates.TemplateResponse(
-        "results_with_jcq.html", 
+        "results.html", 
         {"request": request, "provider": provider}
     )
 
