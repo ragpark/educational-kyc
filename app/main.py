@@ -140,7 +140,7 @@ async def onboard_form(request: Request):
     """Provider onboarding form"""
     api_status = check_api_configuration()
     return templates.TemplateResponse(
-        "onboard_with_jcq.html", 
+        "onboard.html", 
         {"request": request, "api_status": api_status}
     )
 
