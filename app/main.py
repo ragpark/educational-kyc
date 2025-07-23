@@ -1,4 +1,4 @@
-# app/main.py - Updated with Enhanced Companies House Integration.
+# app/main.py - Updated with Educational KYC Orchestrator Integration
 
 from fastapi import FastAPI, Request, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
@@ -15,8 +15,16 @@ import uuid
 import aiohttp
 import requests
 
-# Import the enhanced Companies House service
+# Import the enhanced Companies House service (for quick checks)
 from app.services.companies_house_enhanced import EnhancedCompaniesHouseAPI, get_enhanced_companies_house_result
+
+# Import the Educational KYC Orchestrator
+from app.services.education_kyc_orchestrator import (
+    UKEducationalKYCOrchestrator, 
+    EducationalProviderRequest,
+    ProviderType,
+    EducationalVerificationResult
+)
 
 # In-memory storage for demo
 providers_db = []
@@ -28,20 +36,36 @@ def check_api_configuration() -> Dict[str, bool]:
     
     return {
         "companies_house_api": companies_house_api.is_configured(),
-        "basic_verification": True,  # Always available
-        "jcq_simulation": True,      # Simulated JCQ checks
+        "orchestrator_available": True,  # Orchestrator is always available
+        "basic_verification": True,      # Always available
+        "jcq_simulation": True,          # Simulated JCQ checks
     }
+
+def map_provider_type(provider_type_str: str) -> ProviderType:
+    """Map form provider type to orchestrator enum"""
+    mapping = {
+        "Training Provider": ProviderType.TRAINING_PROVIDER,
+        "FE College": ProviderType.FE_COLLEGE,
+        "HE Institution": ProviderType.HE_INSTITUTION,
+        "Apprenticeship Provider": ProviderType.APPRENTICESHIP_PROVIDER,
+        "Private Training": ProviderType.PRIVATE_TRAINING,
+        "Adult Community": ProviderType.ADULT_COMMUNITY
+    }
+    return mapping.get(provider_type_str, ProviderType.TRAINING_PROVIDER)
 
 @asynccontextmanager
 async def lifespan(app: FastAPI):
-    print("Starting Educational KYC application (Railway-safe version)")
+    print("Starting Educational KYC application with Orchestrator")
     
-    # Check Companies House API configuration
+    # Check API configuration
     api_status = check_api_configuration()
     if api_status["companies_house_api"]:
         print("✓ Companies House API configured")
     else:
         print("⚠ Companies House API not configured - using limited verification")
+    
+    if api_status["orchestrator_available"]:
+        print("✓ Educational KYC Orchestrator available")
     
     # Add sample data
     sample_providers = [
@@ -57,9 +81,9 @@ async def lifespan(app: FastAPI):
             "risk_level": "low",
             "created_at": "2025-07-18",
             "kyc_results": {
-                "basic_checks": {"status": "passed", "risk_score": 0.2},
-                "companies_house": {"status": "passed", "risk_score": 0.1},
-                "jcq_verification": {"status": "passed", "risk_score": 0.1},
+                "company_registration": {"status": "passed", "risk_score": 0.1},
+                "ukprn_validation": {"status": "passed", "risk_score": 0.1},
+                "educational_risk_assessment": {"status": "approved", "risk_score": 0.15},
                 "overall_risk": 0.15
             }
         }
@@ -72,9 +96,9 @@ async def lifespan(app: FastAPI):
     print("Shutting down Educational KYC application")
 
 app = FastAPI(
-    title="UK Educational Provider KYC (Railway-Safe)",
-    description="Enhanced KYC verification for UK educational providers with Companies House integration",
-    version="2.1-enhanced",
+    title="UK Educational Provider KYC (With Orchestrator)",
+    description="Comprehensive KYC verification for UK educational providers using orchestrated workflow",
+    version="3.0-orchestrator",
     lifespan=lifespan
 )
 
@@ -122,7 +146,7 @@ async def onboard_form(request: Request):
 
 @app.post("/onboard")
 async def onboard_provider(request: Request, background_tasks: BackgroundTasks):
-    """Process provider onboarding with enhanced verification"""
+    """Process provider onboarding with orchestrated verification"""
     form_data = await request.form()
     
     verification_id = str(uuid.uuid4())
@@ -130,24 +154,28 @@ async def onboard_provider(request: Request, background_tasks: BackgroundTasks):
     provider_data = {
         "verification_id": verification_id,
         "organisation_name": form_data.get("organisation_name"),
+        "trading_name": form_data.get("trading_name"),
         "provider_type": form_data.get("provider_type"),
         "company_number": form_data.get("company_number"),
         "ukprn": form_data.get("ukprn"),
         "jcq_centre_number": form_data.get("jcq_centre_number"),
         "postcode": form_data.get("postcode"),
         "contact_email": form_data.get("contact_email"),
-        "address": form_data.get("address")
+        "address": form_data.get("address"),
+        "qualifications_offered": form_data.get("qualifications_offered", "").split(",") if form_data.get("qualifications_offered") else []
     }
     
     new_provider = {
         "id": len(providers_db) + 1,
         "verification_id": verification_id,
         "organisation_name": provider_data["organisation_name"],
+        "trading_name": provider_data.get("trading_name"),
         "provider_type": provider_data["provider_type"],
         "company_number": provider_data.get("company_number"),
         "ukprn": provider_data.get("ukprn"),
         "jcq_centre_number": provider_data.get("jcq_centre_number"),
         "postcode": provider_data["postcode"],
+        "contact_email": provider_data["contact_email"],
         "status": "processing",
         "risk_level": "unknown",
         "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
@@ -158,8 +186,8 @@ async def onboard_provider(request: Request, background_tasks: BackgroundTasks):
     providers_db.append(new_provider)
     processing_queue[verification_id] = "started"
     
-    # Start enhanced KYC verification
-    background_tasks.add_task(process_enhanced_kyc, verification_id, provider_data)
+    # Start orchestrated KYC verification
+    background_tasks.add_task(process_orchestrated_kyc, verification_id, provider_data)
     
     return templates.TemplateResponse(
         "processing_with_jcq.html", 
@@ -170,91 +198,94 @@ async def onboard_provider(request: Request, background_tasks: BackgroundTasks):
         }
     )
 
-async def process_enhanced_kyc(verification_id: str, provider_data: Dict):
-    """Enhanced KYC verification with comprehensive Companies House checks"""
-    print(f"Starting enhanced KYC verification: {verification_id}")
+async def process_orchestrated_kyc(verification_id: str, provider_data: Dict):
+    """Orchestrated KYC verification using the educational KYC orchestrator"""
+    print(f"Starting orchestrated KYC verification: {verification_id}")
     
     try:
         processing_queue[verification_id] = "in_progress"
         
-        # Simulate initial processing
-        await asyncio.sleep(2)
-        
         # Find provider
         provider = next((p for p in providers_db if p.get("verification_id") == verification_id), None)
         
-        if provider:
-            # Enhanced verification results
-            kyc_results = {}
-            
-            # Basic format validation
-            kyc_results["basic_validation"] = {
-                "status": "passed",
-                "risk_score": 0.1,
-                "data_source": "Format Validation",
-                "details": {"organisation_name": provider_data["organisation_name"]},
-                "timestamp": datetime.now().isoformat()
+        if not provider:
+            print(f"Provider not found for verification: {verification_id}")
+            return
+        
+        # Create orchestrator
+        orchestrator = UKEducationalKYCOrchestrator()
+        
+        # Create educational provider request
+        educational_request = EducationalProviderRequest(
+            organisation_name=provider_data["organisation_name"],
+            trading_name=provider_data.get("trading_name"),
+            company_number=provider_data["company_number"],
+            ukprn=provider_data.get("ukprn"),
+            provider_type=map_provider_type(provider_data.get("provider_type", "Training Provider")),
+            contact_email=provider_data["contact_email"],
+            address=provider_data["address"],
+            postcode=provider_data["postcode"],
+            qualifications_offered=provider_data.get("qualifications_offered", [])
+        )
+        
+        print(f"Running orchestrated educational KYC for: {provider_data['organisation_name']}")
+        
+        # Run orchestrated verification
+        verification_results = await orchestrator.process_educational_kyc(educational_request)
+        
+        # Convert orchestrator results to our existing format
+        kyc_results = {}
+        overall_risk_score = 0.0
+        total_checks = 0
+        risk_factors = []
+        recommendations = []
+        
+        for result in verification_results:
+            # Convert each verification result
+            kyc_results[result.check_type] = {
+                "status": result.status,
+                "risk_score": result.risk_score,
+                "data_source": result.data_source,
+                "confidence": 0.9,  # Default confidence for orchestrator results
+                "details": result.details,
+                "recommendations": result.recommendations or [],
+                "timestamp": result.timestamp.isoformat()
             }
             
-            # Enhanced Companies House check
-            if provider_data.get("company_number"):
-                print(f"Running enhanced Companies House check for: {provider_data['company_number']}")
-                ch_result = await get_enhanced_companies_house_result(
-                    provider_data["company_number"],
-                    provider_data.get("organisation_name")
-                )
-                
-                # Transform the enhanced result to fit our schema
-                kyc_results["companies_house"] = {
-                    "status": ch_result.get("status", "error"),
-                    "risk_score": ch_result.get("risk_score", 0.5),
-                    "data_source": ch_result.get("data_source", "Companies House API"),
-                    "confidence": ch_result.get("confidence", 0.0),
-                    "details": ch_result.get("details", {}),
-                    "recommendations": ch_result.get("recommendations", []),
-                    "timestamp": ch_result.get("timestamp", datetime.now().isoformat())
-                }
-                
-                # Add any specific risk factors from Companies House
-                if ch_result.get("details", {}).get("risk_factors"):
-                    print(f"Risk factors identified: {ch_result['details']['risk_factors']}")
+            # Accumulate risk scores
+            overall_risk_score += result.risk_score
+            total_checks += 1
             
-            # JCQ simulation
-            if provider_data.get("jcq_centre_number"):
-                jcq_result = simulate_jcq_check(provider_data["jcq_centre_number"])
-                kyc_results["jcq_verification"] = jcq_result
+            # Collect risk factors and recommendations
+            if result.recommendations:
+                recommendations.extend(result.recommendations)
             
-            # UKPRN format check
-            if provider_data.get("ukprn"):
-                ukprn_result = validate_ukprn_format(provider_data["ukprn"])
-                kyc_results["ukprn_validation"] = ukprn_result
-            
-            # Basic sanctions simulation
-            sanctions_result = simulate_sanctions_check(provider_data["organisation_name"])
-            kyc_results["sanctions_screening"] = sanctions_result
-            
-            # Calculate overall risk using weighted scoring
-            risk_scores = []
-            risk_weights = {
-                "companies_house": 0.35,  # Higher weight for Companies House
-                "jcq_verification": 0.25,
-                "ukprn_validation": 0.15,
-                "sanctions_screening": 0.15,
-                "basic_validation": 0.10
+            if result.status in ["failed", "flagged"]:
+                risk_factors.append(result.check_type)
+        
+        # Calculate average risk score
+        if total_checks > 0:
+            overall_risk_score = overall_risk_score / total_checks
+        else:
+            overall_risk_score = 0.5
+        
+        # Determine overall status and risk level based on orchestrator results
+        risk_assessment = next((r for r in verification_results if r.check_type == "educational_risk_assessment"), None)
+        
+        if risk_assessment:
+            # Use orchestrator's risk assessment
+            orchestrator_status = risk_assessment.status
+            risk_level_mapping = {
+                "approved": "low",
+                "approved_with_monitoring": "medium", 
+                "enhanced_due_diligence_required": "high",
+                "rejected": "critical"
             }
             
-            weighted_risk = 0.0
-            total_weight = 0.0
-            
-            for check_name, result in kyc_results.items():
-                weight = risk_weights.get(check_name, 0.1)
-                if "risk_score" in result:
-                    weighted_risk += result["risk_score"] * weight
-                    total_weight += weight
-            
-            overall_risk_score = weighted_risk / total_weight if total_weight > 0 else 0.5
-            
-            # Determine status based on risk and Companies House result
+            overall_status = "approved" if orchestrator_status == "approved" else "review_required" if orchestrator_status in ["approved_with_monitoring", "enhanced_due_diligence_required"] else "rejected"
+            risk_level = risk_level_mapping.get(orchestrator_status, "medium")
+        else:
+            # Fallback status determination
             if overall_risk_score < 0.3:
                 overall_status = "approved"
                 risk_level = "low"
@@ -264,58 +295,50 @@ async def process_enhanced_kyc(verification_id: str, provider_data: Dict):
             else:
                 overall_status = "rejected"
                 risk_level = "high"
-            
-            # Override if Companies House check failed completely
-            if kyc_results.get("companies_house", {}).get("status") == "failed":
-                overall_status = "review_required"
-                risk_level = "medium" if risk_level == "low" else risk_level
-            
-            # Risk assessment summary
-            kyc_results["risk_assessment"] = {
-                "status": "completed",
-                "risk_score": overall_risk_score,
-                "data_source": "Enhanced Risk Engine",
-                "details": {
-                    "total_checks": len(kyc_results) - 1,  # Exclude risk_assessment itself
-                    "risk_calculation": "weighted_average",
-                    "primary_factors": []
-                },
-                "timestamp": datetime.now().isoformat()
+        
+        # Add overall summary
+        kyc_results["verification_summary"] = {
+            "status": "completed",
+            "risk_score": overall_risk_score,
+            "data_source": "Educational KYC Orchestrator",
+            "details": {
+                "total_checks": total_checks,
+                "risk_factors": risk_factors,
+                "orchestrator_version": "3.0",
+                "includes_educational_checks": True
+            },
+            "recommendations": recommendations[:5],  # Limit to top 5 recommendations
+            "timestamp": datetime.now().isoformat()
+        }
+        
+        # Update provider with orchestrated results
+        provider.update({
+            "status": overall_status,
+            "risk_level": risk_level,
+            "kyc_results": kyc_results,
+            "overall_risk_score": overall_risk_score,
+            "processing_completed": datetime.now().isoformat(),
+            "verification_summary": {
+                "total_checks": total_checks,
+                "includes_educational_verification": True,
+                "orchestrator_used": True,
+                "risk_factors_count": len(risk_factors),
+                "recommendations_count": len(recommendations)
             }
-            
-            # Add primary risk factors from Companies House
-            if kyc_results.get("companies_house", {}).get("recommendations"):
-                kyc_results["risk_assessment"]["details"]["primary_factors"].extend(
-                    kyc_results["companies_house"]["recommendations"]
-                )
-            
-            # Update provider
-            provider.update({
-                "status": overall_status,
-                "risk_level": risk_level,
-                "kyc_results": kyc_results,
-                "overall_risk_score": overall_risk_score,
-                "processing_completed": datetime.now().isoformat(),
-                "verification_summary": {
-                    "total_checks": len(kyc_results) - 1,
-                    "includes_jcq": bool(provider_data.get("jcq_centre_number")),
-                    "includes_companies_house": bool(provider_data.get("company_number")),
-                    "enhanced_verification": True
-                }
-            })
-            
-            processing_queue[verification_id] = "completed"
-            print(f"Enhanced KYC completed: {verification_id} - Status: {overall_status}, Risk: {risk_level}")
+        })
+        
+        processing_queue[verification_id] = "completed"
+        print(f"Orchestrated KYC completed: {verification_id} - Status: {overall_status}, Risk: {risk_level}, Checks: {total_checks}")
         
     except Exception as e:
-        print(f"KYC verification error: {verification_id} - {str(e)}")
+        print(f"Orchestrated KYC verification error: {verification_id} - {str(e)}")
         
         provider = next((p for p in providers_db if p.get("verification_id") == verification_id), None)
         if provider:
             provider.update({
                 "status": "error",
                 "risk_level": "unknown",
-                "error_message": str(e),
+                "error_message": f"Orchestrator error: {str(e)}",
                 "processing_completed": datetime.now().isoformat()
             })
         
@@ -323,7 +346,7 @@ async def process_enhanced_kyc(verification_id: str, provider_data: Dict):
 
 @app.get("/companies-house/quick-check/{company_number}")
 async def quick_companies_house_check(company_number: str):
-    """Quick Companies House check endpoint"""
+    """Quick Companies House check endpoint (legacy support)"""
     api = EnhancedCompaniesHouseAPI()
     
     if not api.is_configured():
@@ -336,8 +359,98 @@ async def quick_companies_house_check(company_number: str):
     result = await api.quick_company_check(company_number)
     return result
 
+@app.get("/verification/{verification_id}")
+async def get_verification_status(verification_id: str):
+    """Get verification status with orchestrator details"""
+    provider = next((p for p in providers_db if p.get("verification_id") == verification_id), None)
+    
+    if not provider:
+        return {"error": "Verification not found"}
+    
+    processing_status = processing_queue.get(verification_id, "unknown")
+    
+    return {
+        "verification_id": verification_id,
+        "status": provider["status"],
+        "processing_status": processing_status,
+        "risk_level": provider.get("risk_level"),
+        "organisation_name": provider["organisation_name"],
+        "provider_type": provider.get("provider_type"),
+        "ukprn": provider.get("ukprn"),
+        "jcq_centre_number": provider.get("jcq_centre_number"),
+        "created_at": provider["created_at"],
+        "kyc_results": provider.get("kyc_results", {}),
+        "verification_summary": provider.get("verification_summary", {}),
+        "orchestrator_used": True,
+        "progress": {
+            "started": processing_status in ["started", "in_progress", "completed", "error"],
+            "in_progress": processing_status == "in_progress",
+            "completed": processing_status == "completed",
+            "error": processing_status == "error"
+        }
+    }
+
+@app.get("/jcq/centre/{centre_number}")
+async def lookup_jcq_centre(centre_number: str):
+    """JCQ centre lookup (legacy endpoint)"""
+    result = simulate_jcq_check(centre_number)
+    return {
+        "centre_number": centre_number,
+        "verification": result,
+        "timestamp": datetime.now().isoformat()
+    }
+
+@app.get("/results/{verification_id}", response_class=HTMLResponse)
+async def verification_results(verification_id: str, request: Request):
+    """Results page with orchestrator details"""
+    provider = next((p for p in providers_db if p.get("verification_id") == verification_id), None)
+    
+    if not provider:
+        return templates.TemplateResponse(
+            "error.html", 
+            {"request": request, "message": "Verification not found"}
+        )
+    
+    return templates.TemplateResponse(
+        "results.html", 
+        {"request": request, "provider": provider}
+    )
+
+@app.get("/api/stats")
+async def get_stats():
+    """Dashboard statistics with orchestrator info"""
+    api_status = check_api_configuration()
+    
+    return {
+        "total": len(providers_db),
+        "approved": len([p for p in providers_db if p["status"] == "approved"]),
+        "under_review": len([p for p in providers_db if p["status"] in ["review_required", "pending", "processing"]]),
+        "high_risk": len([p for p in providers_db if p["risk_level"] == "high"]),
+        "processing": len([p for p in providers_db if p["status"] == "processing"]),
+        "api_status": api_status,
+        "verification_queue": len(processing_queue),
+        "orchestrator_enabled": True,
+        "version": "3.0-orchestrator"
+    }
+
+@app.get("/health")
+async def health_check():
+    """Health check with orchestrator status"""
+    api_status = check_api_configuration()
+    
+    return {
+        "status": "healthy",
+        "service": "educational-kyc-orchestrator",
+        "version": "3.0-orchestrator",
+        "providers_count": len(providers_db),
+        "api_configurations": api_status,
+        "orchestrator_available": True,
+        "timestamp": datetime.now().isoformat()
+    }
+
+# Legacy simulation functions (still used by some endpoints)
 def simulate_jcq_check(centre_number: str) -> Dict:
-    """Simulate JCQ centre verification"""
+    """Simulate JCQ centre verification (legacy)"""
     if not centre_number or len(centre_number) != 5 or not centre_number.isdigit():
         return {
             "status": "failed",
@@ -373,131 +486,6 @@ def simulate_jcq_check(centre_number: str) -> Dict:
             },
             "timestamp": datetime.now().isoformat()
         }
-
-def validate_ukprn_format(ukprn: str) -> Dict:
-    """Validate UKPRN format"""
-    if not ukprn or len(ukprn) != 8 or not ukprn.isdigit() or not ukprn.startswith('10'):
-        return {
-            "status": "failed",
-            "risk_score": 0.6,
-            "data_source": "UKPRN Format Validation",
-            "details": {"error": "Invalid UKPRN format"},
-            "timestamp": datetime.now().isoformat()
-        }
-    
-    return {
-        "status": "passed",
-        "risk_score": 0.1,
-        "data_source": "UKPRN Format Validation",
-        "details": {"ukprn": ukprn, "format_valid": True},
-        "timestamp": datetime.now().isoformat()
-    }
-
-def simulate_sanctions_check(organisation_name: str) -> Dict:
-    """Simulate sanctions screening"""
-    # Simple word-based check
-    flagged_words = ["banned", "sanctioned", "prohibited", "blocked"]
-    
-    if any(word in organisation_name.lower() for word in flagged_words):
-        return {
-            "status": "flagged",
-            "risk_score": 0.9,
-            "data_source": "Sanctions Simulation",
-            "details": {"matches": True, "organisation_name": organisation_name},
-            "timestamp": datetime.now().isoformat()
-        }
-    
-    return {
-        "status": "passed",
-        "risk_score": 0.05,
-        "data_source": "Sanctions Simulation",
-        "details": {"matches": False, "organisation_name": organisation_name},
-        "timestamp": datetime.now().isoformat()
-    }
-
-@app.get("/verification/{verification_id}")
-async def get_verification_status(verification_id: str):
-    """Get verification status"""
-    provider = next((p for p in providers_db if p.get("verification_id") == verification_id), None)
-    
-    if not provider:
-        return {"error": "Verification not found"}
-    
-    processing_status = processing_queue.get(verification_id, "unknown")
-    
-    return {
-        "verification_id": verification_id,
-        "status": provider["status"],
-        "processing_status": processing_status,
-        "risk_level": provider.get("risk_level"),
-        "organisation_name": provider["organisation_name"],
-        "jcq_centre_number": provider.get("jcq_centre_number"),
-        "created_at": provider["created_at"],
-        "kyc_results": provider.get("kyc_results", {}),
-        "verification_summary": provider.get("verification_summary", {}),
-        "progress": {
-            "started": processing_status in ["started", "in_progress", "completed", "error"],
-            "in_progress": processing_status == "in_progress",
-            "completed": processing_status == "completed",
-            "error": processing_status == "error"
-        }
-    }
-
-@app.get("/jcq/centre/{centre_number}")
-async def lookup_jcq_centre(centre_number: str):
-    """JCQ centre lookup"""
-    result = simulate_jcq_check(centre_number)
-    return {
-        "centre_number": centre_number,
-        "verification": result,
-        "timestamp": datetime.now().isoformat()
-    }
-
-@app.get("/results/{verification_id}", response_class=HTMLResponse)
-async def verification_results(verification_id: str, request: Request):
-    """Results page"""
-    provider = next((p for p in providers_db if p.get("verification_id") == verification_id), None)
-    
-    if not provider:
-        return templates.TemplateResponse(
-            "error.html", 
-            {"request": request, "message": "Verification not found"}
-        )
-    
-    return templates.TemplateResponse(
-        "results.html", 
-        {"request": request, "provider": provider}
-    )
-
-@app.get("/api/stats")
-async def get_stats():
-    """Dashboard statistics"""
-    api_status = check_api_configuration()
-    
-    return {
-        "total": len(providers_db),
-        "approved": len([p for p in providers_db if p["status"] == "approved"]),
-        "under_review": len([p for p in providers_db if p["status"] in ["review_required", "pending", "processing"]]),
-        "high_risk": len([p for p in providers_db if p["risk_level"] == "high"]),
-        "processing": len([p for p in providers_db if p["status"] == "processing"]),
-        "api_status": api_status,
-        "verification_queue": len(processing_queue),
-        "version": "enhanced"
-    }
-
-@app.get("/health")
-async def health_check():
-    """Health check with enhanced status"""
-    api_status = check_api_configuration()
-    
-    return {
-        "status": "healthy",
-        "service": "educational-kyc-enhanced",
-        "version": "2.1-enhanced",
-        "providers_count": len(providers_db),
-        "api_configurations": api_status,
-        "timestamp": datetime.now().isoformat()
-    }
 
 if __name__ == "__main__":
     import uvicorn
