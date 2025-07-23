@@ -1,4 +1,4 @@
-# app/main.py - Updated with Enhanced Companies House Integration
+# app/main.py - Updated with Enhanced Companies House Integration.
 
 from fastapi import FastAPI, Request, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
