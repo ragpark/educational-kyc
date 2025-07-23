@@ -1,5 +1,5 @@
 # app/services/education_kyc_orchestrator.py
-# Complete implementation for Railway deployment
+# Fixed version with proper logging configuration
 
 from typing import Dict, List, Optional, Tuple
 from dataclasses import dataclass
@@ -7,9 +7,10 @@ from datetime import datetime, timedelta
 import asyncio
 from enum import Enum
 import json
-import structlog
+import logging
 
-logger = structlog.get_logger()
+# Use standard logging instead of structlog to avoid configuration issues
+logger = logging.getLogger(__name__)
 
 class ProviderType(Enum):
     TRAINING_PROVIDER = "training_provider"
@@ -67,7 +68,7 @@ class UKEducationalKYCOrchestrator:
     
     async def process_educational_kyc(self, request: EducationalProviderRequest) -> List[EducationalVerificationResult]:
         """Process comprehensive educational provider KYC"""
-        logger.info("Starting educational KYC process", provider=request.organisation_name)
+        logger.info(f"Starting educational KYC process for {request.organisation_name}")
         
         results = []
         
@@ -85,7 +86,7 @@ class UKEducationalKYCOrchestrator:
                 if isinstance(result, EducationalVerificationResult):
                     results.append(result)
                 elif isinstance(result, Exception):
-                    logger.error("Basic check failed", error=str(result))
+                    logger.error(f"Basic check failed: {str(result)}")
             
             # Phase 2: Educational regulatory checks (parallel)
             educational_checks = await asyncio.gather(
@@ -99,7 +100,7 @@ class UKEducationalKYCOrchestrator:
                 if isinstance(result, EducationalVerificationResult):
                     results.append(result)
                 elif isinstance(result, Exception):
-                    logger.error("Educational check failed", error=str(result))
+                    logger.error(f"Educational check failed: {str(result)}")
             
             # Phase 3: Qualification validation
             if request.qualifications_offered:
@@ -110,16 +111,12 @@ class UKEducationalKYCOrchestrator:
             risk_result = await self.assess_educational_risk(results, request)
             results.append(risk_result)
             
-            logger.info("Educational KYC process completed", 
-                       provider=request.organisation_name, 
-                       checks_completed=len(results))
+            logger.info(f"Educational KYC process completed for {request.organisation_name}, checks: {len(results)}")
             
             return results
             
         except Exception as e:
-            logger.error("Educational KYC process failed", 
-                        provider=request.organisation_name, 
-                        error=str(e))
+            logger.error(f"Educational KYC process failed for {request.organisation_name}: {str(e)}")
             raise
     
     async def verify_company_registration(self, request: EducationalProviderRequest) -> EducationalVerificationResult:
