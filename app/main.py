@@ -1,4 +1,4 @@
-# app/main.py - Updated with Educational KYC Orchestrator Integration
+# app/main.py - Updated with Educational KYC Orchestrator Integration.
 
 from fastapi import FastAPI, Request, BackgroundTasks
 from fastapi.staticfiles import StaticFiles
