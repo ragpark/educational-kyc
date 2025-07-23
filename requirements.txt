@@ -1,6 +1,5 @@
-# requirements.txt - Railway-tested minimal version
-
-# Core FastAPI (known to work on Railway)
+# requirements.txt - Updated for Educational KYC Orchestrator
+# Core FastAPI (Railway-tested versions)
 fastapi==0.104.1
 uvicorn[standard]==0.24.0
 
@@ -12,11 +11,17 @@ python-multipart==0.0.6
 aiohttp==3.9.1
 requests==2.31.0
 
-# Data validation
+# Data validation and models
 pydantic==2.5.0
 
-# Basic logging (no external dependencies)
+# Configuration and environment
 python-dotenv==1.0.0
 
-# Date utilities (pure Python)
+# Date utilities
 python-dateutil==2.8.2
+
+# Logging (required by orchestrator)
+structlog==23.2.0
+
+# Optional: Enhanced data structures for orchestrator
+dataclasses-json==0.6.3
