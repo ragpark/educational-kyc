@@ -19,11 +19,11 @@ import requests
 from app.services.companies_house_enhanced import EnhancedCompaniesHouseAPI, get_enhanced_companies_house_result
 
 # Import the Educational KYC Orchestrator
+from app.services.combined_orchestrator import CombinedEducationalKYCOrchestrator
 from app.services.education_kyc_orchestrator import (
-    UKEducationalKYCOrchestrator, 
     EducationalProviderRequest,
     ProviderType,
-    EducationalVerificationResult
+    EducationalVerificationResult,
 )
 
 # In-memory storage for demo
@@ -216,7 +216,7 @@ async def process_orchestrated_kyc(verification_id: str, provider_data: Dict):
             return
         
         # Create orchestrator
-        orchestrator = UKEducationalKYCOrchestrator()
+        orchestrator = CombinedEducationalKYCOrchestrator()
         
         # Create educational provider request
         educational_request = EducationalProviderRequest(
@@ -626,9 +626,9 @@ async def validate_ukprn_endpoint(ukprn: str):
             }
         
         # Import orchestrator to use UKPRN validation
-        from app.services.education_kyc_orchestrator import UKEducationalKYCOrchestrator
-        
-        orchestrator = UKEducationalKYCOrchestrator()
+        from app.services.combined_orchestrator import CombinedEducationalKYCOrchestrator
+
+        orchestrator = CombinedEducationalKYCOrchestrator()
         
         # Check if scraping dependencies are available
         if not orchestrator._check_scraping_dependencies():
@@ -683,9 +683,9 @@ async def validate_urn_endpoint(urn: str):
             }
         
         # Import orchestrator to use URN validation
-        from app.services.education_kyc_orchestrator import UKEducationalKYCOrchestrator
-        
-        orchestrator = UKEducationalKYCOrchestrator()
+        from app.services.combined_orchestrator import CombinedEducationalKYCOrchestrator
+
+        orchestrator = CombinedEducationalKYCOrchestrator()
         
         # Check if scraping dependencies are available
         if not orchestrator._check_scraping_dependencies():
