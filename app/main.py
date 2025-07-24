@@ -230,6 +230,22 @@ async def process_orchestrated_kyc(verification_id: str, provider_data: Dict):
         
         print(f"Running orchestrated educational KYC for: {provider_data['organisation_name']}")
         
+        # ALSO run the enhanced Companies House check separately to get full data
+        companies_house_full_data = None
+        if provider_data.get("company_number"):
+            print(f"Running detailed Companies House check for: {provider_data['company_number']}")
+            try:
+                companies_house_full_data = await get_enhanced_companies_house_result(
+                    provider_data["company_number"],
+                    provider_data.get("organisation_name")
+                )
+                print(f"Companies House API returned: {companies_house_full_data.get('status', 'unknown status')}")
+                if companies_house_full_data and companies_house_full_data.get("details"):
+                    print(f"Companies House details keys: {list(companies_house_full_data['details'].keys())}")
+            except Exception as e:
+                print(f"Companies House API call failed: {str(e)}")
+                companies_house_full_data = None
+        
         # Run orchestrated verification
         verification_results = await orchestrator.process_educational_kyc(educational_request)
         
@@ -242,7 +258,7 @@ async def process_orchestrated_kyc(verification_id: str, provider_data: Dict):
         
         for result in verification_results:
             # Convert each verification result
-            kyc_results[result.check_type] = {
+            result_data = {
                 "status": result.status,
                 "risk_score": result.risk_score,
                 "data_source": result.data_source,
@@ -252,15 +268,32 @@ async def process_orchestrated_kyc(verification_id: str, provider_data: Dict):
                 "timestamp": result.timestamp.isoformat()
             }
             
+            # For Companies House, merge with full API data if available
+            if result.check_type == "company_registration" and companies_house_full_data:
+                print(f"Merging detailed Companies House data...")
+                # Use the full Companies House data instead of orchestrator mock data
+                result_data = {
+                    "status": companies_house_full_data.get("status", result.status),
+                    "risk_score": companies_house_full_data.get("risk_score", result.risk_score),
+                    "data_source": companies_house_full_data.get("data_source", result.data_source),
+                    "confidence": companies_house_full_data.get("confidence", 0.9),
+                    "details": companies_house_full_data.get("details", result.details),
+                    "recommendations": companies_house_full_data.get("recommendations", result.recommendations or []),
+                    "timestamp": companies_house_full_data.get("timestamp", result.timestamp.isoformat())
+                }
+                print(f"Companies House details: {len(str(result_data['details']))} characters")
+            
+            kyc_results[result.check_type] = result_data
+            
             # Accumulate risk scores
-            overall_risk_score += result.risk_score
+            overall_risk_score += result_data["risk_score"]
             total_checks += 1
             
             # Collect risk factors and recommendations
-            if result.recommendations:
-                recommendations.extend(result.recommendations)
+            if result_data["recommendations"]:
+                recommendations.extend(result_data["recommendations"])
             
-            if result.status in ["failed", "flagged"]:
+            if result_data["status"] in ["failed", "flagged"]:
                 risk_factors.append(result.check_type)
         
         # Calculate average risk score
@@ -573,6 +606,32 @@ async def get_provider_status_api(verification_id: str):
         "processing_completed": provider.get("processing_completed"),
         "uploaded_documents_count": len(provider.get("uploaded_documents", [])),
         "last_updated": datetime.now().isoformat()
+    }
+
+@app.get("/debug/provider/{verification_id}")
+async def debug_provider_data(verification_id: str):
+    """Debug endpoint to see provider data structure"""
+    provider = next((p for p in providers_db if p.get("verification_id") == verification_id), None)
+    
+    if not provider:
+        return {"error": "Provider not found"}
+    
+    # Return the full provider data for inspection
+    return {
+        "provider_id": provider.get("id"),
+        "verification_id": verification_id,
+        "status": provider.get("status"),
+        "kyc_results_keys": list(provider.get("kyc_results", {}).keys()),
+        "companies_house_data": provider.get("kyc_results", {}).get("company_registration"),
+        "full_kyc_results": provider.get("kyc_results", {}),
+        "data_structure": {
+            key: {
+                "status": value.get("status") if isinstance(value, dict) else "not_dict",
+                "details_keys": list(value.get("details", {}).keys()) if isinstance(value, dict) and value.get("details") else [],
+                "has_recommendations": bool(value.get("recommendations")) if isinstance(value, dict) else False
+            }
+            for key, value in provider.get("kyc_results", {}).items()
+        }
     }
 
 @app.get("/health")
