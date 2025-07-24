@@ -1,327 +1,295 @@
-<!-- templates/onboard_with_jcq.html -->
 {% extends "base.html" %}
-
-{% block title %}Register Provider KYC{% endblock %}
-
+{% block title %}Provider Onboarding{% endblock %}
 {% block content %}
-<div class="max-w-2xl mx-auto">
+<div class="max-w-4xl mx-auto">
     <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-900 mb-2">Register New Educational Provider</h2>
-        <p class="text-gray-600">Complete KYC verification</p>
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">Educational Provider Onboarding</h2>
+        <p class="text-gray-600">Complete your KYC verification to become an approved educational provider</p>
     </div>
     
-    <div class="bg-white rounded-lg shadow-md p-8">
-        <form method="POST" action="/onboard" class="space-y-6">
-            <!-- Organisation Details -->
-            <div class="border-b border-gray-200 pb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Organisation Information</h3>
+    <form method="POST" action="/onboard" class="bg-white rounded-lg shadow-md p-8 space-y-6">
+        <!-- Organisation Information -->
+        <div class="border-b border-gray-200 pb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Organisation Information</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="organisation_name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Organisation Name *
+                    </label>
+                    <input type="text" id="organisation_name" name="organisation_name" required
+                           class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Your organisation's legal name">
+                </div>
                 
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="organisation_name" class="block text-sm font-medium text-gray-700 mb-2">
-                            Organisation Name *
-                        </label>
-                        <input type="text" 
-                               id="organisation_name" 
-                               name="organisation_name" 
-                               required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="Excellence Training Academy Ltd">
-                    </div>
-                    
-                    <div>
-                        <label for="provider_type" class="block text-sm font-medium text-gray-700 mb-2">
-                            Provider Type *
-                        </label>
-                        <select id="provider_type" 
-                                name="provider_type" 
-                                required
-                                class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500">
-                            <option value="">Select provider type...</option>
-                            <option value="Secondary School">Secondary School</option>
-                            <option value="Primary School">Primary School</option>
-                            <option value="Sixth Form College">Sixth Form College</option>
-                            <option value="Further Education College">Further Education College</option>
-                            <option value="Higher Education Institution">Higher Education Institution</option>
-                            <option value="Training Provider">Training Provider</option>
-                            <option value="Apprenticeship Provider">Apprenticeship Provider</option>
-                            <option value="Independent School">Independent School</option>
-                            <option value="Adult Community Learning">Adult Community Learning</option>
-                            <option value="Private Tutor">Private Tutor</option>
-
-                        </select>
-                    </div>
+                <div>
+                    <label for="trading_name" class="block text-sm font-medium text-gray-700 mb-2">
+                        Trading Name
+                    </label>
+                    <input type="text" id="trading_name" name="trading_name"
+                           class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="Trading name (if different)">
+                </div>
+                
+                <div>
+                    <label for="provider_type" class="block text-sm font-medium text-gray-700 mb-2">
+                        Provider Type *
+                    </label>
+                    <select id="provider_type" name="provider_type" required
+                            class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        <option value="">Select provider type...</option>
+                        <option value="Training Provider">Training Provider</option>
+                        <option value="FE College">Further Education College</option>
+                        <option value="HE Institution">Higher Education Institution</option>
+                        <option value="Apprenticeship Provider">Apprenticeship Provider</option>
+                        <option value="Private Training">Private Training Provider</option>
+                        <option value="Adult Community">Adult & Community Learning</option>
+                    </select>
+                </div>
+                
+                <div>
+                    <label for="contact_email" class="block text-sm font-medium text-gray-700 mb-2">
+                        Contact Email *
+                    </label>
+                    <input type="email" id="contact_email" name="contact_email" required
+                           class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="contact@organisation.com">
                 </div>
             </div>
-            
-            <!-- Registration Details -->
-            <div class="border-b border-gray-200 pb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Registration Details</h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="company_number" class="block text-sm font-medium text-gray-700 mb-2">
-                            Companies House Number
-                        </label>
-                        <input type="text" 
-                               id="company_number" 
-                               name="company_number"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="12345678">
-                        <p class="text-xs text-gray-500 mt-1">8-digit company registration number</p>
-                    </div>
-                    
-                    <div>
-                        <label for="ukprn" class="block text-sm font-medium text-gray-700 mb-2">
-                            UKPRN
-                        </label>
-                        <input type="text" 
-                               id="ukprn" 
-                               name="ukprn"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="10012345">
-                        <p class="text-xs text-gray-500 mt-1">UK Provider Reference Number</p>
-                    </div>
+        </div>
+
+        <!-- Registration Details -->
+        <div class="border-b border-gray-200 pb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Registration Details</h3>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                <div>
+                    <label for="company_number" class="block text-sm font-medium text-gray-700 mb-2">
+                        Company Number *
+                    </label>
+                    <input type="text" id="company_number" name="company_number" required
+                           class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., 12345678"
+                           pattern="[0-9]{8}"
+                           title="Company number should be 8 digits">
+                    <p class="text-xs text-gray-500 mt-1">8-digit Companies House number</p>
                 </div>
                 
-                <!-- JCQ Centre Number - New Field -->
-                <div class="mt-4">
+                <div>
+                    <label for="ukprn" class="block text-sm font-medium text-gray-700 mb-2">
+                        UKPRN
+                    </label>
+                    <input type="text" id="ukprn" name="ukprn"
+                           class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., 10012345"
+                           pattern="10[0-9]{6}"
+                           title="UKPRN should start with 10 followed by 6 digits">
+                    <p class="text-xs text-gray-500 mt-1">UK Provider Reference Number (if applicable)</p>
+                </div>
+                
+                <div>
                     <label for="jcq_centre_number" class="block text-sm font-medium text-gray-700 mb-2">
-                        JCQ National Centre Number
-                        <span class="text-blue-600 font-semibold">NEW</span>
+                        JCQ Centre Number
+                    </label>
+                    <input type="text" id="jcq_centre_number" name="jcq_centre_number"
+                           class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., 12345"
+                           pattern="[0-9]{5}"
+                           title="JCQ centre number should be 5 digits">
+                    <p class="text-xs text-gray-500 mt-1">Joint Council for Qualifications centre number (if applicable)</p>
+                </div>
+                
+                <div>
+                    <label for="qualifications_offered" class="block text-sm font-medium text-gray-700 mb-2">
+                        Qualifications Offered
+                    </label>
+                    <input type="text" id="qualifications_offered" name="qualifications_offered"
+                           class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                           placeholder="e.g., GCSE, A-Level, BTEC (comma-separated)">
+                    <p class="text-xs text-gray-500 mt-1">List main qualifications you offer, separated by commas</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Address Information -->
+        <div class="border-b border-gray-200 pb-6">
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Address Information</h3>
+            <div class="space-y-4">
+                <div>
+                    <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
+                        Address *
+                    </label>
+                    <textarea id="address" name="address" required rows="3"
+                              class="w-full border border-gray-300 rounded-md px-3 py-2 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                              placeholder="Full address including street, city/town"></textarea>
+                </div>
+                
+                <div class="max-w-md">
+                    <label for="postcode" class="block text-sm font-medium text-gray-700 mb-2">
+                        Postcode *
                     </label>
                     <div class="relative">
-                        <input type="text" 
-                               id="jcq_centre_number" 
-                               name="jcq_centre_number"
-                               maxlength="5"
-                               pattern="[0-9]{5}"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="12345">
-                        <button type="button" 
-                                id="verify-jcq-btn"
-                                onclick="verifyJCQCentre()"
-                                class="absolute right-2 top-2 text-sm bg-blue-100 text-blue-700 px-3 py-1 rounded hover:bg-blue-200">
-                            Verify
-                        </button>
-                    </div>
-                    <div class="mt-2 flex items-start space-x-2">
-                        <svg class="w-4 h-4 text-blue-500 mt-0.5 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
-                            <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
-                        </svg>
-                        <div>
-                            <p class="text-xs text-blue-700 font-medium">About JCQ Centre Numbers:</p>
-                            <p class="text-xs text-gray-500">
-                                5-digit number assigned by Joint Council for Qualifications to centres offering GCSEs, A-levels, and other JCQ qualifications. 
-                                This verifies your centre is authorized to offer and administer JCQ examinations.
-                            </p>
+                        <input type="text" id="postcode" name="postcode" required
+                               class="w-full border border-gray-300 rounded-md px-3 py-2 pr-10 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+                               placeholder="e.g., SW1A 1AA">
+                        <div id="postcode-status" class="absolute inset-y-0 right-0 flex items-center pr-3">
+                            <!-- Status indicator will be inserted here -->
                         </div>
                     </div>
-                    <div id="jcq-verification-result" class="mt-2 hidden"></div>
-                </div>
-            </div>
-            
-            <!-- Contact Information -->
-            <div class="pb-6">
-                <h3 class="text-lg font-medium text-gray-900 mb-4">Contact Information</h3>
-                
-                <div class="grid grid-cols-1 md:grid-cols-2 gap-4">
-                    <div>
-                        <label for="postcode" class="block text-sm font-medium text-gray-700 mb-2">
-                            Postcode *
-                        </label>
-                        <input type="text" 
-                               id="postcode" 
-                               name="postcode" 
-                               required
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="M1 1AA">
+                    <div id="postcode-info" class="mt-2 text-xs text-gray-600 hidden">
+                        <!-- Postcode information will be displayed here -->
                     </div>
-                    
-                    <div>
-                        <label for="contact_email" class="block text-sm font-medium text-gray-700 mb-2">
-                            Contact Email
-                        </label>
-                        <input type="email" 
-                               id="contact_email" 
-                               name="contact_email"
-                               class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                               placeholder="contact@provider.co.uk">
+                    <div id="postcode-error" class="mt-2 text-xs text-red-600 hidden">
+                        <!-- Error messages will be displayed here -->
                     </div>
                 </div>
-                
-                <div class="mt-4">
-                    <label for="address" class="block text-sm font-medium text-gray-700 mb-2">
-                        Full Address
-                    </label>
-                    <textarea id="address" 
-                              name="address"
-                              rows="3"
-                              class="w-full px-3 py-2 border border-gray-300 rounded-md focus:outline-none focus:ring-2 focus:ring-blue-500"
-                              placeholder="123 Training Street, Manchester"></textarea>
+            </div>
+        </div>
+
+        <!-- API Status Information -->
+        {% if api_status %}
+        <div class="bg-gray-50 rounded-lg p-4">
+            <h4 class="text-sm font-medium text-gray-900 mb-2">Verification Services Status</h4>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-2 text-xs">
+                <div class="flex items-center">
+                    <div class="w-2 h-2 rounded-full mr-2 {% if api_status.companies_house_api %}bg-green-400{% else %}bg-red-400{% endif %}"></div>
+                    <span>Companies House API: {% if api_status.companies_house_api %}Active{% else %}Limited{% endif %}</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-2 h-2 rounded-full mr-2 bg-green-400"></div>
+                    <span>Postcode Validation: Active</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-2 h-2 rounded-full mr-2 {% if api_status.orchestrator_available %}bg-green-400{% else %}bg-red-400{% endif %}"></div>
+                    <span>Educational KYC: {% if api_status.orchestrator_available %}Active{% else %}Limited{% endif %}</span>
+                </div>
+                <div class="flex items-center">
+                    <div class="w-2 h-2 rounded-full mr-2 {% if api_status.jcq_simulation %}bg-blue-400{% else %}bg-red-400{% endif %}"></div>
+                    <span>JCQ Verification: {% if api_status.jcq_simulation %}Simulation{% else %}Unavailable{% endif %}</span>
                 </div>
             </div>
-            
-            <!-- Submit Button -->
-            <div class="flex justify-between items-center pt-6">
-                <a href="/" class="text-gray-600 hover:text-gray-800 transition-colors">
+        </div>
+        {% endif %}
+
+        <!-- Submit Button -->
+        <div class="pt-6">
+            <div class="flex justify-between items-center">
+                <a href="/" class="text-gray-600 hover:text-gray-800">
                     ← Back to Dashboard
                 </a>
-                <button type="submit" 
-                        class="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 transition-colors font-medium">
-                    Start Enhanced KYC Verification
+                <button type="submit" id="submit-btn"
+                        class="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2 disabled:opacity-50 disabled:cursor-not-allowed">
+                    Submit Application
                 </button>
             </div>
-        </form>
-        
-        <!-- Enhanced Information Box -->
-        <div class="mt-8 p-4 bg-green-50 rounded-lg border border-green-200">
-            <div class="flex items-start">
-                <span class="text-green-600 text-xl mr-3">🎓</span>
-                <div>
-                    <h4 class="text-sm font-medium text-green-900 mb-2">Enhanced Educational Verification</h4>
-                    <ul class="text-sm text-green-800 space-y-1">
-                        <li>✅ Companies House registration verification</li>
-                        <li>✅ UKPRN validation with UK Register of Learning Providers</li>
-                        <li>✅ <strong>JCQ National Centre Number verification (NEW)</strong></li>
-                        <li>✅ Ofqual awarding organisation recognition check</li>
-                        <li>✅ UK Treasury and international sanctions screening</li>
-                        <li>✅ Advanced educational risk assessment</li>
-                    </ul>
-                </div>
-            </div>
         </div>
-        
-        <!-- API Status -->
-        <div class="mt-6 p-4 bg-blue-50 rounded-lg border border-blue-200">
-            <h4 class="text-sm font-medium text-blue-900 mb-2">Data Source Status</h4>
-            <div class="grid grid-cols-2 md:grid-cols-3 gap-2 text-xs">
-                <div class="flex items-center">
-                    <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                    <span class="text-blue-700">JCQ Directory</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-2 h-2 {{ 'bg-green-500' if api_status.companies_house_api else 'bg-yellow-500' }} rounded-full mr-2"></div>
-                    <span class="text-blue-700">Companies House</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                    <span class="text-blue-700">UK Sanctions</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-2 h-2 {{ 'bg-green-500' if api_status.ukrlp_api else 'bg-yellow-500' }} rounded-full mr-2"></div>
-                    <span class="text-blue-700">UKRLP</span>
-                </div>
-                <div class="flex items-center">
-                    <div class="w-2 h-2 bg-green-500 rounded-full mr-2"></div>
-                    <span class="text-blue-700">Ofqual</span>
-                </div>
-            </div>
-        </div>
-    </div>
+    </form>
 </div>
 
 <script>
-async function verifyJCQCentre() {
-    const centreNumber = document.getElementById('jcq_centre_number').value;
-    const resultDiv = document.getElementById('jcq-verification-result');
-    const verifyBtn = document.getElementById('verify-jcq-btn');
+// Real-time postcode validation
+let postcodeTimeout;
+const postcodeInput = document.getElementById('postcode');
+const postcodeStatus = document.getElementById('postcode-status');
+const postcodeInfo = document.getElementById('postcode-info');
+const postcodeError = document.getElementById('postcode-error');
+
+function showPostcodeStatus(type, content) {
+    postcodeStatus.innerHTML = content;
     
-    if (!centreNumber || centreNumber.length !== 5) {
-        resultDiv.innerHTML = `
-            <div class="p-2 bg-yellow-50 border border-yellow-200 rounded text-sm">
-                <span class="text-yellow-800">Please enter a 5-digit JCQ centre number</span>
-            </div>
-        `;
-        resultDiv.classList.remove('hidden');
+    if (type === 'loading') {
+        postcodeInfo.classList.add('hidden');
+        postcodeError.classList.add('hidden');
+    } else if (type === 'success') {
+        postcodeError.classList.add('hidden');
+        postcodeInfo.classList.remove('hidden');
+    } else if (type === 'error') {
+        postcodeInfo.classList.add('hidden');
+        postcodeError.classList.remove('hidden');
+    }
+}
+
+postcodeInput.addEventListener('input', function(e) {
+    const postcode = e.target.value.trim();
+    
+    // Clear previous timeout
+    clearTimeout(postcodeTimeout);
+    
+    // Clear status
+    showPostcodeStatus('', '');
+    
+    // Skip validation if postcode is too short
+    if (postcode.length < 5) {
         return;
     }
     
-    verifyBtn.textContent = 'Checking...';
-    verifyBtn.disabled = true;
-    
-    try {
-        const response = await fetch(`/jcq/centre/${centreNumber}`);
-        const data = await response.json();
-        
-        if (response.ok) {
-            const verification = data.verification;
-            let statusClass, statusIcon, statusText;
+    // Debounce validation
+    postcodeTimeout = setTimeout(async () => {
+        try {
+            // Show loading
+            showPostcodeStatus('loading', `
+                <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>
+            `);
             
-            if (verification.status === 'passed') {
-                statusClass = 'bg-green-50 border-green-200';
-                statusIcon = '✅';
-                statusText = 'text-green-800';
-            } else if (verification.status === 'flagged') {
-                statusClass = 'bg-yellow-50 border-yellow-200';
-                statusIcon = '⚠️';
-                statusText = 'text-yellow-800';
+            // Call validation API
+            const response = await fetch(`/postcode/validate/${encodeURIComponent(postcode)}`);
+            const data = await response.json();
+            
+            if (data.valid) {
+                // Show success
+                showPostcodeStatus('success', `
+                    <svg class="h-4 w-4 text-green-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                    </svg>
+                `);
+                
+                // Show postcode info
+                postcodeInfo.innerHTML = `
+                    <strong>Valid UK Postcode:</strong> ${data.postcode}<br>
+                    ${data.admin_district ? `<strong>District:</strong> ${data.admin_district}<br>` : ''}
+                    ${data.admin_county ? `<strong>County:</strong> ${data.admin_county}<br>` : ''}
+                    ${data.region ? `<strong>Region:</strong> ${data.region}` : ''}
+                `;
+                
+                // Update input with formatted postcode
+                if (data.postcode && data.postcode !== postcode) {
+                    postcodeInput.value = data.postcode;
+                }
+                
             } else {
-                statusClass = 'bg-red-50 border-red-200';
-                statusIcon = '❌';
-                statusText = 'text-red-800';
+                // Show error
+                showPostcodeStatus('error', `
+                    <svg class="h-4 w-4 text-red-600" fill="currentColor" viewBox="0 0 20 20">
+                        <path fill-rule="evenodd" d="M4.293 4.293a1 1 0 011.414 0L10 8.586l4.293-4.293a1 1 0 111.414 1.414L11.414 10l4.293 4.293a1 1 0 01-1.414 1.414L10 11.414l-4.293 4.293a1 1 0 01-1.414-1.414L8.586 10 4.293 5.707a1 1 0 010-1.414z" clip-rule="evenodd"></path>
+                    </svg>
+                `);
+                
+                postcodeError.textContent = data.error || 'Invalid postcode';
             }
             
-            const centreName = verification.details.centre_name || 'Unknown';
-            const centreType = verification.details.centre_type || 'Unknown';
-            const qualifications = verification.details.qualification_types || [];
+        } catch (error) {
+            // Show error
+            showPostcodeStatus('error', `
+                <svg class="h-4 w-4 text-yellow-600" fill="currentColor" viewBox="0 0 20 20">
+                    <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                </svg>
+            `);
             
-            resultDiv.innerHTML = `
-                <div class="p-3 ${statusClass} border rounded text-sm">
-                    <div class="flex items-start space-x-2">
-                        <span class="text-lg">${statusIcon}</span>
-                        <div class="flex-1">
-                            <p class="${statusText} font-medium">
-                                JCQ Centre ${verification.status === 'passed' ? 'Verified' : verification.status === 'flagged' ? 'Found (Review Needed)' : 'Not Found'}
-                            </p>
-                            ${verification.status !== 'failed' ? `
-                                <p class="text-gray-600 mt-1">
-                                    <strong>Centre:</strong> ${centreName}<br>
-                                    <strong>Type:</strong> ${centreType}<br>
-                                    <strong>Qualifications:</strong> ${qualifications.join(', ') || 'None listed'}
-                                </p>
-                            ` : `
-                                <p class="text-red-600 mt-1">Centre number not found in JCQ directory</p>
-                            `}
-                            ${verification.recommendations && verification.recommendations.length > 0 ? `
-                                <p class="mt-2 text-xs text-gray-600">
-                                    <strong>Note:</strong> ${verification.recommendations.join(', ')}
-                                </p>
-                            ` : ''}
-                        </div>
-                    </div>
-                </div>
-            `;
-        } else {
-            resultDiv.innerHTML = `
-                <div class="p-2 bg-red-50 border border-red-200 rounded text-sm">
-                    <span class="text-red-800">Error verifying JCQ centre: ${data.detail}</span>
-                </div>
-            `;
+            postcodeError.textContent = 'Unable to validate postcode. Please check your connection.';
         }
-        
-        resultDiv.classList.remove('hidden');
-        
-    } catch (error) {
-        resultDiv.innerHTML = `
-            <div class="p-2 bg-red-50 border border-red-200 rounded text-sm">
-                <span class="text-red-800">Error connecting to JCQ verification service</span>
-            </div>
-        `;
-        resultDiv.classList.remove('hidden');
-    }
-    
-    verifyBtn.textContent = 'Verify';
-    verifyBtn.disabled = false;
-}
+    }, 500); // Wait 500ms after user stops typing
+});
 
-// Auto-verify when user types a 5-digit number
-document.getElementById('jcq_centre_number').addEventListener('input', function(e) {
-    const value = e.target.value;
-    if (value.length === 5 && /^\d{5}$/.test(value)) {
-        setTimeout(verifyJCQCentre, 500); // Delay to avoid too many requests
-    }
+// Form validation
+document.querySelector('form').addEventListener('submit', function(e) {
+    const submitBtn = document.getElementById('submit-btn');
+    
+    // Disable submit button and show loading
+    submitBtn.disabled = true;
+    submitBtn.innerHTML = `
+        <div class="flex items-center">
+            <div class="animate-spin rounded-full h-4 w-4 border-b-2 border-white mr-2"></div>
+            Submitting...
+        </div>
+    `;
 });
 </script>
 {% endblock %}
-
