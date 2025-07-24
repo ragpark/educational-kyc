@@ -359,6 +359,66 @@ async def quick_companies_house_check(company_number: str):
     result = await api.quick_company_check(company_number)
     return result
 
+@app.get("/postcode/validate/{postcode}")
+async def validate_postcode_endpoint(postcode: str):
+    """Quick postcode validation endpoint using postcodes.io"""
+    try:
+        # Clean postcode (remove spaces and convert to uppercase)
+        clean_postcode = postcode.replace(" ", "").upper()
+        
+        # Call postcodes.io API
+        url = f"https://api.postcodes.io/postcodes/{clean_postcode}"
+        
+        import aiohttp
+        async with aiohttp.ClientSession() as session:
+            async with session.get(url) as response:
+                if response.status == 200:
+                    data = await response.json()
+                    
+                    if data.get("status") == 200:
+                        result_data = data.get("result", {})
+                        
+                        return {
+                            "valid": True,
+                            "postcode": result_data.get("postcode"),
+                            "country": result_data.get("country"),
+                            "region": result_data.get("region"),
+                            "admin_district": result_data.get("admin_district"),
+                            "admin_county": result_data.get("admin_county"),
+                            "parliamentary_constituency": result_data.get("parliamentary_constituency"),
+                            "coordinates": {
+                                "latitude": result_data.get("latitude"),
+                                "longitude": result_data.get("longitude")
+                            }
+                        }
+                    else:
+                        return {
+                            "valid": False,
+                            "error": "Invalid postcode format",
+                            "postcode": postcode
+                        }
+                
+                elif response.status == 404:
+                    return {
+                        "valid": False,
+                        "error": "Postcode not found",
+                        "postcode": postcode
+                    }
+                
+                else:
+                    return {
+                        "valid": False,
+                        "error": f"API error: {response.status}",
+                        "postcode": postcode
+                    }
+        
+    except Exception as e:
+        return {
+            "valid": False,
+            "error": f"Validation failed: {str(e)}",
+            "postcode": postcode
+        }
+
 @app.get("/verification/{verification_id}")
 async def get_verification_status(verification_id: str):
     """Get verification status with orchestrator details"""
