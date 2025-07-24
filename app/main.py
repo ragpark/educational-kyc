@@ -25,9 +25,19 @@ from app.services.education_kyc_orchestrator import (
     ProviderType,
     EducationalVerificationResult,
 )
+from app.centre_submission import (
+    CentreSubmission,
+    ParentOrganisation,
+    DeliveryAddress,
+    DeliverySite,
+    QualificationRequest,
+    StaffMember,
+    ComplianceDeclarations,
+)
 
 # In-memory storage for demo
 providers_db = []
+centre_submissions: List[CentreSubmission] = []
 processing_queue = {}
 
 def check_api_configuration() -> Dict[str, bool]:
@@ -128,12 +138,18 @@ async def dashboard(request: Request):
         "approved": len([p for p in providers_db if p["status"] == "approved"]),
         "under_review": len([p for p in providers_db if p["status"] in ["review_required", "pending", "processing"]]),
         "high_risk": len([p for p in providers_db if p["risk_level"] == "high"]),
-        "jcq_verified": len([p for p in providers_db if p.get("jcq_centre_number")])
+        "jcq_verified": len([p for p in providers_db if p.get("jcq_centre_number")]),
+        "centre_submissions": len(centre_submissions),
     }
     
     return templates.TemplateResponse(
-        "dashboard.html", 
-        {"request": request, "providers": providers_db, "stats": stats}
+        "dashboard.html",
+        {
+            "request": request,
+            "providers": providers_db,
+            "centre_submissions": centre_submissions,
+            "stats": stats,
+        }
     )
 
 @app.get("/onboard", response_class=HTMLResponse)
@@ -143,6 +159,74 @@ async def onboard_form(request: Request):
     return templates.TemplateResponse(
         "onboard_with_jcq.html", 
         {"request": request, "api_status": api_status}
+    )
+
+# ---------------------------------------------------------------------------
+# Centre Submission workflow
+
+@app.get("/centre-submission", response_class=HTMLResponse)
+async def centre_submission_form(request: Request):
+    return templates.TemplateResponse(
+        "centre_submission_form.html",
+        {"request": request}
+    )
+
+
+@app.post("/centre-submission")
+async def submit_centre_submission(request: Request):
+    form = await request.form()
+
+    submission_id = str(uuid.uuid4())
+    parent_org = ParentOrganisation(
+        groupUkprn=form.get("group_ukprn"),
+        legalName=form.get("legal_name"),
+        organisationType=form.get("organisation_type"),
+    )
+    address = DeliveryAddress(
+        line1=form.get("address_line1"),
+        postcode=form.get("postcode"),
+    )
+    qualification = QualificationRequest(
+        qualificationId=form.get("qualification_id"),
+        aoId=form.get("ao_id"),
+        aoName=form.get("ao_name"),
+        title=form.get("title"),
+        startDate=form.get("start_date"),
+        expectedCohortSize=int(form.get("cohort_size")),
+    )
+    site = DeliverySite(
+        siteId=form.get("site_id"),
+        ukprn=form.get("site_ukprn"),
+        siteName=form.get("site_name"),
+        deliveryAddress=address,
+        qualificationsRequested=[qualification],
+    )
+    staff_member = StaffMember(
+        staffId=form.get("staff_id"),
+        role=form.get("staff_role"),
+        name=form.get("staff_name"),
+        email=form.get("staff_email"),
+    )
+    compliance = ComplianceDeclarations(
+        ofqualConditionsAcknowledged=bool(form.get("ofqual_ack")),
+        gdprConsent=bool(form.get("gdpr_consent")),
+        multiSiteResponsibilityConfirmed=bool(form.get("multi_site")),
+    )
+
+    submission = CentreSubmission(
+        submissionId=submission_id,
+        submittedAt=datetime.utcnow(),
+        parentOrganisation=parent_org,
+        deliverySites=[site],
+        staff=[staff_member],
+        complianceDeclarations=compliance,
+    )
+
+    centre_submissions.append(submission)
+
+    return templates.TemplateResponse(
+        "centre_submission_success.html",
+        {"request": request, "submission": submission}
     )
 
 @app.post("/onboard")
@@ -525,6 +609,7 @@ async def get_stats():
         "under_review": len([p for p in providers_db if p["status"] in ["review_required", "pending", "processing"]]),
         "high_risk": len([p for p in providers_db if p["risk_level"] == "high"]),
         "processing": len([p for p in providers_db if p["status"] == "processing"]),
+        "centre_submissions": len(centre_submissions),
         "api_status": api_status,
         "verification_queue": len(processing_queue),
         "orchestrator_enabled": True,

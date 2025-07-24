@@ -9,9 +9,14 @@
                 <h1 class="text-3xl font-bold text-gray-900">Educational Provider KYC Dashboard</h1>
                 <p class="text-gray-600 mt-2">Monitor and manage educational provider verification applications</p>
             </div>
-            <a href="/onboard" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
-                Add New Provider
-            </a>
+            <div class="space-x-2">
+                <a href="/onboard" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Add New Provider
+                </a>
+                <a href="/centre-submission" class="bg-blue-600 text-white px-6 py-3 rounded-md hover:bg-blue-700 focus:outline-none focus:ring-2 focus:ring-blue-500 focus:ring-offset-2">
+                    Add Centre
+                </a>
+            </div>
         </div>
     </div>
 
@@ -285,6 +290,41 @@
                 </div>
             </div>
             {% endif %}
+        </div>
+    </div>
+
+    <!-- Centre Submissions Table -->
+    <div class="bg-white rounded-lg shadow-md overflow-hidden mt-8">
+        <div class="px-6 py-4 border-b border-gray-200">
+            <h2 class="text-lg font-semibold text-gray-900">Centre Submissions</h2>
+            <p class="text-sm text-gray-600 mt-1">Recent centre submission forms</p>
+        </div>
+        <div class="overflow-x-auto">
+            <table class="min-w-full divide-y divide-gray-200">
+                <thead class="bg-gray-50">
+                    <tr>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submission ID</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Parent Organisation</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Site Name</th>
+                        <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Submitted</th>
+                    </tr>
+                </thead>
+                <tbody class="bg-white divide-y divide-gray-200">
+                    {% for submission in centre_submissions %}
+                    <tr>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ submission.submissionId }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ submission.parentOrganisation.legalName }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ submission.deliverySites[0].siteName }}</td>
+                        <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ submission.submittedAt.strftime('%Y-%m-%d') }}</td>
+                    </tr>
+                    {% endfor %}
+                    {% if not centre_submissions %}
+                    <tr>
+                        <td class="px-6 py-4 text-center text-sm text-gray-500" colspan="4">No centre submissions yet</td>
+                    </tr>
+                    {% endif %}
+                </tbody>
+            </table>
         </div>
     </div>
 
