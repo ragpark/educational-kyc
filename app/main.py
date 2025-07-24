@@ -74,6 +74,7 @@ async def lifespan(app: FastAPI):
             "organisation_name": "Excellent Training Academy",
             "provider_type": "Training Provider",
             "company_number": "12345678",
+            "urn": "123456",  # Sample URN
             "ukprn": "10012345",
             "jcq_centre_number": "12345",
             "postcode": "M1 1AA",
@@ -157,7 +158,8 @@ async def onboard_provider(request: Request, background_tasks: BackgroundTasks):
         "trading_name": form_data.get("trading_name"),
         "provider_type": form_data.get("provider_type"),
         "company_number": form_data.get("company_number"),
-        "ukprn": form_data.get("ukprn"),
+        "urn": form_data.get("urn"),  # Ofsted URN - now mandatory
+        "ukprn": form_data.get("ukprn"),  # UKPRN - now optional
         "jcq_centre_number": form_data.get("jcq_centre_number"),
         "postcode": form_data.get("postcode"),
         "contact_email": form_data.get("contact_email"),
@@ -172,7 +174,8 @@ async def onboard_provider(request: Request, background_tasks: BackgroundTasks):
         "trading_name": provider_data.get("trading_name"),
         "provider_type": provider_data["provider_type"],
         "company_number": provider_data.get("company_number"),
-        "ukprn": provider_data.get("ukprn"),
+        "urn": provider_data.get("urn"),  # Ofsted URN
+        "ukprn": provider_data.get("ukprn"),  # UKPRN - now optional
         "jcq_centre_number": provider_data.get("jcq_centre_number"),
         "postcode": provider_data["postcode"],
         "contact_email": provider_data["contact_email"],
@@ -220,7 +223,8 @@ async def process_orchestrated_kyc(verification_id: str, provider_data: Dict):
             organisation_name=provider_data["organisation_name"],
             trading_name=provider_data.get("trading_name"),
             company_number=provider_data["company_number"],
-            ukprn=provider_data.get("ukprn"),
+            urn=provider_data["urn"],  # Pass URN directly
+            ukprn=provider_data.get("ukprn"),  # UKPRN is now optional
             provider_type=map_provider_type(provider_data.get("provider_type", "Training Provider")),
             contact_email=provider_data["contact_email"],
             address=provider_data["address"],
@@ -469,6 +473,7 @@ async def get_verification_status(verification_id: str):
         "risk_level": provider.get("risk_level"),
         "organisation_name": provider["organisation_name"],
         "provider_type": provider.get("provider_type"),
+        "urn": provider.get("urn"),
         "ukprn": provider.get("ukprn"),
         "jcq_centre_number": provider.get("jcq_centre_number"),
         "created_at": provider["created_at"],
@@ -607,6 +612,61 @@ async def get_provider_status_api(verification_id: str):
         "uploaded_documents_count": len(provider.get("uploaded_documents", [])),
         "last_updated": datetime.now().isoformat()
     }
+
+@app.get("/urn/validate/{urn}")
+async def validate_urn_endpoint(urn: str):
+    """Quick URN validation endpoint using Ofsted search"""
+    try:
+        # Basic format validation first
+        if not urn.isdigit() or len(urn) < 6 or len(urn) > 7:
+            return {
+                "valid": False,
+                "urn": urn,
+                "error": "URN must be 6-7 digits"
+            }
+        
+        # Import orchestrator to use URN validation
+        from app.services.education_kyc_orchestrator import UKEducationalKYCOrchestrator
+        
+        orchestrator = UKEducationalKYCOrchestrator()
+        
+        # Check if scraping dependencies are available
+        if not orchestrator._check_scraping_dependencies():
+            return {
+                "valid": False,
+                "urn": urn,
+                "error": "URN validation temporarily unavailable - dependencies missing"
+            }
+        
+        # Use the resolve_ofsted_url method to check if URN exists
+        resolved_url = await orchestrator._resolve_ofsted_url(urn)
+        
+        if resolved_url:
+            return {
+                "valid": True,
+                "urn": urn,
+                "message": "URN found in Ofsted database",
+                "ofsted_url": resolved_url
+            }
+        else:
+            return {
+                "valid": False,
+                "urn": urn,
+                "error": "URN not found in Ofsted database"
+            }
+        
+    except ImportError as e:
+        return {
+            "valid": False,
+            "urn": urn,
+            "error": "URN validation temporarily unavailable"
+        }
+    except Exception as e:
+        return {
+            "valid": False,
+            "urn": urn,
+            "error": f"Validation failed: {str(e)}"
+        }
 
 @app.get("/debug/provider/{verification_id}")
 async def debug_provider_data(verification_id: str):
