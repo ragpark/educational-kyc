@@ -9,6 +9,21 @@ from enum import Enum
 import json
 import logging
 
+# Web scraping imports with error handling
+try:
+    import aiohttp
+    from bs4 import BeautifulSoup
+    import re
+    SCRAPING_AVAILABLE = True
+except ImportError as e:
+    logging.warning(f"Web scraping dependencies not available: {e}")
+    SCRAPING_AVAILABLE = False
+    # Create dummy classes to prevent NameError
+    class BeautifulSoup:
+        pass
+    aiohttp = None
+    re = None
+
 # Use standard logging instead of structlog to avoid configuration issues
 logger = logging.getLogger(__name__)
 
