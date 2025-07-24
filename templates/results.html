@@ -535,28 +535,153 @@
                                 {{ check.status|title }}
                             </span>
                         </div>
-                        <p class="text-sm text-gray-600 mb-2">{{ check.data_source }}</p>
+                        <p class="text-sm text-gray-600 mb-3">{{ check.data_source }}</p>
                         
                         {% if check.details %}
-                        <div class="text-sm space-y-1">
-                            {% if check.details.latest_overall_effectiveness %}
-                            <p><span class="font-medium">Overall Effectiveness:</span> {{ check.details.latest_overall_effectiveness }}</p>
+                        <div class="space-y-3">
+                            <!-- Main Inspection Information -->
+                            <div class="bg-blue-50 rounded-lg p-3">
+                                <h5 class="text-sm font-semibold text-gray-900 mb-2">Latest Inspection</h5>
+                                <div class="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+                                    {% if check.details.latest_overall_effectiveness %}
+                                    <div>
+                                        <span class="font-medium text-gray-700">Overall Effectiveness:</span>
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ml-2
+                                            {% if check.details.latest_overall_effectiveness == 'Outstanding' %}bg-green-100 text-green-800
+                                            {% elif check.details.latest_overall_effectiveness == 'Good' %}bg-blue-100 text-blue-800
+                                            {% elif check.details.latest_overall_effectiveness == 'Requires improvement' or check.details.latest_overall_effectiveness == 'Requires Improvement' %}bg-yellow-100 text-yellow-800
+                                            {% elif check.details.latest_overall_effectiveness == 'Inadequate' %}bg-red-100 text-red-800
+                                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                            {{ check.details.latest_overall_effectiveness }}
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if check.details.safeguarding_effectiveness %}
+                                    <div>
+                                        <span class="font-medium text-gray-700">Safeguarding:</span>
+                                        <span class="inline-flex items-center px-2 py-1 rounded-full text-xs font-medium ml-2
+                                            {% if check.details.safeguarding_effectiveness == 'Outstanding' %}bg-green-100 text-green-800
+                                            {% elif check.details.safeguarding_effectiveness == 'Good' %}bg-blue-100 text-blue-800
+                                            {% elif check.details.safeguarding_effectiveness == 'Requires improvement' or check.details.safeguarding_effectiveness == 'Requires Improvement' %}bg-yellow-100 text-yellow-800
+                                            {% elif check.details.safeguarding_effectiveness == 'Inadequate' %}bg-red-100 text-red-800
+                                            {% else %}bg-gray-100 text-gray-800{% endif %}">
+                                            {{ check.details.safeguarding_effectiveness }}
+                                        </span>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if check.details.latest_inspection_date %}
+                                    <div>
+                                        <span class="font-medium text-gray-700">Inspection Date:</span>
+                                        <p class="text-gray-900">{{ check.details.latest_inspection_date }}</p>
+                                    </div>
+                                    {% endif %}
+                                    
+                                    {% if check.details.urn %}
+                                    <div>
+                                        <span class="font-medium text-gray-700">URN:</span>
+                                        <p class="text-gray-900 font-mono">{{ check.details.urn }}</p>
+                                    </div>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Provider Information -->
+                            {% if check.details.title %}
+                            <div class="bg-gray-50 rounded-lg p-3">
+                                <h5 class="text-sm font-semibold text-gray-900 mb-2">Provider Information</h5>
+                                <div class="text-sm space-y-1">
+                                    <p><span class="font-medium text-gray-700">Full Name:</span> {{ check.details.title }}</p>
+                                    {% if check.details.address %}
+                                    <p><span class="font-medium text-gray-700">Address:</span> {{ check.details.address }}</p>
+                                    {% endif %}
+                                </div>
+                            </div>
                             {% endif %}
-                            {% if check.details.safeguarding_effectiveness %}
-                            <p><span class="font-medium">Safeguarding:</span> {{ check.details.safeguarding_effectiveness }}</p>
+                            
+                            <!-- Inspection Timeline -->
+                            {% if check.details.timeline and check.details.timeline|length > 0 %}
+                            <div class="bg-purple-50 rounded-lg p-3">
+                                <h5 class="text-sm font-semibold text-gray-900 mb-2">Recent Inspection Activity</h5>
+                                <div class="space-y-2 max-h-32 overflow-y-auto">
+                                    {% for event in check.details.timeline[:5] %}
+                                    {% if event.timeline_date and event.event_title %}
+                                    <div class="text-xs border-l-2 border-purple-200 pl-2">
+                                        <p class="font-medium text-purple-900">{{ event.timeline_date }}</p>
+                                        <p class="text-purple-700">{{ event.event_title }}</p>
+                                    </div>
+                                    {% endif %}
+                                    {% endfor %}
+                                    {% if check.details.timeline|length > 5 %}
+                                    <p class="text-xs text-purple-600 italic">... and {{ check.details.timeline|length - 5 }} more events</p>
+                                    {% endif %}
+                                </div>
+                            </div>
                             {% endif %}
-                            {% if check.details.latest_inspection_date %}
-                            <p><span class="font-medium">Last Inspection:</span> {{ check.details.latest_inspection_date }}</p>
+                            
+                            <!-- Report Download -->
+                            {% if check.details.report_url and check.details.report_url != "Not available" %}
+                            <div class="bg-indigo-50 rounded-lg p-3">
+                                <h5 class="text-sm font-semibold text-gray-900 mb-2">Official Report</h5>
+                                <a href="{{ check.details.report_url }}" 
+                                   target="_blank"
+                                   class="inline-flex items-center text-sm text-indigo-600 hover:text-indigo-800">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 10v6m0 0l-3-3m3 3l3-3m2 8H7a2 2 0 01-2-2V5a2 2 0 012-2h5.586a1 1 0 01.707.293l5.414 5.414a1 1 0 01.293.707V19a2 2 0 01-2 2z"></path>
+                                    </svg>
+                                    Download Full Ofsted Report
+                                    <svg class="w-3 h-3 ml-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 6H6a2 2 0 00-2 2v10a2 2 0 002 2h10a2 2 0 002-2v-4M14 4h6m0 0v6m0-6L10 14"></path>
+                                    </svg>
+                                </a>
+                            </div>
+                            {% endif %}
+                            
+                            <!-- Data Source Indicator -->
+                            <div class="{% if 'Real Data' in check.data_source %}bg-green-50{% elif 'Simulated' in check.data_source %}bg-yellow-50{% else %}bg-gray-50{% endif %} rounded-lg p-3">
+                                <h5 class="text-sm font-semibold text-gray-900 mb-1">Data Source</h5>
+                                <div class="flex items-center text-sm">
+                                    {% if 'Real Data' in check.data_source or 'Web Scraping' in check.data_source %}
+                                    <svg class="w-4 h-4 text-green-600 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="text-green-700">{{ check.data_source }}</span>
+                                    {% elif 'Simulated' in check.data_source %}
+                                    <svg class="w-4 h-4 text-yellow-600 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M8.257 3.099c.765-1.36 2.722-1.36 3.486 0l5.58 9.92c.75 1.334-.213 2.98-1.742 2.98H4.42c-1.53 0-2.493-1.646-1.743-2.98l5.58-9.92zM11 13a1 1 0 11-2 0 1 1 0 012 0zm-1-8a1 1 0 00-1 1v3a1 1 0 002 0V6a1 1 0 00-1-1z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="text-yellow-700">{{ check.data_source }}</span>
+                                    {% else %}
+                                    <svg class="w-4 h-4 text-gray-600 mr-1" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    <span class="text-gray-700">{{ check.data_source }}</span>
+                                    {% endif %}
+                                </div>
+                            </div>
+                            
+                            <!-- Error Display -->
+                            {% if check.details.error %}
+                            <div class="bg-red-50 border border-red-200 rounded-lg p-3">
+                                <h5 class="text-sm font-semibold text-red-900 mb-2">Data Retrieval Issue</h5>
+                                <p class="text-sm text-red-700">{{ check.details.error }}</p>
+                            </div>
                             {% endif %}
                         </div>
                         {% endif %}
                         
                         {% if check.recommendations %}
-                        <div class="mt-2">
-                            <p class="text-xs font-medium text-gray-500 mb-1">Recommendations:</p>
+                        <div class="mt-3 pt-3 border-t border-gray-200">
+                            <p class="text-xs font-medium text-gray-500 mb-2">Recommendations:</p>
                             <ul class="text-xs text-gray-600 space-y-1">
                                 {% for rec in check.recommendations %}
-                                <li>• {{ rec }}</li>
+                                <li class="flex items-start">
+                                    <svg class="h-3 w-3 text-blue-500 mt-0.5 mr-1 flex-shrink-0" fill="currentColor" viewBox="0 0 20 20">
+                                        <path fill-rule="evenodd" d="M7.293 14.707a1 1 0 010-1.414L10.586 10 7.293 6.707a1 1 0 011.414-1.414l4 4a1 1 0 010 1.414l-4 4a1 1 0 01-1.414 0z" clip-rule="evenodd"></path>
+                                    </svg>
+                                    {{ rec }}
+                                </li>
                                 {% endfor %}
                             </ul>
                         </div>
@@ -565,6 +690,11 @@
                     <div class="ml-4 text-right">
                         <div class="text-lg font-bold text-gray-900">{{ "%.1f%%"|format((check.risk_score or 0) * 100) }}</div>
                         <div class="text-xs text-gray-500">Risk Score</div>
+                        {% if 'Real Data' in check.data_source or 'Web Scraping' in check.data_source %}
+                        <div class="text-xs text-green-600 mt-1">✓ Real Data</div>
+                        {% elif 'Simulated' in check.data_source %}
+                        <div class="text-xs text-yellow-600 mt-1">⚠ Simulated</div>
+                        {% endif %}
                     </div>
                 </div>
             </div>
