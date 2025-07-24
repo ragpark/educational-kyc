@@ -31,7 +31,8 @@ class EducationalProviderRequest:
     organisation_name: str
     trading_name: Optional[str]
     company_number: str
-    ukprn: Optional[str]
+    urn: str  # Ofsted Unique Reference Number - now mandatory
+    ukprn: Optional[str]  # UK Provider Reference Number - now optional
     provider_type: ProviderType
     contact_email: str
     address: str
@@ -405,22 +406,20 @@ class UKEducationalKYCOrchestrator:
             return self._create_error_result("ofsted_rating", str(e))
     
     async def _get_real_ofsted_data(self, request: EducationalProviderRequest) -> Dict:
-        """Get real Ofsted data using web scraping approach"""
+        """Get real Ofsted data using the provided URN directly"""
         try:
             # Check if scraping dependencies are available
             if not self._check_scraping_dependencies():
                 return {"error": "Web scraping dependencies not available (beautifulsoup4, lxml)"}
             
-            # First, try to find the URN for this provider
-            urn = await self._find_ofsted_urn(request)
+            # Use the URN directly - no need to search for it
+            if not request.urn:
+                return {"error": "URN is required for Ofsted verification"}
             
-            if not urn:
-                return {"error": "Could not find Ofsted URN for provider"}
+            logger.info(f"Using provided URN {request.urn} for {request.organisation_name}")
             
-            logger.info(f"Found Ofsted URN {urn} for {request.organisation_name}")
-            
-            # Get the full Ofsted report using the provided code
-            ofsted_report = await self._get_ofsted_report_by_urn(urn)
+            # Get the full Ofsted report using the provided URN
+            ofsted_report = await self._get_ofsted_report_by_urn(request.urn)
             
             return ofsted_report
             
@@ -852,7 +851,9 @@ class UKEducationalKYCOrchestrator:
         return {
             "latest_overall_effectiveness": "Good",
             "safeguarding_effectiveness": "Good",
-            "latest_inspection_date": "2023-01-01"
+            "latest_inspection_date": "2023-01-01",
+            "mock_data": True,
+            "note": "Mock data - URN required for real Ofsted verification"
         }
     
     async def _mock_esfa_check(self, ukprn: str) -> Dict:
