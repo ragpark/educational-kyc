@@ -56,6 +56,7 @@ class UKEducationalKYCOrchestrator:
         self.educational_checks = [
             "company_registration",
             "ukprn_validation", 
+            "postcode_validation",
             "ofqual_recognition",
             "ofsted_rating",
             "esfa_funding_status",
@@ -77,6 +78,7 @@ class UKEducationalKYCOrchestrator:
             basic_checks = await asyncio.gather(
                 self.verify_company_registration(request),
                 self.validate_ukprn(request),
+                self.validate_postcode(request),
                 self.check_sanctions(request),
                 return_exceptions=True
             )
@@ -197,6 +199,95 @@ class UKEducationalKYCOrchestrator:
             
         except Exception as e:
             return self._create_error_result("ukprn_validation", str(e))
+    
+    async def validate_postcode(self, request: EducationalProviderRequest) -> EducationalVerificationResult:
+        """Validate UK postcode using postcodes.io service"""
+        if not request.postcode:
+            return EducationalVerificationResult(
+                check_type="postcode_validation",
+                status="failed",
+                risk_score=0.5,
+                data_source="Postcodes.io",
+                timestamp=datetime.now(),
+                details={"error": "No postcode provided"},
+                recommendations=["Postcode is required for location verification"]
+            )
+        
+        try:
+            # Clean postcode (remove spaces and convert to uppercase)
+            clean_postcode = request.postcode.replace(" ", "").upper()
+            
+            # Call postcodes.io API
+            url = f"https://api.postcodes.io/postcodes/{clean_postcode}"
+            
+            import aiohttp
+            async with aiohttp.ClientSession() as session:
+                async with session.get(url) as response:
+                    if response.status == 200:
+                        data = await response.json()
+                        
+                        if data.get("status") == 200:
+                            result_data = data.get("result", {})
+                            
+                            return EducationalVerificationResult(
+                                check_type="postcode_validation",
+                                status="passed",
+                                risk_score=0.05,
+                                data_source="Postcodes.io",
+                                timestamp=datetime.now(),
+                                details={
+                                    "postcode": result_data.get("postcode"),
+                                    "country": result_data.get("country"),
+                                    "region": result_data.get("region"),
+                                    "admin_district": result_data.get("admin_district"),
+                                    "admin_county": result_data.get("admin_county"),
+                                    "parliamentary_constituency": result_data.get("parliamentary_constituency"),
+                                    "coordinates": {
+                                        "latitude": result_data.get("latitude"),
+                                        "longitude": result_data.get("longitude")
+                                    },
+                                    "quality": result_data.get("quality"),
+                                    "eastings": result_data.get("eastings"),
+                                    "northings": result_data.get("northings")
+                                },
+                                recommendations=[]
+                            )
+                        else:
+                            return EducationalVerificationResult(
+                                check_type="postcode_validation",
+                                status="failed",
+                                risk_score=0.7,
+                                data_source="Postcodes.io",
+                                timestamp=datetime.now(),
+                                details={"error": "Invalid postcode format", "postcode": request.postcode},
+                                recommendations=["Verify postcode format and resubmit"]
+                            )
+                    
+                    elif response.status == 404:
+                        return EducationalVerificationResult(
+                            check_type="postcode_validation",
+                            status="failed",
+                            risk_score=0.8,
+                            data_source="Postcodes.io",
+                            timestamp=datetime.now(),
+                            details={"error": "Postcode not found", "postcode": request.postcode},
+                            recommendations=["Verify postcode exists and is correctly formatted"]
+                        )
+                    
+                    else:
+                        return EducationalVerificationResult(
+                            check_type="postcode_validation",
+                            status="error",
+                            risk_score=0.4,
+                            data_source="Postcodes.io",
+                            timestamp=datetime.now(),
+                            details={"error": f"API error: {response.status}", "postcode": request.postcode},
+                            recommendations=["Retry postcode validation later"]
+                        )
+            
+        except Exception as e:
+            return self._create_error_result("postcode_validation", str(e))
+    
     
     async def check_ofqual_recognition(self, request: EducationalProviderRequest) -> EducationalVerificationResult:
         """Check Ofqual recognition for awarding qualifications"""
