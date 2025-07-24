@@ -341,9 +341,9 @@ class UKEducationalKYCOrchestrator:
             
             # Look for provider name - usually in a header or title
             provider_name_selectors = [
+                "h1.govuk-heading-l",
                 "h1",
-                "h2", 
-                "govuk-heading-l",
+                "h2",
                 ".provider-name",
                 ".heading",
                 "td:contains('Provider Name')",
@@ -355,6 +355,10 @@ class UKEducationalKYCOrchestrator:
                 elem = soup.select_one(selector)
                 if elem:
                     text = elem.get_text(strip=True)
+                    if text:
+                        match = re.search(r"Provider Details for\s*(.+)", text, re.I)
+                        if match:
+                            text = match.group(1)
                     # Filter out generic text
                     if text and len(text) > 5 and not any(x in text.lower() for x in ['ukrlp', 'provider details', 'search']):
                         provider_name = text
@@ -379,7 +383,33 @@ class UKEducationalKYCOrchestrator:
                         break
             
             data["provider_name"] = provider_name or "Unknown"
-            
+
+            # Extract fields from GOV.UK summary lists
+            for row in soup.select("dl.govuk-summary-list div.govuk-summary-list__row"):
+                key_elem = row.select_one("dt.govuk-summary-list__key")
+                value_elem = row.select_one("dd.govuk-summary-list__value")
+                if not key_elem or not value_elem:
+                    continue
+                label = key_elem.get_text(" ", strip=True).lower()
+                value = value_elem.get_text(" ", strip=True)
+
+                if "address" in label and "address" not in data:
+                    data["address"] = value
+                elif any(term in label for term in ["telephone", "phone", "contact"]):
+                    data.setdefault("contact_number", value)
+                elif "email" in label:
+                    data.setdefault("email", value)
+                elif "website" in label or "web" in label:
+                    data.setdefault("website", value)
+                elif "trading name" in label:
+                    data.setdefault("trading_name", value)
+                elif "legal name" in label:
+                    data.setdefault("legal_name", value)
+                elif "status" in label:
+                    data.setdefault("provider_status", value)
+                elif "registration" in label and "date" in label:
+                    data.setdefault("registration_date", value)
+
             # Extract other common fields from tables
             tables = soup.find_all('table')
             for table in tables:
