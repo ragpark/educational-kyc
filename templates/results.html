@@ -4,7 +4,7 @@
 <div class="max-w-6xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-900 mb-2">UK Quals A&O Verification Results</h2>
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">KYC Verification Results</h2>
         <p class="text-gray-600">Comprehensive verification completed for {{ provider.organisation_name }}</p>
         <div class="mt-2 text-sm text-gray-500">
             Verification ID: {{ provider.verification_id }} | 
@@ -210,6 +210,69 @@
                             {% endif %}
                             {% if check.details.provider_status %}
                             <p><span class="font-medium">Provider Status:</span> {{ check.details.provider_status }}</p>
+                            {% endif %}
+                        </div>
+                        {% endif %}
+                        
+                        {% if check.recommendations %}
+                        <div class="mt-2">
+                            <p class="text-xs font-medium text-gray-500 mb-1">Recommendations:</p>
+                            <ul class="text-xs text-gray-600 space-y-1">
+                                {% for rec in check.recommendations %}
+                                <li>• {{ rec }}</li>
+                                {% endfor %}
+                            </ul>
+                        </div>
+                        {% endif %}
+                    </div>
+                    <div class="ml-4 text-right">
+                        <div class="text-lg font-bold text-gray-900">{{ "%.1f%%"|format((check.risk_score or 0) * 100) }}</div>
+                        <div class="text-xs text-gray-500">Risk Score</div>
+                    </div>
+                </div>
+            </div>
+            {% endif %}
+
+            <!-- Postcode Validation -->
+            {% if provider.kyc_results.postcode_validation %}
+            {% set check = provider.kyc_results.postcode_validation %}
+            <div class="border rounded-lg p-4 hover:shadow-md transition-shadow">
+                <div class="flex items-start justify-between">
+                    <div class="flex-1">
+                        <div class="flex items-center mb-2">
+                            <h4 class="text-base font-medium text-gray-900">Postcode Validation</h4>
+                            <span class="ml-2 inline-flex items-center px-2.5 py-0.5 rounded-full text-xs font-medium
+                                {% if check.status == 'passed' %}bg-green-100 text-green-800{% elif check.status == 'flagged' %}bg-yellow-100 text-yellow-800{% elif check.status == 'failed' %}bg-red-100 text-red-800{% else %}bg-gray-100 text-gray-800{% endif %}">
+                                {{ check.status|title }}
+                            </span>
+                        </div>
+                        <p class="text-sm text-gray-600 mb-2">{{ check.data_source }}</p>
+                        
+                        {% if check.details %}
+                        <div class="text-sm space-y-1">
+                            {% if check.details.postcode %}
+                            <p><span class="font-medium">Postcode:</span> {{ check.details.postcode }}</p>
+                            {% endif %}
+                            {% if check.details.country %}
+                            <p><span class="font-medium">Country:</span> {{ check.details.country }}</p>
+                            {% endif %}
+                            {% if check.details.region %}
+                            <p><span class="font-medium">Region:</span> {{ check.details.region }}</p>
+                            {% endif %}
+                            {% if check.details.admin_district %}
+                            <p><span class="font-medium">District:</span> {{ check.details.admin_district }}</p>
+                            {% endif %}
+                            {% if check.details.admin_county %}
+                            <p><span class="font-medium">County:</span> {{ check.details.admin_county }}</p>
+                            {% endif %}
+                            {% if check.details.parliamentary_constituency %}
+                            <p><span class="font-medium">Constituency:</span> {{ check.details.parliamentary_constituency }}</p>
+                            {% endif %}
+                            {% if check.details.coordinates %}
+                            <p><span class="font-medium">Coordinates:</span> {{ "%.4f"|format(check.details.coordinates.latitude) }}, {{ "%.4f"|format(check.details.coordinates.longitude) }}</p>
+                            {% endif %}
+                            {% if check.details.error %}
+                            <p><span class="font-medium text-red-600">Error:</span> {{ check.details.error }}</p>
                             {% endif %}
                         </div>
                         {% endif %}
