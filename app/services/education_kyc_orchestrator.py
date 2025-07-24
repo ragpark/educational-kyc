@@ -124,39 +124,51 @@ class UKEducationalKYCOrchestrator:
     async def verify_company_registration(self, request: EducationalProviderRequest) -> EducationalVerificationResult:
         """Verify company registration with Companies House"""
         try:
-            if self.mcp_client:
-                response = await self.mcp_client.call_tool(
-                    server="companies-house-uk",
-                    tool="company_search",
-                    args={
-                        "company_number": request.company_number,
-                        "company_name": request.organisation_name
-                    }
+            # Import the enhanced Companies House service
+            from app.services.companies_house_enhanced import get_enhanced_companies_house_result
+            
+            # Use the enhanced Companies House service for real API calls
+            companies_house_result = await get_enhanced_companies_house_result(
+                request.company_number,
+                request.organisation_name
+            )
+            
+            # Convert the enhanced result to our format
+            if companies_house_result:
+                return EducationalVerificationResult(
+                    check_type="company_registration",
+                    status=companies_house_result.get("status", "error"),
+                    risk_score=companies_house_result.get("risk_score", 0.7),
+                    data_source=companies_house_result.get("data_source", "Companies House"),
+                    timestamp=datetime.now(),
+                    details=companies_house_result.get("details", {}),
+                    recommendations=companies_house_result.get("recommendations", [])
                 )
             else:
-                # Fallback for development/testing
+                # Fallback to mock if enhanced service fails
                 response = await self._mock_companies_house_check(request.company_number)
-            
-            is_active = response.get("company_status") == "active"
-            directors_ok = not any(
-                director.get("disqualified", False) 
-                for director in response.get("officers", [])
-            )
-            
-            status = "passed" if is_active and directors_ok else "failed"
-            risk_score = 0.1 if status == "passed" else 0.8
-            
-            return EducationalVerificationResult(
-                check_type="company_registration",
-                status=status,
-                risk_score=risk_score,
-                data_source="Companies House",
-                timestamp=datetime.now(),
-                details=response,
-                recommendations=[] if status == "passed" else ["Review company status and directors"]
-            )
+                
+                is_active = response.get("company_status") == "active"
+                directors_ok = not any(
+                    director.get("disqualified", False) 
+                    for director in response.get("officers", [])
+                )
+                
+                status = "passed" if is_active and directors_ok else "failed"
+                risk_score = 0.1 if status == "passed" else 0.8
+                
+                return EducationalVerificationResult(
+                    check_type="company_registration",
+                    status=status,
+                    risk_score=risk_score,
+                    data_source="Companies House (Mock)",
+                    timestamp=datetime.now(),
+                    details=response,
+                    recommendations=[] if status == "passed" else ["Review company status and directors"]
+                )
             
         except Exception as e:
+            logger.error(f"Companies House verification failed: {str(e)}")
             return self._create_error_result("company_registration", str(e))
     
     async def validate_ukprn(self, request: EducationalProviderRequest) -> EducationalVerificationResult:
@@ -330,58 +342,285 @@ class UKEducationalKYCOrchestrator:
             return self._create_error_result("ofqual_recognition", str(e))
     
     async def assess_ofsted_rating(self, request: EducationalProviderRequest) -> EducationalVerificationResult:
-        """Assess Ofsted inspection rating"""
+        """Assess Ofsted inspection rating using real Ofsted data"""
         try:
-            if self.mcp_client:
-                response = await self.mcp_client.call_tool(
-                    server="ofsted-reports",
-                    tool="provider_inspection_history",
-                    args={
-                        "provider_name": request.organisation_name,
-                        "ukprn": request.ukprn,
-                        "postcode": request.postcode
-                    }
-                )
-            else:
-                response = await self._mock_ofsted_check(request.organisation_name)
+            # Try to get real Ofsted data first
+            ofsted_data = await self._get_real_ofsted_data(request)
             
-            latest_rating = response.get("latest_overall_effectiveness")
-            safeguarding = response.get("safeguarding_effectiveness")
+            if ofsted_data and not ofsted_data.get("error"):
+                # Use real Ofsted data
+                response = ofsted_data
+                data_source = "Ofsted (Real Data)"
+            else:
+                # Fall back to mock if real data unavailable
+                logger.warning(f"Ofsted API unavailable for {request.organisation_name}: {ofsted_data.get('error', 'Unknown error')}")
+                response = await self._mock_ofsted_check(request.organisation_name)
+                data_source = "Ofsted (Simulated)"
+            
+            # Extract ratings from real or mock data
+            latest_rating = response.get("latest_overall_effectiveness") or response.get("rating")
+            safeguarding = response.get("safeguarding_effectiveness", "Unknown")
             
             # Risk scoring based on Ofsted grades
             risk_mapping = {
                 "Outstanding": 0.05,
                 "Good": 0.15,
                 "Requires improvement": 0.5,
+                "Requires Improvement": 0.5,  # Handle different case
                 "Inadequate": 0.9
             }
             
             risk_score = risk_mapping.get(latest_rating, 0.7)
             
             # Additional risk if safeguarding issues
-            if safeguarding in ["Requires improvement", "Inadequate"]:
+            if safeguarding in ["Requires improvement", "Requires Improvement", "Inadequate"]:
                 risk_score = min(risk_score + 0.3, 1.0)
             
             status = "passed" if risk_score < 0.3 else "flagged" if risk_score < 0.7 else "failed"
             
             recommendations = []
-            if latest_rating in ["Requires improvement", "Inadequate"]:
+            if latest_rating in ["Requires improvement", "Requires Improvement", "Inadequate"]:
                 recommendations.append("Monitor improvement plan progress")
-            if safeguarding in ["Requires improvement", "Inadequate"]:
+            if safeguarding in ["Requires improvement", "Requires Improvement", "Inadequate"]:
                 recommendations.append("Enhanced safeguarding due diligence required")
+            
+            # Add recommendations based on real data
+            if response.get("timeline") and len(response.get("timeline", [])) > 0:
+                recent_events = [event for event in response.get("timeline", []) if event.get("timeline_date")]
+                if recent_events:
+                    recommendations.append("Review recent inspection timeline for compliance updates")
             
             return EducationalVerificationResult(
                 check_type="ofsted_rating",
                 status=status,
                 risk_score=risk_score,
-                data_source="Ofsted",
+                data_source=data_source,
                 timestamp=datetime.now(),
                 details=response,
                 recommendations=recommendations
             )
             
         except Exception as e:
+            logger.error(f"Ofsted assessment failed: {str(e)}")
             return self._create_error_result("ofsted_rating", str(e))
+    
+    async def _get_real_ofsted_data(self, request: EducationalProviderRequest) -> Dict:
+        """Get real Ofsted data using web scraping approach"""
+        try:
+            # Check if scraping dependencies are available
+            if not self._check_scraping_dependencies():
+                return {"error": "Web scraping dependencies not available (beautifulsoup4, lxml)"}
+            
+            # First, try to find the URN for this provider
+            urn = await self._find_ofsted_urn(request)
+            
+            if not urn:
+                return {"error": "Could not find Ofsted URN for provider"}
+            
+            logger.info(f"Found Ofsted URN {urn} for {request.organisation_name}")
+            
+            # Get the full Ofsted report using the provided code
+            ofsted_report = await self._get_ofsted_report_by_urn(urn)
+            
+            return ofsted_report
+            
+        except Exception as e:
+            logger.error(f"Real Ofsted data lookup failed: {str(e)}")
+            return {"error": str(e)}
+    
+    async def _find_ofsted_urn(self, request: EducationalProviderRequest) -> Optional[str]:
+        """Find Ofsted URN by searching for the organization"""
+        try:
+            import aiohttp
+            from bs4 import BeautifulSoup
+            import re
+            
+            # Search Ofsted using organization name and postcode  
+            search_query = f"{request.organisation_name} {request.postcode}"
+            search_url = f"https://reports.ofsted.gov.uk/search?q={search_query}"
+            
+            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(search_url, headers=headers) as response:
+                    if response.status == 200:
+                        html = await response.text()
+                        soup = BeautifulSoup(html, 'html.parser')
+                        
+                        # Look for search results
+                        results = soup.select("li.search-result")
+                        
+                        for result in results:
+                            # Extract title and check if it matches our organization
+                            title_elem = result.select_one("h3.search-result__title a")
+                            if title_elem:
+                                title = title_elem.get_text(strip=True)
+                                
+                                # Check if this result matches our organization
+                                if self._is_organization_match(title, request.organisation_name):
+                                    # Extract URN from the URL or data attributes
+                                    href = title_elem.get('href', '')
+                                    
+                                    # URN is typically in the URL like /provider/123456
+                                    urn_match = re.search(r'/provider/(\d+)', href)
+                                    if urn_match:
+                                        return urn_match.group(1)
+                                    
+                                    # Also check for URN in the result text or metadata
+                                    urn_text = result.get_text()
+                                    urn_match = re.search(r'URN:?\s*(\d{6,7})', urn_text)
+                                    if urn_match:
+                                        return urn_match.group(1)
+            
+            return None
+            
+        except ImportError as e:
+            logger.error(f"Missing dependencies for Ofsted scraping: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"URN search failed: {str(e)}")
+            return None
+    
+    def _is_organization_match(self, ofsted_title: str, org_name: str) -> bool:
+        """Check if Ofsted result matches our organization"""
+        # Normalize names for comparison
+        ofsted_clean = ofsted_title.lower().strip()
+        org_clean = org_name.lower().strip()
+        
+        # Direct match
+        if ofsted_clean == org_clean:
+            return True
+        
+        # Check if organization name is contained in Ofsted title
+        if org_clean in ofsted_clean:
+            return True
+        
+        # Check if Ofsted title is contained in organization name
+        if ofsted_clean in org_clean:
+            return True
+        
+        # Word-based matching (at least 60% of words match)
+        ofsted_words = set(ofsted_clean.split())
+        org_words = set(org_clean.split())
+        
+        if org_words and ofsted_words:
+            overlap = len(org_words.intersection(ofsted_words))
+            total_unique = len(org_words.union(ofsted_words))
+            
+            if total_unique > 0 and (overlap / total_unique) >= 0.6:
+                return True
+        
+        return False
+    
+    async def _get_ofsted_report_by_urn(self, urn: str) -> Dict:
+        """Get Ofsted report by URN using web scraping (async version of provided code)"""
+        try:
+            import aiohttp
+            from bs4 import BeautifulSoup
+            
+            # First resolve the URN to get the actual report URL
+            resolved_url = await self._resolve_ofsted_url(urn)
+            if not resolved_url:
+                return {"error": "URN not found or URL resolution failed"}
+            
+            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(resolved_url, headers=headers) as response:
+                    if response.status != 200:
+                        return {"error": f"Unable to fetch Ofsted page: HTTP {response.status}"}
+                    
+                    html = await response.text()
+            
+            soup = BeautifulSoup(html, 'html.parser')
+            
+            # Extract data using the same logic as provided code
+            title = soup.find("h1").get_text(strip=True) if soup.find("h1") else "Not found"
+            
+            grade_div = soup.find("div", class_="inspection-grade")
+            rating = grade_div.get_text(strip=True) if grade_div else "Not found"
+            
+            date_div = soup.find("div", class_="inspection-date")
+            inspection_date = date_div.get_text(strip=True) if date_div else "Not found"
+            
+            report_link_tag = soup.find("a", href=True, text=lambda t: t and "Download full report" in t)
+            report_url = f"https://reports.ofsted.gov.uk{report_link_tag['href']}" if report_link_tag else "Not available"
+            
+            # Find address from the Ofsted page
+            address_tag = soup.find("address", class_="title-block__address")
+            address = None
+            if address_tag:
+                address_text = address_tag.get_text(strip=True)
+                address = address_text.replace("Address:", "").strip()
+            
+            # Extract timeline
+            timeline = []
+            timeline_items = soup.select("ol.timeline > li.timeline__day")
+            for item in timeline_items:
+                date_tag = item.select_one("p.timeline__date time")
+                timeline_date = date_tag.get_text(strip=True) if date_tag else None
+                
+                event_title_container = item.select_one("span.event__title")
+                if event_title_container:
+                    # Remove non-visual spans as in original code
+                    for s in event_title_container.select("span.nonvisual"):
+                        s.decompose()
+                    event_title = event_title_container.get_text(strip=True)
+                else:
+                    event_title = None
+                
+                timeline.append({
+                    "timeline_date": timeline_date,
+                    "event_title": event_title
+                })
+            
+            # Convert to our expected format
+            return {
+                "title": title,
+                "latest_overall_effectiveness": rating,
+                "safeguarding_effectiveness": "Unknown",  # May need additional parsing
+                "latest_inspection_date": inspection_date,
+                "report_url": report_url,
+                "address": address,
+                "timeline": timeline,
+                "urn": urn,
+                "data_source": "Ofsted Web Scraping"
+            }
+            
+        except ImportError as e:
+            logger.error(f"Missing dependencies for Ofsted scraping: {str(e)}")
+            return {"error": "Web scraping dependencies not available"}
+        except Exception as e:
+            logger.error(f"Ofsted report extraction failed: {str(e)}")
+            return {"error": str(e)}
+    
+    async def _resolve_ofsted_url(self, urn: str) -> Optional[str]:
+        """Resolve URN to Ofsted report URL (async version of provided code)"""
+        try:
+            import aiohttp
+            from bs4 import BeautifulSoup
+            
+            search_url = f"https://reports.ofsted.gov.uk/search?q={urn}"
+            headers = {"User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36"}
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(search_url, headers=headers) as response:
+                    if response.status == 200:
+                        html = await response.text()
+                        soup = BeautifulSoup(html, 'html.parser')
+                        
+                        result = soup.select_one("li.search-result h3.search-result__title a[href]")
+                        if result:
+                            return f"https://reports.ofsted.gov.uk{result['href']}"
+            
+            return None
+            
+        except ImportError as e:
+            logger.error(f"Missing dependencies for Ofsted scraping: {str(e)}")
+            return None
+        except Exception as e:
+            logger.error(f"URL resolution failed: {str(e)}")
+            return None
     
     async def verify_esfa_status(self, request: EducationalProviderRequest) -> EducationalVerificationResult:
         """Verify ESFA funding status and RoATP listing"""
@@ -572,7 +811,18 @@ class UKEducationalKYCOrchestrator:
             recommendations=recommendations
         )
     
-    # Mock methods for development/testing when MCP client is not available
+# Mock methods for development/testing when MCP client is not available
+    
+    def _check_scraping_dependencies(self) -> bool:
+        """Check if web scraping dependencies are available"""
+        try:
+            import aiohttp
+            from bs4 import BeautifulSoup
+            return True
+        except ImportError as e:
+            logger.error(f"Web scraping dependencies not available: {str(e)}")
+            return False
+    
     async def _mock_companies_house_check(self, company_number: str) -> Dict:
         """Mock Companies House check for development"""
         return {
