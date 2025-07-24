@@ -15,6 +15,9 @@ import uuid
 import aiohttp
 import requests
 
+# Ofqual awarding organisation search
+from app.services.ofqual_awarding_orgs import OfqualAOSearchClient
+
 # Import the enhanced Companies House service (for quick checks)
 from app.services.companies_house_enhanced import EnhancedCompaniesHouseAPI, get_enhanced_companies_house_result
 
@@ -754,6 +757,22 @@ async def validate_ukprn_endpoint(ukprn: str):
             "ukprn": ukprn,
             "error": f"Validation failed: {str(e)}"
         }
+
+
+@app.get("/ofqual/awarding-organisations", response_class=HTMLResponse)
+async def search_awarding_organisations(request: Request, subject: Optional[str] = None, course: Optional[str] = None):
+    """Retrieve awarding organisations from Ofqual based on subject or course."""
+    client = OfqualAOSearchClient()
+    organisations = await client.search(subject=subject, course=course)
+    return templates.TemplateResponse(
+        "awarding_organisations.html",
+        {
+            "request": request,
+            "organisations": organisations,
+            "subject": subject,
+            "course": course,
+        },
+    )
 
 @app.get("/urn/validate/{urn}")
 async def validate_urn_endpoint(urn: str):
