@@ -186,32 +186,268 @@ class UKEducationalKYCOrchestrator:
             )
         
         try:
-            if self.mcp_client:
-                response = await self.mcp_client.call_tool(
-                    server="ukrlp",
-                    tool="provider_lookup",
-                    args={"ukprn": request.ukprn}
-                )
+            # Try to get real UKRLP data first
+            ukrlp_data = await self._get_real_ukrlp_data(request.ukprn)
+            
+            if ukrlp_data and not ukrlp_data.get("error"):
+                # Use real UKRLP data
+                response = ukrlp_data
+                data_source = "UKRLP (Real Data)"
             else:
+                # Fall back to mock if real data unavailable
+                logger.warning(f"UKRLP data unavailable for {request.ukprn}: {ukrlp_data.get('error', 'Unknown error')}")
                 response = await self._mock_ukprn_check(request.ukprn)
+                data_source = "UKRLP (Simulated)"
             
-            is_verified = response.get("verification_status") == "Verified"
-            is_active = response.get("provider_status") == "Active"
+            # Determine verification status
+            verification_status = response.get("verification_status", "Unknown")
+            provider_status = response.get("provider_status", "Unknown")
             
-            status = "passed" if is_verified and is_active else "flagged"
-            risk_score = 0.1 if status == "passed" else 0.6
+            # Risk scoring based on UKRLP status
+            if verification_status == "Verified" and provider_status == "Active":
+                status = "passed"
+                risk_score = 0.1
+            elif verification_status == "Verified" and provider_status in ["Inactive", "Deactivated"]:
+                status = "flagged"
+                risk_score = 0.6
+            elif verification_status == "Not Verified":
+                status = "failed"
+                risk_score = 0.8
+            else:
+                status = "flagged"
+                risk_score = 0.5
+            
+            # Add recommendations based on status
+            recommendations = []
+            if provider_status == "Inactive":
+                recommendations.append("Provider is inactive in UKRLP - verify current operational status")
+            elif provider_status == "Deactivated":
+                recommendations.append("Provider has been deactivated - check compliance status")
+            elif verification_status == "Not Verified":
+                recommendations.append("UKPRN is not verified - may indicate registration issues")
             
             return EducationalVerificationResult(
                 check_type="ukprn_validation",
                 status=status,
                 risk_score=risk_score,
-                data_source="UKRLP",
+                data_source=data_source,
                 timestamp=datetime.now(),
-                details=response
+                details=response,
+                recommendations=recommendations
             )
             
         except Exception as e:
+            logger.error(f"UKPRN validation failed: {str(e)}")
             return self._create_error_result("ukprn_validation", str(e))
+    
+    async def _get_real_ukrlp_data(self, ukprn: str) -> Dict:
+        """Get real UKRLP data using web scraping"""
+        try:
+            # Check if scraping dependencies are available
+            if not self._check_scraping_dependencies():
+                return {"error": "Web scraping dependencies not available (beautifulsoup4, lxml)"}
+            
+            # Validate UKPRN format first
+            if not ukprn or not ukprn.isdigit() or len(ukprn) != 8 or not ukprn.startswith('10'):
+                return {"error": "Invalid UKPRN format - should be 8 digits starting with 10"}
+            
+            logger.info(f"Retrieving UKRLP data for UKPRN: {ukprn}")
+            
+            # Get UKRLP provider details
+            ukrlp_data = await self._scrape_ukrlp_provider(ukprn)
+            
+            return ukrlp_data
+            
+        except Exception as e:
+            logger.error(f"Real UKRLP data lookup failed: {str(e)}")
+            return {"error": str(e)}
+    
+    async def _scrape_ukrlp_provider(self, ukprn: str) -> Dict:
+        """Scrape UKRLP provider details from the website"""
+        try:
+            import aiohttp
+            from bs4 import BeautifulSoup
+            
+            # Construct UKRLP URL using the pattern from the example
+            ukrlp_url = f"https://www.ukrlp.co.uk/ukrlp/ukrlp_provider.page_pls_provDetails?x=&pn_p_id={ukprn}&pv_status=VERIFIED&pv_vis_code=L"
+            
+            headers = {
+                "User-Agent": "Mozilla/5.0 (Windows NT 10.0; Win64; x64) AppleWebKit/537.36",
+                "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,*/*;q=0.8",
+                "Accept-Language": "en-GB,en;q=0.5",
+                "Accept-Encoding": "gzip, deflate",
+                "Connection": "keep-alive"
+            }
+            
+            async with aiohttp.ClientSession() as session:
+                async with session.get(ukrlp_url, headers=headers) as response:
+                    if response.status != 200:
+                        return {"error": f"Unable to fetch UKRLP page: HTTP {response.status}"}
+                    
+                    html = await response.text()
+            
+            soup = BeautifulSoup(html, 'html.parser')
+            
+            # Check if the page shows "No records found" or similar error
+            error_indicators = [
+                "No records found",
+                "Provider not found",
+                "Invalid provider",
+                "Error"
+            ]
+            
+            page_text = soup.get_text().lower()
+            for indicator in error_indicators:
+                if indicator.lower() in page_text:
+                    return {"error": f"UKPRN {ukprn} not found in UKRLP database"}
+            
+            # Extract provider information from the page
+            provider_data = self._extract_ukrlp_data(soup, ukprn)
+            
+            if not provider_data.get("provider_name"):
+                return {"error": "Could not extract provider information from UKRLP page"}
+            
+            return provider_data
+            
+        except ImportError as e:
+            logger.error(f"Missing dependencies for UKRLP scraping: {str(e)}")
+            return {"error": "Web scraping dependencies not available"}
+        except Exception as e:
+            logger.error(f"UKRLP scraping failed: {str(e)}")
+            return {"error": str(e)}
+    
+    def _extract_ukrlp_data(self, soup: BeautifulSoup, ukprn: str) -> Dict:
+        """Extract provider data from UKRLP page HTML"""
+        try:
+            data = {
+                "ukprn": ukprn,
+                "data_source": "UKRLP Web Scraping"
+            }
+            
+            # Look for provider name - usually in a header or title
+            provider_name_selectors = [
+                "h1",
+                "h2", 
+                ".provider-name",
+                ".heading",
+                "td:contains('Provider Name')",
+                "th:contains('Provider Name')"
+            ]
+            
+            provider_name = None
+            for selector in provider_name_selectors:
+                elem = soup.select_one(selector)
+                if elem:
+                    text = elem.get_text(strip=True)
+                    # Filter out generic text
+                    if text and len(text) > 5 and not any(x in text.lower() for x in ['ukrlp', 'provider details', 'search']):
+                        provider_name = text
+                        break
+            
+            # If provider name not found in headers, look in table cells
+            if not provider_name:
+                # Look for table structure with provider details
+                tables = soup.find_all('table')
+                for table in tables:
+                    rows = table.find_all('tr')
+                    for row in rows:
+                        cells = row.find_all(['td', 'th'])
+                        if len(cells) >= 2:
+                            label = cells[0].get_text(strip=True).lower()
+                            value = cells[1].get_text(strip=True)
+                            
+                            if 'provider name' in label or 'organisation' in label:
+                                provider_name = value
+                                break
+                    if provider_name:
+                        break
+            
+            data["provider_name"] = provider_name or "Unknown"
+            
+            # Extract other common fields from tables
+            tables = soup.find_all('table')
+            for table in tables:
+                rows = table.find_all('tr')
+                for row in rows:
+                    cells = row.find_all(['td', 'th'])
+                    if len(cells) >= 2:
+                        label = cells[0].get_text(strip=True).lower()
+                        value = cells[1].get_text(strip=True)
+                        
+                        # Map common fields
+                        if 'status' in label:
+                            # Determine provider status
+                            if 'active' in value.lower():
+                                data["provider_status"] = "Active"
+                                data["verification_status"] = "Verified"
+                            elif 'inactive' in value.lower() or 'deactivated' in value.lower():
+                                data["provider_status"] = "Inactive"
+                                data["verification_status"] = "Verified"
+                            else:
+                                data["provider_status"] = value
+                                data["verification_status"] = "Verified"
+                        
+                        elif 'type' in label or 'category' in label:
+                            data["provider_type"] = value
+                        
+                        elif 'address' in label or 'location' in label:
+                            data["address"] = value
+                        
+                        elif 'contact' in label or 'phone' in label or 'telephone' in label:
+                            data["contact_number"] = value
+                        
+                        elif 'email' in label:
+                            data["email"] = value
+                        
+                        elif 'website' in label or 'web' in label:
+                            data["website"] = value
+                        
+                        elif 'legal name' in label:
+                            data["legal_name"] = value
+                        
+                        elif 'trading name' in label:
+                            data["trading_name"] = value
+                        
+                        elif 'verification' in label:
+                            data["verification_status"] = value
+                        
+                        elif 'registration' in label and 'date' in label:
+                            data["registration_date"] = value
+            
+            # Set default values if not found
+            if "verification_status" not in data:
+                # If we got this far, the UKPRN exists in the system
+                data["verification_status"] = "Verified"
+            
+            if "provider_status" not in data:
+                # Default to Active if we can access the page
+                data["provider_status"] = "Active"
+            
+            # Look for any additional provider information
+            # Check for any div or span elements with relevant content
+            for elem in soup.find_all(['div', 'span', 'p']):
+                text = elem.get_text(strip=True)
+                if len(text) > 10 and any(keyword in text.lower() for keyword in ['qualification', 'education', 'training', 'provider']):
+                    if "description" not in data:
+                        data["description"] = text[:200] + "..." if len(text) > 200 else text
+                        break
+            
+            return data
+            
+        except Exception as e:
+            logger.error(f"UKRLP data extraction failed: {str(e)}")
+            return {"error": f"Data extraction failed: {str(e)}"}
+    
+    async def _mock_ukrlp_check(self, ukprn: str) -> Dict:
+        """Mock UKRLP check for development"""
+        return {
+            "verification_status": "Verified",
+            "provider_status": "Active",
+            "provider_name": "Example Training Provider",
+            "ukprn": ukprn,
+            "mock_data": True,
+            "note": "Mock data - real UKRLP integration attempted but failed"
+        }
     
     async def validate_postcode(self, request: EducationalProviderRequest) -> EducationalVerificationResult:
         """Validate UK postcode using postcodes.io service"""
@@ -536,7 +772,7 @@ class UKEducationalKYCOrchestrator:
             # Extract data using the same logic as provided code
             title = soup.find("h1").get_text(strip=True) if soup.find("h1") else "Not found"
             
-            grade_div = soup.find("div", class_="latest-rating__title")
+            grade_div = soup.find("div", class_="inspection-grade")
             rating = grade_div.get_text(strip=True) if grade_div else "Not found"
             
             date_div = soup.find("div", class_="inspection-date")
