@@ -343,6 +343,7 @@ class UKEducationalKYCOrchestrator:
             provider_name_selectors = [
                 "h1",
                 "h2", 
+                "govuk-heading-l",
                 ".provider-name",
                 ".heading",
                 "td:contains('Provider Name')",
