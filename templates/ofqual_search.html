@@ -23,6 +23,7 @@
         <form method="get" action="/centre-submission">
             <input type="hidden" name="course" value="{{ course }}">
             <input type="hidden" name="location" value="{{ location }}">
+            <input type="hidden" name="organisation_name" id="organisation_name">
             <h3 class="text-xl font-semibold mb-2">Organisations</h3>
             <div class="overflow-x-auto">
                 <table class="min-w-full divide-y divide-gray-200">
@@ -36,7 +37,7 @@
                     <tbody class="bg-white divide-y divide-gray-200">
                         {% for org in organisations %}
                         <tr>
-                            <td class="px-4 py-2"><input type="radio" name="organisation_id" value="{{ org.recognitionNumber or org['recognitionNumber'] }}" required></td>
+                            <td class="px-4 py-2"><input type="radio" name="organisation_id" value="{{ org.recognitionNumber or org['recognitionNumber'] }}" data-org-name="{{ org.name or org['name'] }}" required></td>
                             <td class="px-4 py-2">{{ org.name or org['name'] }}</td>
                             <td class="px-4 py-2">{{ org.recognitionNumber or org['recognitionNumber'] }}</td>
                         </tr>
@@ -74,4 +75,13 @@
     </div>
     {% endif %}
 </div>
+<script>
+    const radios = document.querySelectorAll('input[name="organisation_id"]');
+    const nameInput = document.getElementById('organisation_name');
+    radios.forEach(r => {
+        r.addEventListener('change', () => {
+            nameInput.value = r.dataset.orgName;
+        });
+    });
+</script>
 {% endblock %}

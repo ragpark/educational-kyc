@@ -168,10 +168,18 @@ async def onboard_form(request: Request):
 # Centre Submission workflow
 
 @app.get("/centre-submission", response_class=HTMLResponse)
-async def centre_submission_form(request: Request):
+async def centre_submission_form(
+    request: Request,
+    organisation_id: Optional[str] = None,
+    organisation_name: Optional[str] = None,
+):
     return templates.TemplateResponse(
         "centre_submission_form.html",
-        {"request": request}
+        {
+            "request": request,
+            "organisation_id": organisation_id,
+            "organisation_name": organisation_name,
+        },
     )
 
 
