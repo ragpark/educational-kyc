@@ -68,3 +68,28 @@ Alternatively you can call the FastAPI endpoint directly:
 ```
 GET /ofqual/awarding-organisations?subject=history&course=gcse
 ```
+
+### Example: Ofqual Register Search
+
+You can search both organisations and qualifications by course and location using `OfqualAOSearchClient`:
+
+```python
+import asyncio
+from app.services.ofqual_awarding_orgs import OfqualAOSearchClient
+
+
+async def demo():
+    client = OfqualAOSearchClient()
+    organisations = await client.search(course="maths", location="london")
+    qualifications = await client.search_qualifications(course="maths", location="london")
+    print("Organisations:", len(organisations))
+    print("Qualifications:", len(qualifications))
+
+asyncio.run(demo())
+```
+
+Or via the new endpoint:
+
+```
+GET /ofqual/search?course=maths&location=london
+```

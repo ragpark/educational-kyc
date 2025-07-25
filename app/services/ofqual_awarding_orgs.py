@@ -1,27 +1,68 @@
 import aiohttp
 import logging
+import os
 from typing import List, Dict, Optional
 
 logger = logging.getLogger(__name__)
 
 class OfqualAOSearchClient:
-    """Client for searching Ofqual awarding organisations by course or subject."""
+    """Client for searching Ofqual awarding organisations by course, subject or location."""
 
-    BASE_URL = "https://api.ofqual.gov.uk/api/v1/awarding-organisations"
+    def __init__(self, base_url: Optional[str] = None, api_key: Optional[str] = None) -> None:
+        self.base_url = (base_url or os.getenv("APIMgmgt_URL", "https://api.ofqual.gov.uk")).rstrip("/")
+        self.api_key = api_key or os.getenv("APISubKey")
 
-    async def search(self, *, subject: Optional[str] = None, course: Optional[str] = None) -> List[Dict]:
+    async def search(
+        self,
+        *,
+        subject: Optional[str] = None,
+        course: Optional[str] = None,
+        location: Optional[str] = None,
+        page: int = 1,
+        limit: int = 25,
+    ) -> List[Dict]:
         """Return a list of awarding organisations matching the query."""
-        params = {}
-        if subject:
-            params["subject"] = subject
-        if course:
-            params["course"] = course
+        search_terms = " ".join(filter(None, [subject or course, location]))
+        params = {"search": search_terms, "page": page, "limit": limit}
+
+        headers = {}
+        if self.api_key:
+            headers["Ocp-Apim-Subscription-Key"] = self.api_key
+
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(self.BASE_URL, params=params) as resp:
+                async with session.get(f"{self.base_url}/api/Organisations", params=params, headers=headers) as resp:
                     if resp.status == 200:
                         data = await resp.json()
-                        # API may return list directly or under "results" key
+                        if isinstance(data, dict):
+                            return data.get("results", data.get("items", []))
+                        return data
+                    logger.error("Ofqual API error %s", resp.status)
+        except Exception as e:
+            logger.error("Ofqual API request failed: %s", e)
+        return []
+
+    async def search_qualifications(
+        self,
+        *,
+        course: Optional[str] = None,
+        location: Optional[str] = None,
+        page: int = 1,
+        limit: int = 25,
+    ) -> List[Dict]:
+        """Return a list of qualifications matching the query."""
+        search_terms = " ".join(filter(None, [course, location]))
+        params = {"search": search_terms, "page": page, "limit": limit}
+
+        headers = {}
+        if self.api_key:
+            headers["Ocp-Apim-Subscription-Key"] = self.api_key
+
+        try:
+            async with aiohttp.ClientSession() as session:
+                async with session.get(f"{self.base_url}/api/Qualifications", params=params, headers=headers) as resp:
+                    if resp.status == 200:
+                        data = await resp.json()
                         if isinstance(data, dict):
                             return data.get("results", data.get("items", []))
                         return data

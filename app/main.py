@@ -774,6 +774,27 @@ async def search_awarding_organisations(request: Request, subject: Optional[str]
         },
     )
 
+
+@app.get("/ofqual/search", response_class=HTMLResponse)
+async def ofqual_search(request: Request, course: Optional[str] = None, location: Optional[str] = None):
+    """Search the Ofqual Register for organisations and qualifications."""
+    client = OfqualAOSearchClient()
+    organisations = []
+    qualifications = []
+    if course or location:
+        organisations = await client.search(course=course, location=location)
+        qualifications = await client.search_qualifications(course=course, location=location)
+    return templates.TemplateResponse(
+        "ofqual_search.html",
+        {
+            "request": request,
+            "course": course,
+            "location": location,
+            "organisations": organisations,
+            "qualifications": qualifications,
+        },
+    )
+
 @app.get("/urn/validate/{urn}")
 async def validate_urn_endpoint(urn: str):
     """Quick URN validation endpoint using Ofsted search"""
