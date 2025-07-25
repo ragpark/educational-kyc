@@ -644,6 +644,15 @@ async def provider_status_page(verification_id: str, request: Request):
     )
 
 
+@app.get("/provider-dashboard", response_class=HTMLResponse)
+async def provider_dashboard_no_id(request: Request):
+    """Dashboard page when no verification ID is provided"""
+    return templates.TemplateResponse(
+        "provider_dashboard.html",
+        {"request": request, "provider": None},
+    )
+
+
 @app.get("/provider-dashboard/{verification_id}", response_class=HTMLResponse)
 async def provider_dashboard(verification_id: str, request: Request):
     """Dashboard view for a single provider application"""
