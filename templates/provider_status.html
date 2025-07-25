@@ -116,12 +116,12 @@
                     {% endif %}
                 </div>
                 <div class="mt-2 text-center">
-                    <p class="text-sm font-medium text-gray-900">Final Approval</p>
+                    <p class="text-sm font-medium text-gray-900">Compliance Checks completed</p>
                     <p class="text-xs text-gray-500">
                         {% if provider.status == 'approved' %}
-                            Approved ✓
+                            Completed ✓
                         {% elif provider.status == 'rejected' %}
-                            Rejected
+                            Not Completed
                         {% elif provider.status == 'review_required' %}
                             Under review
                         {% else %}
@@ -166,8 +166,8 @@
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                 </svg>
                 <div>
-                    <h4 class="text-green-900 font-medium">Congratulations! Application Approved</h4>
-                    <p class="text-green-700 text-sm">Your organization has been successfully verified and approved as an education provider.</p>
+                    <h4 class="text-green-900 font-medium">Congratulations! The application is compliant</h4>
+                    <p class="text-green-700 text-sm">Your application has been successfully verified.</p>
                 </div>
             </div>
         </div>
