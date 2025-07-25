@@ -1,51 +1,18 @@
 {% extends "base.html" %}
-{% block title %}Centre Submission{% endblock %}
+{% block title %}Qualification Submission{% endblock %}
 {% block content %}
 <div class="max-w-4xl mx-auto">
     <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-900 mb-2">Centre Submission</h2>
-        <p class="text-gray-600">Provide details for your delivery centre</p>
+        <h2 class="text-3xl font-bold text-gray-900 mb-2">Course and qualification selection</h2>
+        <p class="text-gray-600">Using the OFQUAL register select the courses and qualifications you want to offer. We will route them to the AO on your behalf.</p>
     </div>
     <form method="POST" action="/centre-submission" class="bg-white rounded-lg shadow-md p-8 space-y-6">
         <div class="border-b border-gray-200 pb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Parent Organisation</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Application or Verification details</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="group_ukprn">Group UKPRN</label>
-                    <input type="text" id="group_ukprn" name="group_ukprn" required class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g., 12345678">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="legal_name">Legal Name</label>
-                    <input type="text" id="legal_name" name="legal_name" required class="w-full border border-gray-300 rounded-md px-3 py-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="organisation_type">Organisation Type</label>
-                    <input type="text" id="organisation_type" name="organisation_type" required class="w-full border border-gray-300 rounded-md px-3 py-2">
-                </div>
-            </div>
-        </div>
-        <div class="border-b border-gray-200 pb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Delivery Site</h3>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="site_id">Site ID</label>
-                    <input type="text" id="site_id" name="site_id" required class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="Unique site reference">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="site_ukprn">Site UKPRN</label>
-                    <input type="text" id="site_ukprn" name="site_ukprn" required class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g., 87654321">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="site_name">Site Name</label>
-                    <input type="text" id="site_name" name="site_name" required class="w-full border border-gray-300 rounded-md px-3 py-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="address_line1">Address Line 1</label>
-                    <input type="text" id="address_line1" name="address_line1" required class="w-full border border-gray-300 rounded-md px-3 py-2">
-                </div>
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="postcode">Postcode</label>
-                    <input type="text" id="postcode" name="postcode" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" for="group_ukprn">Verification ID from your compliance check</label>
+                    <input type="text" id="verification_id" name="verification_id" required class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g., 12345678">
                 </div>
             </div>
         </div>
@@ -79,7 +46,7 @@
             </div>
         </div>
         <div class="border-b border-gray-200 pb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Staff Contact</h3>
+            <h3 class="text-lg font-semibold text-gray-900 mb-4">Approval Contact </h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2" for="staff_id">Staff ID</label>
@@ -111,14 +78,14 @@
                     <label for="gdpr_consent" class="ml-2 block text-sm text-gray-700">GDPR consent</label>
                 </div>
                 <div class="flex items-center">
-                    <input id="multi_site" name="multi_site" type="checkbox" required class="h-4 w-4 text-blue-600 border-gray-300 rounded">
-                    <label for="multi_site" class="ml-2 block text-sm text-gray-700">Multi-site responsibility confirmed</label>
+                    <input id="share_aos" name="share_aos" type="checkbox" required class="h-4 w-4 text-blue-600 border-gray-300 rounded">
+                    <label for="share_aos" class="ml-2 block text-sm text-gray-700">Share this data with appropriate AOs confirmed</label>
                 </div>
             </div>
         </div>
         <div class="pt-6 flex justify-between">
             <a href="/" class="text-gray-600 hover:text-gray-800">← Back to Dashboard</a>
-            <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700">Submit</button>
+            <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700">Add to application pack</button>
         </div>
     </form>
 </div>
