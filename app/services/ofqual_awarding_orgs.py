@@ -9,7 +9,7 @@ class OfqualAOSearchClient:
     """Client for searching Ofqual awarding organisations by course, subject or location."""
 
     def __init__(self, base_url: Optional[str] = None, api_key: Optional[str] = None) -> None:
-        self.base_url = (base_url or os.getenv("APIMgmgt_URL", "https://api.ofqual.gov.uk")).rstrip("/")
+        self.base_url = (base_url or os.getenv("APIMgmgt_URL", "https://register-api.ofqual.gov.uk")).rstrip("/")
         self.api_key = api_key or os.getenv("APISubKey")
 
     async def search(
