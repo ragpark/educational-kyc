@@ -4,8 +4,8 @@
 <div class="max-w-7xl mx-auto">
     <!-- Header -->
     <div class="mb-8">
-        <h1 class="text-3xl font-bold text-gray-900">Application Dashboard</h1>
-        <p class="text-gray-600 mt-2">Overview of your educational provider application</p>
+        <h1 class="text-3xl font-bold text-gray-900">Qualification Applications Dashboard</h1>
+        <p class="text-gray-600 mt-2">Overview of your educational provider applications by AO</p>
     </div>
 
     {% if provider %}
@@ -37,7 +37,7 @@
                 </div>
                 <div class="ml-4">
                     <div class="text-2xl font-bold text-gray-900">{{ provider.status|title }}</div>
-                    <div class="text-sm text-gray-500">Status</div>
+                    <div class="text-sm text-gray-500">Compliance</div>
                 </div>
             </div>
         </div>
@@ -51,8 +51,8 @@
                     </div>
                 </div>
                 <div class="ml-4">
-                    <div class="text-2xl font-bold text-gray-900">{{ provider.risk_level|title }}</div>
-                    <div class="text-sm text-gray-500">Risk Level</div>
+                    <div class="text-2xl font-bold text-gray-900">Pending</div>
+                    <div class="text-sm text-gray-500">AO approval</div>
                 </div>
             </div>
         </div>
@@ -67,7 +67,7 @@
                 </div>
                 <div class="ml-4">
                     <div class="text-2xl font-bold text-gray-900">{{ provider.created_at }}</div>
-                    <div class="text-sm text-gray-500">Submitted</div>
+                    <div class="text-sm text-gray-500">Created</div>
                 </div>
             </div>
         </div>
@@ -78,11 +78,10 @@
         <table class="min-w-full divide-y divide-gray-200">
             <thead class="bg-gray-50">
                 <tr>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Organisation</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Provider Type</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Company No.</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">URN</th>
-                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">UKPRN</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Awarding Organisation</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">OFQUAL Centre Number (RN)</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">OFQUAL Course Number</th>
+                    <th class="px-6 py-3 text-left text-xs font-medium text-gray-500 uppercase tracking-wider">Specification</th>                    
                 </tr>
             </thead>
             <tbody class="bg-white divide-y divide-gray-200">
@@ -91,7 +90,6 @@
                     <td class="px-6 py-4 whitespace-nowrap text-sm text-gray-900">{{ provider.provider_type or 'N/A' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ provider.company_number or 'N/A' }}</td>
                     <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ provider.urn or 'N/A' }}</td>
-                    <td class="px-6 py-4 whitespace-nowrap text-sm font-mono text-gray-900">{{ provider.ukprn or 'N/A' }}</td>
                 </tr>
             </tbody>
         </table>
