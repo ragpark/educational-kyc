@@ -631,8 +631,25 @@ async def provider_status_page(verification_id: str, request: Request):
         )
     
     return templates.TemplateResponse(
-        "provider_status.html", 
+        "provider_status.html",
         {"request": request, "provider": provider}
+    )
+
+
+@app.get("/provider-dashboard/{verification_id}", response_class=HTMLResponse)
+async def provider_dashboard(verification_id: str, request: Request):
+    """Dashboard view for a single provider application"""
+    provider = next((p for p in providers_db if p.get("verification_id") == verification_id), None)
+
+    if not provider:
+        return templates.TemplateResponse(
+            "error.html",
+            {"request": request, "message": f"Application not found for verification ID: {verification_id}"},
+        )
+
+    return templates.TemplateResponse(
+        "provider_dashboard.html",
+        {"request": request, "provider": provider},
     )
 
 @app.post("/provider-status/{verification_id}/upload")
