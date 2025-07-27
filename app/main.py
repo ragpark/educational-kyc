@@ -1,6 +1,8 @@
 # app/main.py - Updated with Educational KYC Orchestrator Integration
 
-from fastapi import FastAPI, Request, BackgroundTasks
+from fastapi import FastAPI, Request, BackgroundTasks, Form
+from fastapi.responses import RedirectResponse
+from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
@@ -45,6 +47,28 @@ from app.centre_submission import (
 providers_db = []
 centre_submissions: List[CentreSubmission] = []
 processing_queue = {}
+
+# Demo users for login
+users = {
+    "centre1": {
+        "name": "Example Learning Centre",
+        "password": "centrepass",
+        "role": "learning_centre",
+    },
+    "awarding1": {
+        "name": "Example Awarding Organisation",
+        "password": "awardingpass",
+        "role": "awarding_organisation",
+    },
+}
+
+
+def get_current_user(request: Request):
+    """Retrieve the currently logged in user from the session"""
+    username = request.session.get("user")
+    if username:
+        return users.get(username)
+    return None
 
 
 def check_api_configuration() -> Dict[str, bool]:
@@ -133,6 +157,7 @@ app.add_middleware(
     allow_methods=["*"],
     allow_headers=["*"],
 )
+app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET", "super-secret"))
 
 # Templates setup
 templates = Jinja2Templates(directory="templates")
@@ -173,6 +198,34 @@ async def dashboard(request: Request):
     )
 
 
+@app.get("/login", response_class=HTMLResponse)
+async def login_form(request: Request):
+    """Display the login form"""
+    user = get_current_user(request)
+    if user:
+        return RedirectResponse("/", status_code=302)
+    return templates.TemplateResponse("login.html", {"request": request})
+
+
+@app.post("/login")
+async def login(request: Request, username: str = Form(...), password: str = Form(...)):
+    """Handle login submissions"""
+    user = users.get(username)
+    if not user or user["password"] != password:
+        return templates.TemplateResponse(
+            "login.html",
+            {"request": request, "error": "Invalid credentials"},
+        )
+    request.session["user"] = username
+    return RedirectResponse("/", status_code=302)
+
+
+@app.get("/logout")
+async def logout(request: Request):
+    request.session.pop("user", None)
+    return RedirectResponse("/login", status_code=302)
+
+
 # ---------------------------------------------------------------------------
 # New navigation pages for refactored information architecture
 
@@ -180,15 +233,31 @@ async def dashboard(request: Request):
 @app.get("/applications", response_class=HTMLResponse)
 async def applications(request: Request):
     """List all applications"""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    if user["role"] != "awarding_organisation":
+        return templates.TemplateResponse(
+            "error.html",
+            {"request": request, "message": "Access restricted to awarding organisations"},
+        )
     return templates.TemplateResponse(
         "provider_dashboard.html",
-        {"request": request, "provider": None},
+        {"request": request, "provider": None, "user": user},
     )
 
 
 @app.get("/applications/{verification_id}", response_class=HTMLResponse)
 async def application_detail(verification_id: str, request: Request):
     """View a single application"""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    if user["role"] != "awarding_organisation":
+        return templates.TemplateResponse(
+            "error.html",
+            {"request": request, "message": "Access restricted to awarding organisations"},
+        )
     provider = next(
         (p for p in providers_db if p.get("verification_id") == verification_id), None
     )
@@ -204,26 +273,35 @@ async def application_detail(verification_id: str, request: Request):
 
     return templates.TemplateResponse(
         "provider_dashboard.html",
-        {"request": request, "provider": provider},
+        {"request": request, "provider": provider, "user": user},
     )
 
 
 @app.get("/my-organisation", response_class=HTMLResponse)
 async def my_organisation(request: Request):
     """Organisation management page"""
-    return templates.TemplateResponse("my_organisation.html", {"request": request})
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    return templates.TemplateResponse("my_organisation.html", {"request": request, "user": user})
 
 
 @app.get("/messages", response_class=HTMLResponse)
 async def messages(request: Request):
     """Messages page"""
-    return templates.TemplateResponse("messages.html", {"request": request})
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    return templates.TemplateResponse("messages.html", {"request": request, "user": user})
 
 
 @app.get("/documents", response_class=HTMLResponse)
 async def documents(request: Request):
     """Document repository page"""
-    return templates.TemplateResponse("documents.html", {"request": request})
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    return templates.TemplateResponse("documents.html", {"request": request, "user": user})
 
 
 @app.get("/help", response_class=HTMLResponse)

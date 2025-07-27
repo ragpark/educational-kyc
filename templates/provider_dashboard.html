@@ -2,6 +2,9 @@
 {% block title %}Application Dashboard{% endblock %}
 {% block content %}
 <div class="max-w-7xl mx-auto">
+    {% if user %}
+    <p class="text-sm text-gray-600 mb-4">Logged in as {{ user.name }} ({{ user.role.replace('_',' ')|title }})</p>
+    {% endif %}
     <!-- Header -->
     <div class="mb-8">
         <h1 class="text-3xl font-bold text-gray-900">Qualification Applications Dashboard</h1>
