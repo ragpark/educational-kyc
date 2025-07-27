@@ -6,6 +6,7 @@ uvicorn[standard]==0.24.0
 # Templates and forms
 jinja2==3.1.2
 python-multipart==0.0.6
+itsdangerous==2.1.2
 
 # HTTP requests (essential for API calls)
 aiohttp==3.9.1
