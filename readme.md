@@ -22,6 +22,18 @@ A comprehensive Know Your Customer (KYC) verification system specifically design
 - Data protection (GDPR)
 - Audit trail maintenance
 
+## Information Architecture
+
+The app now includes a global navigation bar linking to:
+
+- **Home** – dashboard overview
+- **Applications** – track submitted and in‑progress applications
+- **My Organisation** – manage organisational details and delivery sites
+- **Messages** – application updates and AO requests
+- **Documents** – upload and reuse common documents
+- **Help & Support** – FAQs and guidance
+- **User Profile** – account management and settings
+
 ## Quick Start
 
 This application is deployed on Railway.app with PostgreSQL and Redis.
