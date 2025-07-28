@@ -78,11 +78,17 @@ asyncio.run(demo())
 
 ### MCP Wrapper Endpoint
 
+
 Once the server is running you can access the wrapper via HTTP. If deploying on Railway make sure the `MCP_BASE_URL` environment variable matches your service URL; otherwise the wrapper defaults to `http://localhost:$PORT`.
 Calling `/mcp/health` returns the underlying `/health` response wrapped in the MCP metadata:
 
 ```bash
 curl http://localhost:$PORT/mcp/health
+=======
+Once the server is running you can also access the wrapper via HTTP.
+Calling `/mcp/health` returns the underlying `/health` response wrapped in the MCP metadata:
+
+
 ```
 
 The JSON payload contains the raw content and context information returned by
