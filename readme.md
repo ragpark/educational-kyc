@@ -105,3 +105,22 @@ Or via the new endpoint:
 ```
 GET /ofqual/search?course=maths&location=london
 ```
+
+## MCP Wrapper Usage
+
+The application exposes a lightweight wrapper that speaks the
+**Model Context Protocol (MCP)**. This wrapper lets downstream AI agents
+retrieve context from the service in a standardised document format.
+
+```python
+from app.mcp_wrapper import KYCContextSource
+
+source = KYCContextSource(base_url="https://your-kyc-service.com")
+health_doc = await source.health()
+print(health_doc.content)
+```
+
+Each method on `KYCContextSource` returns an `MCPDocument` which contains the
+raw content, metadata about when it was retrieved, and the originating URL.
+You can use this wrapper to fetch awarding organisation data or verification
+statuses without dealing with HTTP directly.
