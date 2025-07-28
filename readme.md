@@ -160,3 +160,23 @@ pip install -r requirements.txt
 pip install pytest
 pytest
 ```
+
+## Verifiable Credential Workflow
+
+The project provides a simple `create_verifiable_credential` function in `app.vc_issue`. After a provider passes all KYC checks and the `status` field is set to `"approved"`, issue a credential like so:
+
+```python
+from app.vc_issue import create_verifiable_credential
+
+credential = create_verifiable_credential(provider)
+```
+
+The returned JSON document includes a `proof` object with an Ed25519 signature. This signature allows any verifier to confirm the credential was issued by the KYC service.
+
+### Tools for Issuing and Verifying
+
+* **Issuing** – The built-in `create_verifiable_credential` helper signs credentials for you. For more advanced flows you can integrate libraries such as `didkit` or Hyperledger tools.
+* **Verification** – Third parties can validate a credential using standard VC libraries (e.g. [`jsonld-signatures`](https://github.com/digitalbazaar/jsonld-signatures`) or Hyperledger Aries). Verification consists of checking the `proof` signature, confirming the issuer URL, and validating the `credentialSubject` details.
+
+A successfully verified credential can be relied upon as proof that the organisation has completed the KYC process.
+
