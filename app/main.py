@@ -6,7 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse
+from fastapi.responses import HTMLResponse, JSONResponse
 from contextlib import asynccontextmanager
 import os
 from typing import Dict, List, Optional
@@ -16,6 +16,8 @@ import asyncio
 import uuid
 import aiohttp
 import requests
+
+from app.mcp_wrapper import KYCContextSource
 
 # Ofqual awarding organisation search
 from app.services.ofqual_awarding_orgs import OfqualAOSearchClient
@@ -47,6 +49,9 @@ from app.centre_submission import (
 providers_db = []
 centre_submissions: List[CentreSubmission] = []
 processing_queue = {}
+
+# MCP wrapper instance (created during startup)
+mcp_wrapper: KYCContextSource | None = None
 
 # Demo users for login
 users = {
@@ -99,6 +104,9 @@ def map_provider_type(provider_type_str: str) -> ProviderType:
 @asynccontextmanager
 async def lifespan(app: FastAPI):
     print("Starting Educational KYC application with Orchestrator")
+
+    global mcp_wrapper
+    mcp_wrapper = KYCContextSource(base_url=os.getenv("MCP_BASE_URL", "http://localhost:8000"))
 
     # Check API configuration
     api_status = check_api_configuration()
@@ -1198,6 +1206,22 @@ async def health_check():
         "api_configurations": api_status,
         "orchestrator_available": True,
         "timestamp": datetime.now().isoformat(),
+    }
+
+
+@app.get("/mcp/health")
+async def mcp_health():
+    """Proxy health check using the MCP wrapper."""
+    if not mcp_wrapper:
+        return JSONResponse(status_code=503, content={"error": "MCP wrapper not initialised"})
+
+    doc = await mcp_wrapper.health()
+    return {
+        "content": doc.content,
+        "source_url": doc.source_url,
+        "media_type": doc.media_type,
+        "retrieved_at": doc.retrieved_at.isoformat(),
+        "context": doc.context,
     }
 
 
