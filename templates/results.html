@@ -591,6 +591,16 @@
                             {% endif %}
                             {% if check.details.coordinates %}
                             <p><span class="font-medium">Coordinates:</span> {{ "%.4f"|format(check.details.coordinates.latitude) }}, {{ "%.4f"|format(check.details.coordinates.longitude) }}</p>
+                            <div class="mt-2">
+                                <iframe
+                                    width="100%"
+                                    height="250"
+                                    style="border:0"
+                                    loading="lazy"
+                                    referrerpolicy="no-referrer-when-downgrade"
+                                    src="https://maps.google.com/maps?q=&layer=c&cbll={{ check.details.coordinates.latitude }},{{ check.details.coordinates.longitude }}&cbp=11,0,0,0,0&output=svembed">
+                                </iframe>
+                            </div>
                             {% endif %}
                             {% if check.details.error %}
                             <p><span class="font-medium text-red-600">Error:</span> {{ check.details.error }}</p>
