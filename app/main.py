@@ -35,6 +35,7 @@ from app.services.education_kyc_orchestrator import (
     ProviderType,
     EducationalVerificationResult,
 )
+from app.vc_issue import create_verifiable_credential
 from app.centre_submission import (
     CentreSubmission,
     ParentOrganisation,
@@ -849,6 +850,37 @@ async def verification_results(verification_id: str, request: Request):
 
     return templates.TemplateResponse(
         "results.html", {"request": request, "provider": provider}
+    )
+
+
+@app.get("/credential/{verification_id}", response_class=HTMLResponse)
+async def verifiable_credential_page(verification_id: str, request: Request):
+    """View the issued Verifiable Credential for an approved provider."""
+    provider = next(
+        (p for p in providers_db if p.get("verification_id") == verification_id),
+        None,
+    )
+
+    if not provider:
+        return templates.TemplateResponse(
+            "error.html",
+            {"request": request, "message": "Verification not found"},
+        )
+
+    if provider.get("status") != "approved":
+        return templates.TemplateResponse(
+            "error.html",
+            {
+                "request": request,
+                "message": "Credential available only for approved applications",
+            },
+        )
+
+    credential = create_verifiable_credential(provider)
+
+    return templates.TemplateResponse(
+        "credential.html",
+        {"request": request, "credential": credential, "provider": provider},
     )
 
 
