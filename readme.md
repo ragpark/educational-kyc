@@ -161,6 +161,7 @@ pip install pytest
 pytest
 ```
 
+cvu9o6-codex/update-readme-with-verification-process
 ## Verifiable Credentials
 
 When an application is approved the service can issue a W3C compliant
@@ -170,10 +171,16 @@ at `/credential/<verification_id>` in a running instance. The credentials are
 issued by **certify3.io** and use a UUID based identifier for the subject.
 
 ### Issuing a Credential
+=======
+## Verifiable Credential Workflow
+
+The project provides a simple `create_verifiable_credential` function in `app.vc_issue`. After a provider passes all KYC checks and the `status` field is set to `"approved"`, issue a credential like so:
+main
 
 ```python
 from app.vc_issue import create_verifiable_credential
 
+cvu9o6-codex/update-readme-with-verification-process
 provider = {
     "id": 2,
     "verification_id": "11111111-1111-1111-1111-111111111111",
@@ -198,4 +205,16 @@ from py_vcreds import verify_credential
 is_valid = verify_credential(vc)
 print("Valid:" if is_valid else "Invalid")
 ```
+credential = create_verifiable_credential(provider)
+```
+
+The returned JSON document includes a `proof` object with an Ed25519 signature. This signature allows any verifier to confirm the credential was issued by the KYC service.
+
+### Tools for Issuing and Verifying
+
+* **Issuing** – The built-in `create_verifiable_credential` helper signs credentials for you. For more advanced flows you can integrate libraries such as `didkit` or Hyperledger tools.
+* **Verification** – Third parties can validate a credential using standard VC libraries (e.g. [`jsonld-signatures`](https://github.com/digitalbazaar/jsonld-signatures`) or Hyperledger Aries). Verification consists of checking the `proof` signature, confirming the issuer URL, and validating the `credentialSubject` details.
+
+A successfully verified credential can be relied upon as proof that the organisation has completed the KYC process.
+main
 
