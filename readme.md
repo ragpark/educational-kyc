@@ -11,6 +11,7 @@ A comprehensive Know Your Customer (KYC) verification system specifically design
 - ESFA funding status verification
 - UKPRN validation
 - Companies House integration
+- Model Context Protocol (MCP) wrapper for AI integrations
 
 📊 **Risk Assessment**
 - Automated risk scoring
@@ -104,4 +105,26 @@ Or via the new endpoint:
 
 ```
 GET /ofqual/search?course=maths&location=london
+```
+
+### Using the MCP Wrapper
+
+The `KYCContextSource` class provides a simple Model Context Protocol (MCP)
+interface to the application's endpoints. Each call returns an `MCPDocument`
+containing the raw response and metadata.
+
+```python
+import asyncio
+from app.mcp_wrapper import KYCContextSource
+
+
+async def demo():
+    source = KYCContextSource(base_url="http://localhost:8000")
+    health = await source.health()
+    print("Health status:", health.content)
+
+    orgs = await source.search_awarding_orgs(subject="maths")
+    print(orgs.content)
+
+asyncio.run(demo())
 ```
