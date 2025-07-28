@@ -160,3 +160,42 @@ pip install -r requirements.txt
 pip install pytest
 pytest
 ```
+
+## Verifiable Credentials
+
+When an application is approved the service can issue a W3C compliant
+Verifiable Credential for the organisation.  Credentials are created using the
+`create_verifiable_credential` function in `app/vc_issue.py` and can be viewed
+at `/credential/<verification_id>` in a running instance. The credentials are
+issued by **certify3.io** and use a UUID based identifier for the subject.
+
+### Issuing a Credential
+
+```python
+from app.vc_issue import create_verifiable_credential
+
+provider = {
+    "id": 2,
+    "verification_id": "11111111-1111-1111-1111-111111111111",
+    "organisation_name": "Sample Training Ltd",
+    "status": "approved",
+}
+
+vc = create_verifiable_credential(provider)
+print(vc)
+```
+
+### Verifying a Credential
+
+A third party can verify the JSON-LD signature in the `proof` section using any
+VC verification library (for example `jsonld-signatures` or `did-jwt-vc`).  A
+successful verification confirms the credential was issued by certify3.io and
+has not been modified, providing proof of completion.  For example in Python:
+
+```python
+from py_vcreds import verify_credential
+
+is_valid = verify_credential(vc)
+print("Valid:" if is_valid else "Invalid")
+```
+

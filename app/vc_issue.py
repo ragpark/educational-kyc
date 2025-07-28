@@ -9,13 +9,17 @@ def create_verifiable_credential(provider: Dict[str, Any]) -> Dict[str, Any]:
     if provider.get("status") != "approved":
         raise ValueError("Provider must be approved to issue credential")
 
+    subject_id = provider.get("verification_id") or provider.get("id")
+    if subject_id and not str(subject_id).startswith("urn:uuid:"):
+        subject_id = f"urn:uuid:{subject_id}"
+
     credential = {
         "@context": ["https://www.w3.org/2018/credentials/v1"],
         "type": ["VerifiableCredential", "EducationalProvider"],
-        "issuer": "https://example.com/kyc",
+        "issuer": "https://certify3.io/kyc",
         "issuanceDate": datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
         "credentialSubject": {
-            "id": provider.get("id"),
+            "id": subject_id,
             "name": provider.get("organisation_name"),
         },
     }
@@ -24,8 +28,12 @@ def create_verifiable_credential(provider: Dict[str, Any]) -> Dict[str, Any]:
         "type": "Ed25519Signature2018",
         "created": datetime.utcnow().replace(microsecond=0).isoformat() + "Z",
         "proofPurpose": "assertionMethod",
-        "verificationMethod": "https://example.com/keys/1",
-        "jws": "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9...",
+        "verificationMethod": "https://certify3.io/keys/1",
+        "jws": (
+            "eyJhbGciOiJFZERTQSIsInR5cCI6IkpXVCJ9."
+            "eyJleGFtcGxlIjoidmFsaWRhdGlvbiJ9."
+            "Q1IzZVdUajB1RUJ5eEdPZmxrWkNDS1lMNjBpaWxIY2VFbFFydkV2QldYQT0="
+        ),
     }
 
     return credential
