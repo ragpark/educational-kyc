@@ -106,6 +106,7 @@ async def lifespan(app: FastAPI):
     print("Starting Educational KYC application with Orchestrator")
 
     global mcp_wrapper
+    default_base = f"http://localhost:{os.getenv('PORT', '8000')}"
     mcp_wrapper = KYCContextSource(base_url=os.getenv("MCP_BASE_URL", "http://localhost:8000"))
 
     # Check API configuration
@@ -1215,7 +1216,7 @@ async def mcp_health():
     if not mcp_wrapper:
         return JSONResponse(status_code=503, content={"error": "MCP wrapper not initialised"})
 
-    doc = await mcp_wrapper.health()
+
     return {
         "content": doc.content,
         "source_url": doc.source_url,
