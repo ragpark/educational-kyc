@@ -36,6 +36,7 @@ from app.services.education_kyc_orchestrator import (
     EducationalVerificationResult,
 )
 from app.vc_issue import create_verifiable_credential
+from app.vc_verify import verify_credential
 from app.centre_submission import (
     CentreSubmission,
     ParentOrganisation,
@@ -881,6 +882,50 @@ async def verifiable_credential_page(verification_id: str, request: Request):
     return templates.TemplateResponse(
         "credential.html",
         {"request": request, "credential": credential, "provider": provider},
+    )
+
+
+@app.get("/verify-credential", response_class=HTMLResponse)
+async def verify_credential_form(request: Request):
+    """Display the credential verification form."""
+    return templates.TemplateResponse(
+        "verify_credential.html",
+        {"request": request, "result": None, "error": None},
+    )
+
+
+@app.post("/verify-credential", response_class=HTMLResponse)
+async def verify_credential_submit(
+    request: Request,
+    credential_json: str = Form(...),
+    expected_subject: str | None = Form(None),
+):
+    """Handle credential verification."""
+    try:
+        credential = json.loads(credential_json)
+    except json.JSONDecodeError:
+        return templates.TemplateResponse(
+            "verify_credential.html",
+            {
+                "request": request,
+                "error": "Invalid credential JSON",
+                "result": None,
+                "credential_json": credential_json,
+                "expected_subject": expected_subject,
+            },
+        )
+
+    result = verify_credential(credential, expected_subject)
+
+    return templates.TemplateResponse(
+        "verify_credential.html",
+        {
+            "request": request,
+            "result": result,
+            "credential_json": credential_json,
+            "expected_subject": expected_subject,
+            "error": None,
+        },
     )
 
 
