@@ -199,7 +199,7 @@ async def dashboard(request: Request):
     }
 
     return templates.TemplateResponse(
-        "dashboard.html",
+        "home.html",
         {
             "request": request,
             "providers": providers_db,
