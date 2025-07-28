@@ -149,3 +149,14 @@ async def demo():
 
 asyncio.run(demo())
 ```
+
+
+### Running Tests
+
+To run the automated tests locally, install the dependencies and execute `pytest`:
+
+```bash
+pip install -r requirements.txt
+pip install pytest
+pytest
+```
