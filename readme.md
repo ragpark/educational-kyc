@@ -76,6 +76,19 @@ async def demo():
 asyncio.run(demo())
 ```
 
+### MCP Wrapper Endpoint
+
+Once the server is running you can also access the wrapper via HTTP.
+Calling `/mcp/health` returns the underlying `/health` response wrapped in the MCP metadata:
+
+```bash
+curl http://localhost:8000/mcp/health
+```
+
+The JSON payload contains the raw content and context information returned by
+`KYCContextSource`.
+
+
 Alternatively you can call the FastAPI endpoint directly:
 
 ```
