@@ -34,6 +34,9 @@ class ProviderType(Enum):
     APPRENTICESHIP_PROVIDER = "apprenticeship_provider"
     PRIVATE_TRAINING = "private_training"
     ADULT_COMMUNITY = "adult_community"
+    TRUST = "trust"
+    SCHOOL = "school"
+    CHARITY = "charity"
 
 class RiskLevel(Enum):
     LOW = "low"
