@@ -76,6 +76,19 @@ async def demo():
 asyncio.run(demo())
 ```
 
+### MCP Wrapper Endpoint
+
+Once the server is running you can access the wrapper via HTTP. If deploying on Railway make sure the `MCP_BASE_URL` environment variable matches your service URL; otherwise the wrapper defaults to `http://localhost:$PORT`.
+Calling `/mcp/health` returns the underlying `/health` response wrapped in the MCP metadata:
+
+```bash
+curl http://localhost:$PORT/mcp/health
+```
+
+The JSON payload contains the raw content and context information returned by
+`KYCContextSource`.
+
+
 Alternatively you can call the FastAPI endpoint directly:
 
 ```
@@ -115,11 +128,13 @@ containing the raw response and metadata.
 
 ```python
 import asyncio
+import os
 from app.mcp_wrapper import KYCContextSource
 
 
 async def demo():
-    source = KYCContextSource(base_url="http://localhost:8000")
+    default_base = f"http://localhost:{os.getenv('PORT', '8000')}"
+    source = KYCContextSource(base_url=os.getenv("MCP_BASE_URL", default_base))
     health = await source.health()
     print("Health status:", health.content)
 
