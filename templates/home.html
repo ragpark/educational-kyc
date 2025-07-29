@@ -46,17 +46,7 @@
                         <a href="#contact" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Contact</a>
                         <a href="/login" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition"><button class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium">
                             Sign In
-                        </button></a>
-
-                        @app.get("/login", response_class=HTMLResponse)
-async def login_form(request: Request):
-    """Display the login form"""
-    user = get_current_user(request)
-    if user:
-        return RedirectResponse("/", status_code=302)
-    return templates.TemplateResponse("login.html", {"request": request})
-
-                        
+                        </button></a>         
                     </div>
                 </div>
                 <div class="md:hidden">
