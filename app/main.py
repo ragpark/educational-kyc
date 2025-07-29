@@ -910,7 +910,6 @@ async def verifiable_credential_page(verification_id: str, request: Request):
     encoded = base64.urlsafe_b64encode(credential_json.encode()).decode()
 
     verify_url = f"{request.url_for('verify_via_link')}?credential={encoded}"
-
     qr_data = generate_qr_code(verify_url)
 
     return templates.TemplateResponse(
