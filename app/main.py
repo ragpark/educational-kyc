@@ -1295,6 +1295,8 @@ async def mcp_health():
 
     # Query the underlying `/health` endpoint via the MCP wrapper
     doc = await mcp_wrapper.health()
+    if doc.context and doc.context.get("error"):
+        return JSONResponse(status_code=503, content={"error": doc.context["error"]})
 
     return {
         "content": doc.content,
