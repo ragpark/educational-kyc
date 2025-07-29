@@ -216,5 +216,10 @@ The returned JSON document includes a `proof` object with an Ed25519 signature. 
 * **Verification** – Third parties can validate a credential using standard VC libraries (e.g. [`jsonld-signatures`](https://github.com/digitalbazaar/jsonld-signatures`) or Hyperledger Aries). Verification consists of checking the `proof` signature, confirming the issuer URL, and validating the `credentialSubject` details.
 
 A successfully verified credential can be relied upon as proof that the organisation has completed the KYC process.
-main
+
+### QR Code Verification
+
+Each issued credential page now displays a QR code. Scanning the code opens the
+`/verify` endpoint with the credential embedded in the URL. The page
+automatically validates the credential and shows whether it is valid or not.
 
