@@ -9,6 +9,7 @@ from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
 from contextlib import asynccontextmanager
 import os
+import base64
 from typing import Dict, List, Optional
 from datetime import datetime
 import json
@@ -37,6 +38,7 @@ from app.services.education_kyc_orchestrator import (
 )
 from app.vc_issue import create_verifiable_credential
 from app.vc_verify import verify_credential
+from app.qr_utils import generate_qr_code
 from app.centre_submission import (
     CentreSubmission,
     ParentOrganisation,
@@ -878,10 +880,19 @@ async def verifiable_credential_page(verification_id: str, request: Request):
         )
 
     credential = create_verifiable_credential(provider)
+    credential_json = json.dumps(credential)
+    encoded = base64.urlsafe_b64encode(credential_json.encode()).decode()
+    verify_url = f"{request.url_for('verify_via_link')}?credential={encoded}"
+    qr_data = generate_qr_code(verify_url)
 
     return templates.TemplateResponse(
         "credential.html",
-        {"request": request, "credential": credential, "provider": provider},
+        {
+            "request": request,
+            "credential": credential,
+            "provider": provider,
+            "qr_data": qr_data,
+        },
     )
 
 
@@ -924,6 +935,36 @@ async def verify_credential_submit(
             "result": result,
             "credential_json": credential_json,
             "expected_subject": expected_subject,
+            "error": None,
+        },
+    )
+
+
+@app.get("/verify", response_class=HTMLResponse)
+async def verify_via_link(request: Request, credential: str):
+    """Verify a credential encoded in a URL parameter."""
+    try:
+        credential_json = base64.urlsafe_b64decode(credential.encode()).decode()
+        cred = json.loads(credential_json)
+    except Exception:
+        return templates.TemplateResponse(
+            "verify_credential.html",
+            {
+                "request": request,
+                "error": "Invalid credential data",
+                "result": None,
+            },
+        )
+
+    result = verify_credential(cred)
+
+    return templates.TemplateResponse(
+        "verify_credential.html",
+        {
+            "request": request,
+            "result": result,
+            "credential_json": credential_json,
+            "expected_subject": None,
             "error": None,
         },
     )
