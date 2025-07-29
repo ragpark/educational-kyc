@@ -28,13 +28,21 @@ class KYCContextSource:
     async def _get(self, path: str) -> MCPDocument:
         url = f"{self.base_url}{path}"
         async with aiohttp.ClientSession() as session:
-            async with session.get(url) as resp:
-                text = await resp.text()
+            try:
+                async with session.get(url) as resp:
+                    text = await resp.text()
+                    return MCPDocument(
+                        content=text,
+                        source_url=url,
+                        media_type=resp.headers.get("Content-Type", "text/plain"),
+                        context={"status": resp.status},
+                    )
+            except aiohttp.ClientError as exc:
+                # Gracefully handle connection errors and return minimal context
                 return MCPDocument(
-                    content=text,
+                    content="",
                     source_url=url,
-                    media_type=resp.headers.get("Content-Type", "text/plain"),
-                    context={"status": resp.status},
+                    context={"error": str(exc)},
                 )
 
     async def health(self) -> MCPDocument:
