@@ -45,6 +45,9 @@ This application is deployed on Railway.app with PostgreSQL and Redis.
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 
+# create tables locally
+python -c "from app.database import init_db; init_db()"
+
 # Educational Provider KYC System
 
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/your-template-id)
@@ -55,6 +58,13 @@ uvicorn app.main:app --reload
 2. Connect your GitHub account
 3. Railway will automatically deploy the app
 4. Your app will be live in 2-3 minutes!
+
+## Architecture Overview
+
+The Railway deployment now provisions a **PostgreSQL** service for storing user
+accounts and provider applications. The FastAPI application connects to this
+database using SQLAlchemy. Dataclasses in `app/models.py` define the schema for
+`user_accounts` and `applications` tables, which support full CRUD operations.
 
 ### Example: Awarding Organisation Search
 
