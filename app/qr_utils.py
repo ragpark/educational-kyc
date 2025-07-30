@@ -14,9 +14,19 @@ def generate_qr_code(data: str) -> str:
     qr.make(fit=True)
     img = qr.make_image(fill_color="black", back_color="white")
     buf = io.BytesIO()
-    # Saving without a format works for both Pillow and the fallback PyPNG
-    # implementation used when Pillow isn't installed.
-    img.save(buf)
+
+
+    try:
+        # Pillow's Image.save requires the format when saving to a buffer.
+        # If Pillow isn't installed, qrcode falls back to a PyPNG implementation
+        # whose save() method does not accept the format argument.
+        img.save(buf, format="PNG")
+    except TypeError:
+        img.save(buf)
+
+    img.save(buf, format="PNG")
+
+
     return base64.b64encode(buf.getvalue()).decode()
 
 

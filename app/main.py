@@ -209,7 +209,33 @@ async def dashboard(request: Request):
             "stats": stats,
         },
     )
+@app.get("/dashboard", response_class=HTMLResponse)
+async def dashboard(request: Request):
+    """Main dashboard page"""
+    stats = {
+        "total": len(providers_db),
+        "approved": len([p for p in providers_db if p["status"] == "approved"]),
+        "under_review": len(
+            [
+                p
+                for p in providers_db
+                if p["status"] in ["review_required", "pending", "processing"]
+            ]
+        ),
+        "high_risk": len([p for p in providers_db if p["risk_level"] == "high"]),
+        "jcq_verified": len([p for p in providers_db if p.get("jcq_centre_number")]),
+        "centre_submissions": len(centre_submissions),
+    }
 
+    return templates.TemplateResponse(
+        "dashboard.html",
+        {
+            "request": request,
+            "providers": providers_db,
+            "centre_submissions": centre_submissions,
+            "stats": stats,
+        },
+    )
 
 @app.get("/login", response_class=HTMLResponse)
 async def login_form(request: Request):
