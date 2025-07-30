@@ -8,5 +8,8 @@ healthcheckTimeout = 300
 restartPolicyType = "ON_FAILURE"
 restartPolicyMaxRetries = 10
 
+[plugins.postgresql]
+enabled = true
+
 [environments.production]
-variables = { ENVIRONMENT = "production" }
+variables = { ENVIRONMENT = "production", DATABASE_URL = "${{postgresql.DATABASE_URL}}" }
