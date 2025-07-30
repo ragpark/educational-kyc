@@ -15,6 +15,7 @@ def generate_qr_code(data: str) -> str:
     img = qr.make_image(fill_color="black", back_color="white")
     buf = io.BytesIO()
 
+
     try:
         # Pillow's Image.save requires the format when saving to a buffer.
         # If Pillow isn't installed, qrcode falls back to a PyPNG implementation
@@ -24,6 +25,7 @@ def generate_qr_code(data: str) -> str:
         img.save(buf)
 
     img.save(buf, format="PNG")
+
 
     return base64.b64encode(buf.getvalue()).decode()
 
