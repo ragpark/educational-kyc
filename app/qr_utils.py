@@ -24,8 +24,6 @@ def generate_qr_code(data: str) -> str:
     except TypeError:
         img.save(buf)
 
-    img.save(buf, format="PNG")
-
 
     return base64.b64encode(buf.getvalue()).decode()
 
