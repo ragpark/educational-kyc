@@ -3,17 +3,61 @@
 {% block content %}
 <div class="max-w-5xl mx-auto">
     <h2 class="text-2xl font-semibold text-gray-900 mb-4">Search Ofqual Register</h2>
-    <form method="get" action="/ofqual/search" class="grid grid-cols-1 md:grid-cols-3 gap-4 mb-6">
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1" for="course">Course</label>
-            <input type="text" id="course" name="course" value="{{ course or '' }}" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g., Maths">
-        </div>
-        <div>
-            <label class="block text-sm font-medium text-gray-700 mb-1" for="location">Location</label>
-            <input type="text" id="location" name="location" value="{{ location or '' }}" class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g., London">
-        </div>
-        <div class="flex items-end">
-            <button type="submit" class="bg-blue-600 text-white px-6 py-2 rounded-md">Search</button>
+    <form method="get" action="/ofqual/search">
+        <div class="govuk-grid-column-one-third govuk-!-margin-bottom-5">
+            <div class="searchForm">
+                <h2 class="govuk-heading-m">Search</h2>
+
+                <!-- Qualification title -->
+                <div class="govuk-form-group ">
+                    <label class="govuk-label govuk-!-font-weight-bold" for="Title">Qualification title</label>
+                    <input class="govuk-input js-searchfield " type="text" id="Title" maxlength="150" name="Title" value="{{ Title or '' }}">
+                </div>
+
+                <!-- Qualification number -->
+                <div class="govuk-form-group ">
+                    <label class="govuk-label govuk-!-font-weight-bold" for="Num">Qualification number</label>
+                    <input class="govuk-input js-searchfield " type="text" id="Num" maxlength="10" name="Num" value="{{ Num or '' }}">
+                </div>
+
+                <!-- Status radio buttons -->
+                <div class="govuk-form-group">
+                    <fieldset class="govuk-fieldset">
+                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
+                            <span class="govuk-fieldset__heading">
+                                Status
+                            </span>
+                        </legend>
+                        <div class="govuk-radios govuk-radios--small">
+                            <div class="govuk-radios__item">
+                                <label>
+                                    <input value="All" type="radio" class="govuk-radios__input" name="Status" {% if Status == 'All' or not Status %}checked="checked"{% endif %}>
+                                    <span class="govuk-label govuk-radios__label">All</span>
+                                </label>
+                            </div>
+                            <div class="govuk-radios__item">
+                                <label>
+                                    <input value="Approved" type="radio" class="govuk-radios__input" name="Status" {% if Status == 'Approved' %}checked="checked"{% endif %}>
+                                    <span class="govuk-label govuk-radios__label">Approved</span>
+                                </label>
+                            </div>
+                            <div class="govuk-radios__item">
+                                <label>
+                                    <input value="Archived" type="radio" class="govuk-radios__input" name="Status" {% if Status == 'Archived' %}checked="checked"{% endif %}>
+                                    <span class="govuk-label govuk-radios__label">Archived</span>
+                                </label>
+                            </div>
+                        </div>
+                    </fieldset>
+                </div>
+
+                <!-- Qualification offer -->
+                <!-- Additional filter fields omitted for brevity -->
+
+                <input class="govuk-button js-searchfield js-submit" type="submit" value="Search">
+                <br>
+                <a class="govuk-link" href="/Search">Clear search</a>
+            </div>
         </div>
     </form>
 
@@ -21,8 +65,7 @@
     <div class="space-y-10">
         {% if organisations %}
         <form method="get" action="/centre-submission">
-            <input type="hidden" name="course" value="{{ course }}">
-            <input type="hidden" name="location" value="{{ location }}">
+            <input type="hidden" name="course" value="{{ Title }}">
             <input type="hidden" name="organisation_name" id="organisation_name">
             <h3 class="text-xl font-semibold mb-2">Organisations</h3>
             <div class="overflow-x-auto">

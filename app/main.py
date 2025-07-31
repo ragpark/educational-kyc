@@ -1303,23 +1303,31 @@ async def search_awarding_organisations(
 
 @app.get("/ofqual/search", response_class=HTMLResponse)
 async def ofqual_search(
-    request: Request, course: Optional[str] = None, location: Optional[str] = None
+    request: Request,
+    Title: Optional[str] = None,
+    Num: Optional[str] = None,
+    Status: Optional[str] = None,
 ):
-    """Search the Ofqual Register for organisations and qualifications."""
+    """Search the Ofqual Register for organisations and qualifications.
+
+    Only the qualification title field is currently used to query the Ofqual API.
+    The remaining filter parameters are accepted for future use.
+    """
     client = OfqualAOSearchClient()
-    organisations = []
-    qualifications = []
-    if course or location:
-        organisations = await client.search(course=course, location=location)
-        qualifications = await client.search_qualifications(
-            course=course, location=location
-        )
+    organisations: List[Dict] = []
+    qualifications: List[Dict] = []
+
+    if Title:
+        organisations = await client.search(course=Title)
+        qualifications = await client.search_qualifications(course=Title)
+
     return templates.TemplateResponse(
         "ofqual_search.html",
         {
             "request": request,
-            "course": course,
-            "location": location,
+            "Title": Title,
+            "Num": Num,
+            "Status": Status,
             "organisations": organisations,
             "qualifications": qualifications,
         },
