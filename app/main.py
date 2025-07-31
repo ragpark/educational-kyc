@@ -1,6 +1,6 @@
 # app/main.py - Updated with Educational KYC Orchestrator Integration
 
-from fastapi import FastAPI, Request, BackgroundTasks, Form
+from fastapi import FastAPI, Request, BackgroundTasks, Form, UploadFile, File
 from fastapi.responses import RedirectResponse
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -17,6 +17,17 @@ import asyncio
 import uuid
 import aiohttp
 import requests
+
+
+def secure_filename(filename: str) -> str:
+    """Return a secure version of a filename."""
+    keep = {"-", "_", "."}
+    filename = os.path.basename(filename)
+    cleaned = []
+    for ch in filename:
+        if ch.isalnum() or ch in keep:
+            cleaned.append(ch)
+    return "".join(cleaned)
 
 from app.mcp_wrapper import KYCContextSource
 
@@ -53,6 +64,11 @@ from app.centre_submission import (
 providers_db = []
 centre_submissions: List[CentreSubmission] = []
 processing_queue = {}
+
+# Per-user document storage metadata
+documents_storage: Dict[str, List[Dict]] = {}
+# Directory to store uploaded files
+UPLOAD_DIR = os.path.join("app", "static", "uploads")
 
 # MCP wrapper instance (created during startup)
 mcp_wrapper: KYCContextSource | None = None
@@ -112,6 +128,9 @@ async def lifespan(app: FastAPI):
     global mcp_wrapper
     default_base = f"http://localhost:{os.getenv('PORT', '8080')}"
     mcp_wrapper = KYCContextSource(base_url=os.getenv("MCP_BASE_URL", "http://localhost:8080"))
+
+    # Ensure upload directory exists
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
 
     # Check API configuration
     api_status = check_api_configuration()
@@ -340,7 +359,44 @@ async def documents(request: Request):
     user = get_current_user(request)
     if not user:
         return RedirectResponse("/login", status_code=302)
-    return templates.TemplateResponse("documents.html", {"request": request, "user": user})
+    user_docs = documents_storage.get(user["name"], [])
+    return templates.TemplateResponse(
+        "documents.html", {"request": request, "user": user, "documents": user_docs}
+    )
+
+
+@app.post("/documents/upload")
+async def upload_user_documents(request: Request, files: List[UploadFile] = File(...)):
+    """Receive document uploads from the Documents page."""
+    user = get_current_user(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    user_docs = documents_storage.setdefault(user["name"], [])
+    saved = []
+    for file in files:
+        if not file.filename:
+            continue
+        filename = secure_filename(file.filename)
+        stored_name = f"{uuid.uuid4().hex}_{filename}"
+        path = os.path.join(UPLOAD_DIR, stored_name)
+        with open(path, "wb") as out:
+            while True:
+                chunk = await file.read(8192)
+                if not chunk:
+                    break
+                out.write(chunk)
+        user_docs.append(
+            {
+                "name": file.filename,
+                "stored_name": stored_name,
+                "uploaded_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+            }
+        )
+        saved.append(file.filename)
+
+    return {"success": True, "files": saved}
 
 
 @app.get("/help", response_class=HTMLResponse)
