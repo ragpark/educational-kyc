@@ -131,9 +131,16 @@ verificationInput.addEventListener('input', function(e) {
             const resp = await fetch(`/verification/${encodeURIComponent(value)}`);
             const data = await resp.json();
             if (!data.error) {
-                statusEl.classList.add('text-green-600');
-                statusEl.textContent = 'Verification ID confirmed';
-                disableOthers(false);
+                if (data.revoked) {
+                    statusEl.classList.add('text-red-600');
+                    const reason = data.revocation_reason ? `: ${data.revocation_reason}` : '';
+                    statusEl.textContent = `Verification ID revoked${reason}`;
+                    disableOthers(true);
+                } else {
+                    statusEl.classList.add('text-green-600');
+                    statusEl.textContent = 'Verification ID confirmed';
+                    disableOthers(false);
+                }
             } else {
                 statusEl.classList.add('text-red-600');
                 statusEl.textContent = 'Invalid Verification ID';
