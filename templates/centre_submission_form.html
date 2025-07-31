@@ -13,6 +13,7 @@
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2" for="group_ukprn">Verification ID from your compliance check</label>
                     <input type="text" id="verification_id" name="verification_id" required class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g., 12345678">
+                    <div id="verification-status" class="mt-2 text-xs text-red-600 hidden"></div>
                 </div>
             </div>
         </div>
@@ -90,4 +91,58 @@
         </div>
     </form>
 </div>
+<script>
+// Disable all form fields until verification ID is validated
+const verificationInput = document.getElementById('verification_id');
+const statusEl = document.getElementById('verification-status');
+const formEl = document.querySelector('form');
+const otherFields = Array.from(formEl.querySelectorAll('input, select, textarea, button'))
+    .filter(el => el.id !== 'verification_id');
+
+function disableOthers(disabled) {
+    otherFields.forEach(el => {
+        if (el.type !== 'submit') {
+            el.disabled = disabled;
+        } else if (disabled) {
+            el.disabled = true;
+        }
+    });
+}
+
+let verifyTimeout;
+disableOthers(true);
+
+verificationInput.addEventListener('input', function(e) {
+    const value = e.target.value.trim();
+    clearTimeout(verifyTimeout);
+    statusEl.classList.add('hidden');
+    statusEl.textContent = '';
+    disableOthers(true);
+
+    if (!value) {
+        return;
+    }
+
+    verifyTimeout = setTimeout(async () => {
+        try {
+            statusEl.classList.remove('text-red-600', 'text-green-600');
+            statusEl.innerHTML = '<div class="animate-spin rounded-full h-4 w-4 border-b-2 border-blue-600"></div>';
+            statusEl.classList.remove('hidden');
+            const resp = await fetch(`/verification/${encodeURIComponent(value)}`);
+            const data = await resp.json();
+            if (!data.error) {
+                statusEl.classList.add('text-green-600');
+                statusEl.textContent = 'Verification ID confirmed';
+                disableOthers(false);
+            } else {
+                statusEl.classList.add('text-red-600');
+                statusEl.textContent = 'Invalid Verification ID';
+            }
+        } catch (_) {
+            statusEl.classList.add('text-red-600');
+            statusEl.textContent = 'Unable to verify ID';
+        }
+    }, 500);
+});
+</script>
 {% endblock %}
