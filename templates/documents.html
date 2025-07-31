@@ -4,6 +4,85 @@
 {% if user %}
 <p class="text-sm text-gray-600 mb-2">Logged in as {{ user.name }} ({{ user.role.replace('_',' ')|title }})</p>
 {% endif %}
+
 <h1 class="text-2xl font-bold mb-4">Document Repository</h1>
-<p>Upload and manage documents for reuse across applications.</p>
+
+<form id="uploadForm" class="space-y-4" enctype="multipart/form-data">
+    <input type="file" id="fileInput" name="files" multiple class="border rounded w-full px-3 py-2">
+    <div class="flex space-x-2">
+        <button type="button" id="gdriveBtn" class="bg-red-600 text-white px-3 py-2 rounded">Google Drive</button>
+        <button type="button" id="onedriveBtn" class="bg-blue-600 text-white px-3 py-2 rounded">OneDrive</button>
+    </div>
+    <div class="w-full bg-gray-200 rounded h-2">
+        <div id="progressBar" class="bg-blue-600 h-2 w-0 rounded"></div>
+    </div>
+    <p id="progressText" class="text-sm"></p>
+    <button type="submit" class="bg-indigo-600 text-white px-4 py-2 rounded">Upload</button>
+</form>
+
+{% if documents %}
+<h2 class="text-xl font-semibold mt-8 mb-2">Your Documents</h2>
+<ul class="list-disc ml-6">
+{% for doc in documents %}
+    <li>
+        <a href="/static/uploads/{{ doc.stored_name }}" class="text-blue-600 hover:underline">{{ doc.name }}</a>
+        <span class="text-gray-500 text-sm">uploaded {{ doc.uploaded_at }}</span>
+    </li>
+{% endfor %}
+</ul>
+{% endif %}
+
+<div id="uploadResult" class="mt-4 text-sm"></div>
+
+<script src="https://apis.google.com/js/api.js"></script>
+<script src="https://js.live.net/v7.2/OneDrive.js"></script>
+<script>
+let externalFiles = [];
+
+// Google Drive picker placeholder
+function loadDrivePicker() {
+    // Requires OAuth token configuration
+    // This function should use google.picker.PickerBuilder to allow file selection
+}
+
+document.getElementById('gdriveBtn').addEventListener('click', loadDrivePicker);
+
+// OneDrive picker placeholder
+function loadOneDrivePicker() {
+    // Requires OneDrive client ID configuration
+    // This function should call OneDrive.open with the required options
+}
+
+document.getElementById('onedriveBtn').addEventListener('click', loadOneDrivePicker);
+
+document.getElementById('uploadForm').addEventListener('submit', function(e) {
+    e.preventDefault();
+    const formData = new FormData();
+    const files = document.getElementById('fileInput').files;
+    for (const file of files) {
+        formData.append('files', file);
+    }
+    for (const file of externalFiles) {
+        formData.append('files', file);
+    }
+    const xhr = new XMLHttpRequest();
+    xhr.open('POST', '/documents/upload');
+    xhr.upload.onprogress = function(evt) {
+        if (evt.lengthComputable) {
+            const percent = (evt.loaded / evt.total) * 100;
+            document.getElementById('progressBar').style.width = percent + '%';
+            document.getElementById('progressText').textContent = percent.toFixed(0) + '%';
+        }
+    };
+    xhr.onload = function() {
+        document.getElementById('uploadResult').textContent = xhr.responseText;
+        document.getElementById('progressBar').style.width = '0';
+        document.getElementById('progressText').textContent = '';
+        document.getElementById('uploadForm').reset();
+        externalFiles = [];
+    };
+    xhr.send(formData);
+});
+</script>
 {% endblock %}
+
