@@ -32,7 +32,7 @@ class OfqualAOSearchClient:
 
         try:
             async with aiohttp.ClientSession() as session:
-                async with session.get(f"{self.base_url}/api/Organisations/RN5133", headers=headers) as resp:
+                async with session.get(f"{self.base_url}/api/Organisations", params=params, headers=headers) as resp:
                     if resp.status == 200:
                         data = await resp.json()
                         if isinstance(data, dict):
