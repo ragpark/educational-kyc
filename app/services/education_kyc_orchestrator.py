@@ -937,7 +937,7 @@ class UKEducationalKYCOrchestrator:
             if funding_restrictions:
                 risk_score = min(risk_score + 0.3, 1.0)
             
-            status = "passed" if risk_score < 0.3 else "flagged"
+            status = "Not_applicable" if risk_score < 0.3 else "flagged"
             
             recommendations = []
             if funding_restrictions:
@@ -1020,7 +1020,7 @@ class UKEducationalKYCOrchestrator:
                 response = await self._mock_sanctions_check(request.organisation_name)
             
             has_matches = bool(response.get("matches"))
-            status = "flagged" if has_matches else "passed"
+            status = "flagged" if has_matches else "Pending"
             risk_score = 0.9 if has_matches else 0.05
             
             return EducationalVerificationResult(
