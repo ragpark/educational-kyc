@@ -121,7 +121,7 @@ async def lifespan(app: FastAPI):
         print("⚠ Companies House API not configured - using limited verification")
 
     if api_status["orchestrator_available"]:
-        print("✓ Educational KYC Orchestrator available")
+        print("✓ Certify3 KYC Orchestrator available")
 
     # Add sample data
     sample_providers = [
@@ -275,10 +275,10 @@ async def applications(request: Request):
     user = get_current_user(request)
     if not user:
         return RedirectResponse("/login", status_code=302)
-    if user["role"] != "awarding_organisation":
+    if user["role"] != "learning_centre":
         return templates.TemplateResponse(
             "error.html",
-            {"request": request, "message": "Access restricted to awarding organisations"},
+            {"request": request, "message": "Access restricted to learning providers"},
         )
     return templates.TemplateResponse(
         "provider_dashboard.html",
@@ -292,10 +292,10 @@ async def application_detail(verification_id: str, request: Request):
     user = get_current_user(request)
     if not user:
         return RedirectResponse("/login", status_code=302)
-    if user["role"] != "awarding_organisation":
+    if user["role"] != "learning_centre":
         return templates.TemplateResponse(
             "error.html",
-            {"request": request, "message": "Access restricted to awarding organisations"},
+            {"request": request, "message": "Access restricted to learning providers"},
         )
     provider = next(
         (p for p in providers_db if p.get("verification_id") == verification_id), None
