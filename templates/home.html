@@ -41,17 +41,12 @@
                 </div>
                 <div class="hidden md:block">
                     <div class="ml-10 flex items-baseline space-x-4">
-                        <a href="#features" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Features</a>
-                        <a href="#benefits" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Benefits</a>
-                        <a href="#contact" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Contact</a>
                         <a href="/" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Home</a>
                         <a href="/dashboard" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">AO Dashboard</a>
-                        <a href="/applications" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Provider Dashboard</a>
-                        <a href="/messages" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Messages</a>
+                        <a href="/applications" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Centre Approval</a>
+                        <a href="/applications" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Qualifcation Approval</a>                        
                         <a href="/documents" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Documents</a>
-                        <a href="/verify-credential" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Verify Centre Badge</a>
-                        <a href="/help" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Help &amp; Support</a>
-                        <a href="/profile" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Profile</a>
+                        <a href="/verify-credential" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Verify a Centre</a>
                         {% if request.session.get('user') %}
                         <a href="/logout" class="hover:text-blue-200"><button class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium">
                             Sign Out
@@ -86,9 +81,6 @@
                     </p>
                     <div class="mt-8 sm:max-w-lg sm:mx-auto sm:text-center lg:text-left lg:mx-0">
                         <div class="space-y-4 sm:space-y-0 sm:space-x-4 sm:flex sm:justify-center lg:justify-start">
-                            <button class="w-full sm:w-auto bg-white text-indigo-600 px-8 py-3 border border-transparent text-base font-medium rounded-lg hover:bg-gray-50 transition shadow-lg">
-                                Start Free Trial
-                            </button>
                             <button class="w-full sm:w-auto bg-transparent text-white px-8 py-3 border-2 border-white text-base font-medium rounded-lg hover:bg-white hover:text-indigo-600 transition">
                                 Schedule Demo
                             </button>
@@ -264,7 +256,7 @@
                         Intelligent Automation Meets Verifiable Credentials
                     </h2>
                     <p class="mt-4 text-lg text-gray-600">
-                        Certify3 leverages cutting-edge AI automation and blockchain-secured digital credentials to revolutionize educational provider verification.
+                        Certify3 leverages cutting-edge AI automation and W3C JSON-LD digital credentials to create portable QR Codes for faster AO approval of candidate centres.
                     </p>
                     
                     <div class="mt-8 space-y-6">
@@ -277,7 +269,7 @@
                             <div class="ml-4">
                                 <h3 class="text-lg font-medium text-gray-900">Tamper-Proof Digital Credentials</h3>
                                 <p class="mt-2 text-base text-gray-600">
-                                    Generate cryptographically secure digital credentials for every verification. Recipients can instantly validate authenticity without compromising sensitive data.
+                                    Generate cryptographically secure digital credentials for every Centre. AOs can instantly validate a centre's licence to operate with a QR Code.
                                 </p>
                             </div>
                         </div>
@@ -291,7 +283,7 @@
                             <div class="ml-4">
                                 <h3 class="text-lg font-medium text-gray-900">Expedited Approvals</h3>
                                 <p class="mt-2 text-base text-gray-600">
-                                    Digital credentials enable instant verification across institutions, reducing approval times from weeks to minutes while maintaining full security.
+                                    Creating a Centre credential enable instant verification across institutions, reducing approval times from weeks to minutes while maintaining full security. and accelrating the pathway to qualications approval.
                                 </p>
                             </div>
                         </div>
