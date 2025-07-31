@@ -19,10 +19,11 @@ class OfqualAOSearchClient:
         course: Optional[str] = None,
         location: Optional[str] = None,
         page: int = 1,
-        limit: int = 25,
+        limit: int = 50,
     ) -> List[Dict]:
         """Return a list of awarding organisations matching the query."""
-        search_terms = " ".join(filter(None, [subject or course, location]))
+        #search_terms = " ".join(filter(None, [subject or course, location]))
+        search_terms = "Pearson"
         params = {"search": search_terms, "page": page, "limit": limit}
 
         headers = {}
