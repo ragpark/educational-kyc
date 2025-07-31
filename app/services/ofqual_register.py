@@ -32,6 +32,7 @@ class OfqualRegisterClient:
 
     async def search_organisations(self, search: str, page: int = 1, limit: int = 25) -> List[Dict]:
         """Search Ofqual organisations."""
+        search = "Pearson"
         return await self._request("/api/Organisations", {"search": search, "page": page, "limit": limit})
 
     async def search_qualifications(self, search: str, page: int = 1, limit: int = 25) -> List[Dict]:
