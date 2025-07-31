@@ -821,7 +821,10 @@ class UKEducationalKYCOrchestrator:
             # Extract data using the same logic as provided code
             title = soup.find("h1").get_text(strip=True) if soup.find("h1") else "Not found"
             
-            grade_div = soup.find("div", class_="rating rating--selected heading--sub")
+            # Find the div with the selected rating class
+            grade_div = soup.find("div", class_=lambda c: c and "rating--selected" in c)
+            
+            # Extract the rating
             rating = grade_div.get_text(strip=True) if grade_div else "Not found"
             
             date_div = soup.find("div", class_="timeline__date")
