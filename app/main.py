@@ -890,6 +890,8 @@ async def get_verification_status(verification_id: str):
         "verification_id": verification_id,
         "status": provider["status"],
         "processing_status": processing_status,
+        "revoked": provider.get("revoked", False),
+        "revocation_reason": provider.get("revocation_reason"),
         "risk_level": provider.get("risk_level"),
         "organisation_name": provider["organisation_name"],
         "provider_type": provider.get("provider_type"),
