@@ -36,6 +36,13 @@ def create_verifiable_credential(provider: Dict[str, Any]) -> Dict[str, Any]:
         ),
     }
 
+    if provider.get("revoked") and provider.get("revocation_reason"):
+        credential["credentialStatus"] = {
+            "id": f"https://certify3.io/revocations/{subject_id}",
+            "type": "RevocationList2020Status",
+            "revocationReason": provider["revocation_reason"],
+        }
+
     return credential
 
 

@@ -266,6 +266,19 @@
                                 Credential
                             </a>
                             {% endif %}
+
+                            {% if provider.revoked %}
+                            <span class="text-red-600 inline-flex items-center">Revoked</span>
+                            {% elif provider.status == 'approved' %}
+                            <form method="post" action="/revoke/{{ provider.verification_id }}" style="display:inline">
+                                <button type="submit" class="text-red-600 hover:text-red-900 inline-flex items-center">
+                                    <svg class="w-4 h-4 mr-1" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M6 18L18 6M6 6l12 12"></path>
+                                    </svg>
+                                    Revoke
+                                </button>
+                            </form>
+                            {% endif %}
                             
                             {% if provider.status == 'processing' %}
                             <span class="text-gray-400 inline-flex items-center">

@@ -30,7 +30,13 @@ def verify_credential(credential: Dict[str, Any], expected_subject: Optional[str
             not_expired = False
 
     cred_id = credential.get("id") or credential.get("credentialSubject", {}).get("id")
-    not_revoked = cred_id not in REVOKED_IDS
+
+    status = credential.get("credentialStatus", {})
+    revoked_in_credential = bool(status.get("revocationReason"))
+    if revoked_in_credential:
+        REVOKED_IDS.add(cred_id)
+
+    not_revoked = cred_id not in REVOKED_IDS and not revoked_in_credential
 
     subject_match = True
     if expected_subject:

@@ -978,6 +978,27 @@ async def verifiable_credential_page(verification_id: str, request: Request):
     )
 
 
+@app.post("/revoke/{verification_id}")
+async def revoke_credential(verification_id: str, request: Request):
+    """Revoke an issued credential for a provider."""
+    provider = next(
+        (p for p in providers_db if p.get("verification_id") == verification_id),
+        None,
+    )
+
+    if provider:
+        provider["revoked"] = True
+        provider["revocation_reason"] = "Poor Credit"
+        cred_id = provider.get("verification_id") or provider.get("id")
+        if cred_id and not str(cred_id).startswith("urn:uuid:"):
+            cred_id = f"urn:uuid:{cred_id}"
+        from app.vc_verify import REVOKED_IDS
+
+        REVOKED_IDS.add(cred_id)
+
+    return RedirectResponse("/dashboard", status_code=302)
+
+
 @app.get("/verify-credential", response_class=HTMLResponse)
 async def verify_credential_form(request: Request):
     """Display the credential verification form."""
