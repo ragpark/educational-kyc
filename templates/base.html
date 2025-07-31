@@ -16,13 +16,11 @@
                 </div>
                 <div class="flex space-x-6">
                     <a href="/" class="hover:text-blue-200">Home</a>
-                    <a href="/applications" class="hover:text-blue-200">Applications</a>
-                    <a href="/my-organisation" class="hover:text-blue-200">My Organisation</a>
-                    <a href="/messages" class="hover:text-blue-200">Messages</a>
+                    <a href="/applications" class="hover:text-blue-200">AO Dashboard</a>
+                    <a href="/my-organisation" class="hover:text-blue-200">Centre Approval</a>
+                    <a href="/my-organisation" class="hover:text-blue-200">Qualifcation Approval</a>
                     <a href="/documents" class="hover:text-blue-200">Documents</a>
-                    <a href="/verify-credential" class="hover:text-blue-200">Verify Credential</a>
-                    <a href="/help" class="hover:text-blue-200">Help &amp; Support</a>
-                    <a href="/profile" class="hover:text-blue-200">User Profile</a>
+                    <a href="/verify-credential" class="hover:text-blue-200">Verify a Centre</a>
                     {% if request.session.get('user') %}
                     <a href="/logout" class="hover:text-blue-200">Logout</a>
                     {% else %}
