@@ -14,3 +14,19 @@ def test_verify_valid_credential():
     vc = create_verifiable_credential(provider)
     result = verify_credential(vc, expected_subject=vc["credentialSubject"]["id"])
     assert result["is_valid"]
+
+
+def test_verify_revoked_credential_fails():
+    provider = {
+        "id": 1,
+        "verification_id": "11111111-1111-1111-1111-111111111111",
+        "organisation_name": "Test Provider",
+        "status": "approved",
+        "revoked": True,
+        "revocation_reason": "Poor Credit",
+    }
+
+    vc = create_verifiable_credential(provider)
+    result = verify_credential(vc, expected_subject=vc["credentialSubject"]["id"])
+    assert not result["is_valid"]
+    assert not result["not_revoked"]
