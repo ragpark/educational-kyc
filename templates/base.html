@@ -7,25 +7,41 @@
     <script src="https://cdn.tailwindcss.com"></script>
 </head>
 <body class="bg-gray-50 min-h-screen">
-    <nav class="bg-blue-600 text-white shadow-lg">
-        <div class="container mx-auto px-4">
-            <div class="flex justify-between items-center py-4">
-                <div class="flex items-center space-x-2">
-                    <span class="text-2xl">🎓</span>
-                    <h1 class="text-xl font-bold">Educational Provider KYC</h1>
+ <!-- Navigation -->
+    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between items-center h-16">
+                <div class="flex items-center">
+                    <div class="flex-shrink-0 flex items-center">
+                        <div class="w-8 h-8 bg-indigo-600 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-shield-alt text-white text-sm"></i>
+                        </div>
+                        <span class="text-2xl font-bold text-gray-900">Certify3</span>
+                    </div>
                 </div>
-                <div class="flex space-x-6">
-                    <a href="/" class="hover:text-blue-200">Home</a>
-                    <a href="/applications" class="hover:text-blue-200">AO Dashboard</a>
-                    <a href="/my-organisation" class="hover:text-blue-200">Centre Approval</a>
-                    <a href="/my-organisation" class="hover:text-blue-200">Qualifcation Approval</a>
-                    <a href="/documents" class="hover:text-blue-200">Documents</a>
-                    <a href="/verify-credential" class="hover:text-blue-200">Verify a Centre</a>
-                    {% if request.session.get('user') %}
-                    <a href="/logout" class="hover:text-blue-200">Logout</a>
-                    {% else %}
-                    <a href="/login" class="hover:text-blue-200">Login</a>
-                    {% endif %}
+                <div class="hidden md:block">
+                    <div class="ml-10 flex items-baseline space-x-4">
+                        <a href="/" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Home</a>
+                        <a href="/dashboard" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">AO Dashboard</a>
+                        <a href="/applications" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Centre Approval</a>
+                        <a href="/applications" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Qualifcation Approval</a>                        
+                        <a href="/documents" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Documents</a>
+                        <a href="/verify-credential" class="text-gray-600 hover:text-indigo-600 px-3 py-2 text-sm font-medium transition">Verify a Centre</a>
+                        {% if request.session.get('user') %}
+                        <a href="/logout" class="hover:text-blue-200"><button class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium">
+                            Sign Out
+                        </button></a>
+                        {% else %}
+                        <a href="/login" class="hover:text-blue-200"><button class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700 transition font-medium">
+                            Sign In
+                        </button></a>
+                        {% endif %}                        
+                    </div>
+                </div>
+                <div class="md:hidden">
+                    <button class="text-gray-600 hover:text-indigo-600">
+                        <i class="fas fa-bars text-xl"></i>
+                    </button>
                 </div>
             </div>
         </div>
