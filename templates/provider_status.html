@@ -5,7 +5,7 @@
     <!-- Header -->
     <div class="mb-8">
         <h2 class="text-3xl font-bold text-gray-900 mb-2">Application Status</h2>
-        <p class="text-gray-600">Track your verification progress for {{ provider.organisation_name }}</p>
+        <p class="text-gray-600">Tracking verification progress for {{ provider.organisation_name }}</p>
         <div class="mt-2 p-3 bg-gray-50 rounded-lg">
             <p class="text-sm text-gray-600">
                 <span class="font-medium">Verification ID:</span> 
@@ -14,7 +14,7 @@
             <p class="text-sm text-gray-600 mt-1">
                 <span class="font-medium">Submitted:</span> {{ provider.created_at }}
             </p>
-        </div>
+        </div>`
     </div>
 
     <!-- 4-Stage Progress Indicator -->
@@ -176,7 +176,7 @@
                 <div class="animate-spin rounded-full h-5 w-5 border-b-2 border-blue-600 mr-3"></div>
                 <div>
                     <h4 class="text-blue-900 font-medium">Verification in Progress</h4>
-                    <p class="text-blue-700 text-sm">We're currently verifying your application. This typically takes 2-5 business days.</p>
+                    <p class="text-blue-700 text-sm">We're finalising your application. We will contact you when this completed.</p>
                 </div>
             </div>
         </div>
@@ -199,8 +199,8 @@
                     <path fill-rule="evenodd" d="M16.707 5.293a1 1 0 010 1.414l-8 8a1 1 0 01-1.414 0l-4-4a1 1 0 011.414-1.414L8 12.586l7.293-7.293a1 1 0 011.414 0z" clip-rule="evenodd"></path>
                 </svg>
                 <div>
-                    <h4 class="text-green-900 font-medium">Congratulations! The application is compliant</h4>
-                    <p class="text-green-700 text-sm">Your application has been successfully verified.</p>
+                    <h4 class="text-green-900 font-medium">The application has passed basic institutional checks.</h4>
+                    <p class="text-green-700 text-sm">further background checks are being carried out. You have been issued with a Digital Credential to share with AOs that provde your centre's licence to operate and is valid for 6 months,</p>
                 </div>
             </div>
         </div>
