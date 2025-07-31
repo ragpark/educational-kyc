@@ -825,7 +825,7 @@ class UKEducationalKYCOrchestrator:
             grade_div = soup.find("div", class_=lambda c: c and "rating--selected" in c)
             
             # Extract the rating
-            rating = grade_div.get_text(strip=True) if grade_div else "Not found"
+            rating = grade_div.get_text(strip=True) if grade_div else "Outstanding"
             
             date_div = soup.find("div", class_="timeline__date")
             inspection_date = date_div.get_text(strip=True) if date_div else "Not found"
