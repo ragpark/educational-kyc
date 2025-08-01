@@ -160,6 +160,34 @@ async def demo():
 asyncio.run(demo())
 ```
 
+## REST API Onboarding
+
+You can submit provider details directly via JSON using the `/api/onboard` endpoint. The payload must conform to the `ProviderAPIRequest` schema used by the application.
+
+```json
+{
+  "organisation_name": "Example College",
+  "urn": "123456",
+  "postcode": "AB1 2CD",
+  "company_number": "12345678",
+  "provider_type": "Training Provider"
+}
+```
+
+The endpoint runs the full KYC orchestration and returns the verification ID, risk score, and a link to the credential page. If the application is approved, the JSON‑LD credential is included in the response.
+
+```json
+{
+  "verification_id": "11111111-2222-3333-4444-555555555555",
+  "status": "approved",
+  "risk_score": 0.12,
+  "credential_url": "https://example.com/credential/11111111-2222-3333-4444-555555555555",
+  "credential": { "@context": "https://www.w3.org/2018/credentials/v1" }
+}
+```
+
+For applications still processing, poll `/api/provider-status/<verification_id>` until the status changes from `processing`.
+
 
 ### Running Tests
 
