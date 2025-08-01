@@ -1,7 +1,7 @@
 # app/main.py - Updated with Educational KYC Orchestrator Integration
 
 from fastapi import FastAPI, Request, BackgroundTasks, Form, UploadFile, File
-from fastapi.responses import RedirectResponse
+from fastapi.responses import RedirectResponse, Response
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
@@ -50,6 +50,7 @@ from app.services.education_kyc_orchestrator import (
 from app.vc_issue import create_verifiable_credential
 from app.vc_verify import verify_credential
 from app.qr_utils import generate_qr_code
+from app.pdf_utils import generate_credential_pdf
 from app.centre_submission import (
     CentreSubmission,
     ParentOrganisation,
@@ -978,6 +979,42 @@ async def verifiable_credential_page(verification_id: str, request: Request):
             "qr_data": qr_data,
         },
     )
+
+
+@app.get("/credential/{verification_id}/download")
+async def download_credential_pdf(verification_id: str, request: Request):
+    """Provide the issued credential and QR code as a PDF download."""
+    provider = next(
+        (p for p in providers_db if p.get("verification_id") == verification_id),
+        None,
+    )
+
+    if not provider:
+        return templates.TemplateResponse(
+            "error.html",
+            {"request": request, "message": "Verification not found"},
+        )
+
+    if provider.get("status") != "approved":
+        return templates.TemplateResponse(
+            "error.html",
+            {
+                "request": request,
+                "message": "Credential available only for approved applications",
+            },
+        )
+
+    credential = create_verifiable_credential(provider)
+    credential_json = json.dumps(credential)
+    encoded = base64.urlsafe_b64encode(credential_json.encode()).decode()
+    verify_url = f"{request.url_for('verify_via_link')}?credential={encoded}"
+    qr_data = generate_qr_code(verify_url)
+
+    pdf_bytes = generate_credential_pdf(credential, qr_data)
+
+    filename = f"{provider.get('organisation_name','credential')}.pdf"
+    headers = {"Content-Disposition": f"attachment; filename={filename}"}
+    return Response(content=pdf_bytes, media_type="application/pdf", headers=headers)
 
 
 @app.post("/revoke/{verification_id}")

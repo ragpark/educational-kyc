@@ -28,3 +28,5 @@ structlog==23.3.0
 qrcode==7.4.2
 SQLAlchemy==2.0.23
 psycopg2-binary==2.9.9
+httpx==0.26.0
+reportlab==4.0.5
