@@ -12,6 +12,7 @@ A comprehensive Know Your Customer (KYC) verification system specifically design
 - UKPRN validation
 - Companies House integration
 - Model Context Protocol (MCP) wrapper for AI integrations
+- REST onboarding API with MCP wrapper support
 
 📊 **Risk Assessment**
 - Automated risk scoring
@@ -157,8 +158,20 @@ async def demo():
     orgs = await source.search_awarding_orgs(subject="maths")
     print(orgs.content)
 
+    onboarding = await source.onboard_provider(
+        {
+            "organisation_name": "Demo School",
+            "urn": "123456",
+            "postcode": "AB1 2CD",
+        }
+    )
+    print(onboarding.content)
+
 asyncio.run(demo())
 ```
+
+`onboard_provider` posts the given details to `/api/onboard` and returns the
+wrapped response, allowing automated client integrations.
 
 ## REST API Onboarding
 

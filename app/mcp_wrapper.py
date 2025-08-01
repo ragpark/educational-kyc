@@ -36,9 +36,29 @@ class KYCContextSource:
                         source_url=url,
                         media_type=resp.headers.get("Content-Type", "text/plain"),
                         context={"status": resp.status},
-                    )
+                )
             except aiohttp.ClientError as exc:
                 # Gracefully handle connection errors and return minimal context
+                return MCPDocument(
+                    content="",
+                    source_url=url,
+                    context={"error": str(exc)},
+                )
+
+    async def _post(self, path: str, payload: Dict[str, Any]) -> MCPDocument:
+        """Send a POST request and wrap the response in an MCPDocument."""
+        url = f"{self.base_url}{path}"
+        async with aiohttp.ClientSession() as session:
+            try:
+                async with session.post(url, json=payload) as resp:
+                    text = await resp.text()
+                    return MCPDocument(
+                        content=text,
+                        source_url=url,
+                        media_type=resp.headers.get("Content-Type", "text/plain"),
+                        context={"status": resp.status},
+                    )
+            except aiohttp.ClientError as exc:
                 return MCPDocument(
                     content="",
                     source_url=url,
@@ -76,6 +96,10 @@ class KYCContextSource:
         query = "&".join(params)
         path = f"/ofqual/search?{query}" if query else "/ofqual/search"
         return await self._get(path)
+
+    async def onboard_provider(self, data: Dict[str, Any]) -> MCPDocument:
+        """Submit provider details to the onboarding API."""
+        return await self._post("/api/onboard", data)
 
 
 __all__ = ["MCPDocument", "KYCContextSource"]
