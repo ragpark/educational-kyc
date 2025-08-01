@@ -7,6 +7,7 @@ from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import HTMLResponse, JSONResponse
+from pydantic import BaseModel
 from contextlib import asynccontextmanager
 import os
 import base64
@@ -120,6 +121,21 @@ def map_provider_type(provider_type_str: str) -> ProviderType:
         "Adult Community": ProviderType.ADULT_COMMUNITY,
     }
     return mapping.get(provider_type_str, ProviderType.TRAINING_PROVIDER)
+
+
+class ProviderAPIRequest(BaseModel):
+    """Input schema for the API onboarding endpoint."""
+
+    organisation_name: str
+    urn: str
+    postcode: str
+    company_number: str | None = None
+    trading_name: Optional[str] = None
+    provider_type: Optional[str] = "Training Provider"
+    contact_email: Optional[str] = None
+    address: Optional[str] = None
+    ukprn: Optional[str] = None
+    jcq_centre_number: Optional[str] = None
 
 
 @asynccontextmanager
@@ -1262,6 +1278,68 @@ async def get_provider_status_api(verification_id: str):
         "uploaded_documents_count": len(provider.get("uploaded_documents", [])),
         "last_updated": datetime.now().isoformat(),
     }
+
+
+@app.post("/api/onboard")
+async def api_onboard_provider(request: Request, data: ProviderAPIRequest):
+    """RESTful API endpoint to run the onboarding KYC checks."""
+
+    verification_id = str(uuid.uuid4())
+
+    provider_data = data.dict()
+    provider_data["verification_id"] = verification_id
+
+    new_provider = {
+        "id": len(providers_db) + 1,
+        "verification_id": verification_id,
+        "organisation_name": provider_data["organisation_name"],
+        "trading_name": provider_data.get("trading_name"),
+        "provider_type": provider_data.get("provider_type", "Training Provider"),
+        "company_number": provider_data.get("company_number"),
+        "urn": provider_data.get("urn"),
+        "ukprn": provider_data.get("ukprn"),
+        "jcq_centre_number": provider_data.get("jcq_centre_number"),
+        "postcode": provider_data["postcode"],
+        "contact_email": provider_data.get("contact_email"),
+        "status": "processing",
+        "risk_level": "unknown",
+        "created_at": datetime.now().strftime("%Y-%m-%d %H:%M:%S"),
+        "kyc_results": {},
+        "processing_started": datetime.now().isoformat(),
+    }
+
+    providers_db.append(new_provider)
+    processing_queue[verification_id] = "started"
+
+    # Run the orchestration synchronously
+    await process_orchestrated_kyc(verification_id, provider_data)
+
+    provider = next(
+        (p for p in providers_db if p.get("verification_id") == verification_id),
+        None,
+    )
+
+    if not provider:
+        return JSONResponse(status_code=500, content={"error": "Processing failed"})
+
+    credential_url = str(
+        request.url_for("verifiable_credential_page", verification_id=verification_id)
+    )
+
+    response = {
+        "verification_id": verification_id,
+        "status": provider.get("status"),
+        "risk_score": provider.get("overall_risk_score"),
+        "credential_url": credential_url,
+    }
+
+    if provider.get("status") == "approved":
+        try:
+            response["credential"] = create_verifiable_credential(provider)
+        except Exception as exc:
+            response["credential_error"] = str(exc)
+
+    return response
 
 
 @app.get("/ukprn/validate/{ukprn}")
