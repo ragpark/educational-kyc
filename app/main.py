@@ -52,6 +52,7 @@ from app.vc_issue import create_verifiable_credential
 from app.vc_verify import verify_credential
 from app.qr_utils import generate_qr_code
 from app.pdf_utils import generate_credential_pdf
+from app.services.safeguarding_assessment import assess_safeguarding_policy
 from app.centre_submission import (
     CentreSubmission,
     ParentOrganisation,
@@ -406,14 +407,26 @@ async def upload_user_documents(request: Request, files: List[UploadFile] = File
                 if not chunk:
                     break
                 out.write(chunk)
-        assessment = await assess_safeguarding_document(path)
-        doc_info = {
-            "name": file.filename,
-            "stored_name": stored_name,
-            "uploaded_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
-            "assessment": assessment,
-        }
-        user_docs.append(doc_info)
+        assessment = None
+        assessment_rationale = None
+
+        if "safeguard" in filename.lower():
+            assessment_result = await assess_safeguarding_document(path)
+            if isinstance(assessment_result, tuple):
+                assessment, assessment_rationale = assessment_result
+            else:
+                assessment = assessment_result
+
+        user_docs.append(
+            {
+                "name": file.filename,
+                "stored_name": stored_name,
+                "uploaded_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                "assessment": assessment,
+                "assessment_rationale": assessment_rationale,
+            }
+        )
+
         saved.append(file.filename)
         assessments.append({"name": file.filename, "assessment": assessment})
 
