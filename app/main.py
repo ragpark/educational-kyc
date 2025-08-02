@@ -1429,8 +1429,9 @@ async def ofqual_search(
     The remaining filter parameters are accepted for future use.
     """
     client = OfqualAOSearchClient()
+
     # Always search qualifications for Pearson Education, filtering by title if provided
-    qualifications: List[Dict] = await client.search_qualifications(course=Title)
+
 
     return templates.TemplateResponse(
         "ofqual_search.html",
