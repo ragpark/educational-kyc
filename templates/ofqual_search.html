@@ -20,37 +20,6 @@
                     <input class="govuk-input js-searchfield " type="text" id="Num" maxlength="10" name="Num" value="{{ Num or '' }}">
                 </div>
 
-                <!-- Status radio buttons -->
-                <div class="govuk-form-group">
-                    <fieldset class="govuk-fieldset">
-                        <legend class="govuk-fieldset__legend govuk-fieldset__legend--s">
-                            <span class="govuk-fieldset__heading">
-                                Status
-                            </span>
-                        </legend>
-                        <div class="govuk-radios govuk-radios--small">
-                            <div class="govuk-radios__item">
-                                <label>
-                                    <input value="All" type="radio" class="govuk-radios__input" name="Status" {% if Status == 'All' or not Status %}checked="checked"{% endif %}>
-                                    <span class="govuk-label govuk-radios__label">All</span>
-                                </label>
-                            </div>
-                            <div class="govuk-radios__item">
-                                <label>
-                                    <input value="Approved" type="radio" class="govuk-radios__input" name="Status" {% if Status == 'Approved' %}checked="checked"{% endif %}>
-                                    <span class="govuk-label govuk-radios__label">Approved</span>
-                                </label>
-                            </div>
-                            <div class="govuk-radios__item">
-                                <label>
-                                    <input value="Archived" type="radio" class="govuk-radios__input" name="Status" {% if Status == 'Archived' %}checked="checked"{% endif %}>
-                                    <span class="govuk-label govuk-radios__label">Archived</span>
-                                </label>
-                            </div>
-                        </div>
-                    </fieldset>
-                </div>
-
                 <!-- Qualification offer -->
                 <!-- Additional filter fields omitted for brevity -->
 
@@ -63,37 +32,6 @@
 
     {% if organisations or qualifications %}
     <div class="space-y-10">
-        {% if organisations %}
-        <form method="get" action="/centre-submission">
-            <input type="hidden" name="course" value="{{ Title }}">
-            <input type="hidden" name="organisation_name" id="organisation_name">
-            <h3 class="text-xl font-semibold mb-2">Organisations</h3>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200 bg-white shadow rounded-lg overflow-hidden">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th></th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Recognition Number</th>
-                        </tr>
-                    </thead>
-                    <tbody class="divide-y divide-gray-200">
-                        {% for org in organisations %}
-                        <tr class="hover:bg-gray-50">
-                            <td class="px-4 py-2"><input type="radio" name="organisation_id" value="{{ org.recognitionNumber or org['recognitionNumber'] }}" data-org-name="{{ org.name or org['name'] }}" required></td>
-                            <td class="px-4 py-2">{{ org.name or org['name'] }}</td>
-                            <td class="px-4 py-2">{{ org.recognitionNumber or org['recognitionNumber'] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-4 text-right">
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md">Use Selected Organisation</button>
-            </div>
-        </form>
-        {% endif %}
-
         {% if qualifications %}
         <h3 class="text-xl font-semibold mb-2">Qualifications</h3>
         <div class="overflow-x-auto">
