@@ -73,7 +73,7 @@ async def assess_safeguarding_policy(path: str) -> Tuple[str, str]:
         system_prompt = (
             "You analyse learning centre safeguarding policy documents. "
             "Given a document, respond with the rating GREEN, AMBER, or RED on the first line "
-            "followed by two sentences explaining the rating with this criteria where GREEN	Specific, current (within 2 years), names a DSL, includes staff training, aligns with UK guidance for AMBER	Mostly relevant but missing elements (DSL, update date, references) and for RED	Outdated, No date or has expired, generic, non-specific, or missing entirely."
+            "followed by two sentences explaining the rating with this criteria where GREEN	Specific, current (within 2 years from today's date), names a DSL, includes staff training, aligns with UK guidance for AMBER	Mostly relevant but missing elements (DSL, update date, references) and for RED	Outdated, No date or the dates are in the past and has expired, generic, non-specific, or missing entirely."
         )
         try:
             response = await asyncio.to_thread(
