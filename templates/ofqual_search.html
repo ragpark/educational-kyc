@@ -4,28 +4,28 @@
 <div class="max-w-5xl mx-auto">
     <h2 class="text-2xl font-semibold text-gray-900 mb-4">Search Ofqual Register</h2>
     <form method="get" action="/ofqual/search">
-        <div class="govuk-grid-column-one-third govuk-!-margin-bottom-5">
+        <div >
             <div class="searchForm">
-                <h2 class="govuk-heading-m">Search ODQUAL</h2>
+                <h2>Search ODQUAL</h2>
 
                 <!-- Qualification title -->
                 <div class="govuk-form-group ">
-                    <label class="govuk-label govuk-!-font-weight-bold" for="Title">Qualification title</label>
-                    <input class="govuk-input js-searchfield " type="text" id="Title" maxlength="150" name="Title" value="{{ Title or '' }}">
+                    <label for="Title">Qualification title</label>
+                    <input type="text" id="Title" maxlength="150" name="Title" value="{{ Title or '' }}">
                 </div>
 
                 <!-- Qualification number -->
-                <div class="govuk-form-group ">
-                    <label class="govuk-label govuk-!-font-weight-bold" for="Num">Qualification number</label>
-                    <input class="govuk-input js-searchfield " type="text" id="Num" maxlength="10" name="Num" value="{{ Num or '' }}">
+                <div>
+                    <label for="Num">Qualification number</label>
+                    <input type="text" id="Num" maxlength="10" name="Num" value="{{ Num or '' }}">
                 </div>
 
                 <!-- Qualification offer -->
                 <!-- Additional filter fields omitted for brevity -->
 
-                <input class="govuk-button js-searchfield js-submit" type="submit" value="Search">
+                <input type="submit" value="Search">
                 <br>
-                <a class="govuk-link" href="/Search">Clear search</a>
+                <a href="/Search">Clear search</a>
             </div>
         </div>
     </form>
