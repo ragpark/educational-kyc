@@ -3,6 +3,10 @@ from __future__ import annotations
 import asyncio
 import os
 import re
+
+import logging
+
+
 from datetime import datetime
 from typing import Optional, Tuple
 
@@ -10,6 +14,12 @@ try:
     from openai import OpenAI
 except Exception:  # pragma: no cover - openai optional
     OpenAI = None  # type: ignore
+
+
+
+logger = logging.getLogger(__name__)
+
+
 
 
 def _extract_text(path: str) -> str:
@@ -56,6 +66,9 @@ async def assess_safeguarding_policy(path: str) -> Tuple[str, str]:
     api_key = os.getenv("OPENAI_API_KEY")
 
     if api_key and OpenAI:
+
+        logger.info("Assessing safeguarding policy using OpenAI LLM")
+
         client = OpenAI(api_key=api_key)
         system_prompt = (
             "You analyse learning centre safeguarding policy documents. "
@@ -78,12 +91,17 @@ async def assess_safeguarding_policy(path: str) -> Tuple[str, str]:
             rating_line = lines[0].strip().lower() if lines else ""
             rationale = " ".join(line.strip() for line in lines[1:]).strip()
             if "green" in rating_line:
+                logger.info("Safeguarding assessment generated via OpenAI: green")
                 return "green", rationale
             if "amber" in rating_line or "yellow" in rating_line:
+                logger.info("Safeguarding assessment generated via OpenAI: amber")
                 return "amber", rationale
             if "red" in rating_line:
+                logger.info("Safeguarding assessment generated via OpenAI: red")
                 return "red", rationale
-        except Exception:
-            pass
+        except Exception as exc:
+            logger.warning("OpenAI safeguarding assessment failed: %s", exc)
+
+    logger.info("Using heuristic safeguarding assessment")
 
     return _heuristic_classification(text)

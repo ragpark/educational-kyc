@@ -50,6 +50,7 @@
                     {% else %}
                     <span class="text-gray-400">N/A</span>
                     {% endif %}
+
                         {% if doc.assessment %}
                             {% set colour = 'bg-gray-300' %}
                             {% if doc.assessment == 'green' %}
@@ -65,6 +66,7 @@
                         {% else %}
                             <span class="text-gray-400">N/A</span>
                         {% endif %}
+
                 </td>
                 <td class="px-4 py-2 text-sm text-gray-700">
                     {{ doc.assessment_rationale or '' }}
