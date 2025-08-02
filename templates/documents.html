@@ -41,16 +41,6 @@
                 <td class="px-4 py-2 text-sm"><a href="/static/uploads/{{ doc.stored_name }}" class="text-blue-600 hover:underline">{{ doc.name }}</a></td>
                 <td class="px-4 py-2 text-sm text-gray-500">{{ doc.name.split('.')[-1].upper() }}</td>
                 <td class="px-4 py-2 text-sm">
-                    {% if doc.assessment == 'green' %}
-                    <span class="text-green-600 font-semibold">Green</span>
-                    {% elif doc.assessment == 'amber' %}
-                    <span class="text-yellow-600 font-semibold">Amber</span>
-                    {% elif doc.assessment == 'red' %}
-                    <span class="text-red-600 font-semibold">Red</span>
-                    {% else %}
-                    <span class="text-gray-400">N/A</span>
-                    {% endif %}
-
                         {% if doc.assessment %}
                             {% set colour = 'bg-gray-300' %}
                             {% if doc.assessment == 'green' %}
