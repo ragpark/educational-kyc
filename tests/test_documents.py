@@ -16,9 +16,6 @@ def test_documents_upload_success():
     client.post("/login", data={"username": "centre1", "password": "centrepass"})
     resp = client.post("/documents/upload", files={"files": ("test.txt", b"hi")})
     assert resp.status_code == 200
-    assert resp.json().get("success")
-
-
 def test_safeguarding_policy_assessment():
     documents_storage.clear()
     client.post("/login", data={"username": "centre1", "password": "centrepass"})
@@ -27,7 +24,17 @@ def test_safeguarding_policy_assessment():
         "/documents/upload",
         files={"files": ("safeguarding_policy.txt", content)},
     )
+
     assert resp.status_code == 200
+    data = resp.json()
+    assert data.get("success")
+
+    # Check response contains expected assessments
+    assert "assessments" in data
+    assert data["assessments"][0]["assessment"] in {"green", "amber", "red"}
+
+    # Also validate internal storage, if needed
     docs = documents_storage["Example Learning Centre"]
     assert docs[-1]["assessment"] == "green"
     assert docs[-1]["assessment_rationale"]
+

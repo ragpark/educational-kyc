@@ -50,10 +50,26 @@
                     {% else %}
                     <span class="text-gray-400">N/A</span>
                     {% endif %}
+                        {% if doc.assessment %}
+                            {% set colour = 'bg-gray-300' %}
+                            {% if doc.assessment == 'green' %}
+                                {% set colour = 'bg-green-600' %}
+                            {% elif doc.assessment == 'amber' %}
+                                {% set colour = 'bg-yellow-500' %}
+                            {% elif doc.assessment == 'red' %}
+                                {% set colour = 'bg-red-600' %}
+                            {% endif %}
+                            <span class="px-2 py-1 rounded text-white {{ colour }}">
+                                {{ doc.assessment|capitalize }}
+                            </span>
+                        {% else %}
+                            <span class="text-gray-400">N/A</span>
+                        {% endif %}
                 </td>
                 <td class="px-4 py-2 text-sm text-gray-700">
                     {{ doc.assessment_rationale or '' }}
                 </td>
+
                 <td class="px-4 py-2 text-center">
                     <a href="#" title="Attach to application" class="text-indigo-600 hover:text-indigo-900">
                         <svg xmlns="http://www.w3.org/2000/svg" class="h-5 w-5" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -117,7 +133,13 @@ document.getElementById('uploadForm').addEventListener('submit', function(e) {
         }
     };
     xhr.onload = function() {
-        document.getElementById('uploadResult').textContent = xhr.responseText;
+        try {
+            const resp = JSON.parse(xhr.responseText);
+            const msg = resp.assessments ? resp.assessments.map(a => `${a.name}: ${a.assessment}`).join(', ') : xhr.responseText;
+            document.getElementById('uploadResult').textContent = msg;
+        } catch (e) {
+            document.getElementById('uploadResult').textContent = xhr.responseText;
+        }
         document.getElementById('progressBar').style.width = '0';
         document.getElementById('progressText').textContent = '';
         document.getElementById('uploadForm').reset();

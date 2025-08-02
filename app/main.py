@@ -62,6 +62,7 @@ from app.centre_submission import (
     StaffMember,
     ComplianceDeclarations,
 )
+from app.services.safeguarding_assessor import assess_safeguarding_document
 
 # In-memory storage for demo
 providers_db = []
@@ -393,6 +394,7 @@ async def upload_user_documents(request: Request, files: List[UploadFile] = File
     os.makedirs(UPLOAD_DIR, exist_ok=True)
     user_docs = documents_storage.setdefault(user["name"], [])
     saved = []
+    assessments = []
     for file in files:
         if not file.filename:
             continue
@@ -407,8 +409,14 @@ async def upload_user_documents(request: Request, files: List[UploadFile] = File
                 out.write(chunk)
         assessment = None
         assessment_rationale = None
+
         if "safeguard" in filename.lower():
-            assessment, assessment_rationale = await assess_safeguarding_policy(path)
+            assessment_result = await assess_safeguarding_document(path)
+            if isinstance(assessment_result, tuple):
+                assessment, assessment_rationale = assessment_result
+            else:
+                assessment = assessment_result
+
         user_docs.append(
             {
                 "name": file.filename,
@@ -418,9 +426,11 @@ async def upload_user_documents(request: Request, files: List[UploadFile] = File
                 "assessment_rationale": assessment_rationale,
             }
         )
-        saved.append(file.filename)
 
-    return {"success": True, "files": saved}
+        saved.append(file.filename)
+        assessments.append({"name": file.filename, "assessment": assessment})
+
+    return {"success": True, "files": saved, "assessments": assessments}
 
 
 @app.get("/help", response_class=HTMLResponse)
