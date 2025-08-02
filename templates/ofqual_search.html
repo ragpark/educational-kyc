@@ -39,6 +39,7 @@
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Awarding organisation</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Number</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Availability</th>
                     </tr>
@@ -47,6 +48,7 @@
                     {% for qual in qualifications %}
                     <tr class="hover:bg-gray-50">
                         <td class="px-4 py-2">{{ qual.title or qual['title'] }}</td>
+                        <td class="px-4 py-2">{{ qual.awardingOrganisation or qual['awardingOrganisation'] }}</td>
                         <td class="px-4 py-2">{{ qual.qualificationNumber or qual['qualificationNumber'] }}</td>
                         <td class="px-4 py-2">{{ qual.availability or qual['availability'] }}</td>
                     </tr>
