@@ -58,13 +58,4 @@
     </div>
 
 </div>
-<script>
-    const radios = document.querySelectorAll('input[name="organisation_id"]');
-    const nameInput = document.getElementById('organisation_name');
-    radios.forEach(r => {
-        r.addEventListener('change', () => {
-            nameInput.value = r.dataset.orgName;
-        });
-    });
-</script>
 {% endblock %}
