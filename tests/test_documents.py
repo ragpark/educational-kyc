@@ -15,4 +15,8 @@ def test_documents_upload_success():
     client.post("/login", data={"username": "centre1", "password": "centrepass"})
     resp = client.post("/documents/upload", files={"files": ("test.txt", b"hi")})
     assert resp.status_code == 200
-    assert resp.json().get("success")
+    data = resp.json()
+    assert data.get("success")
+    # Should include an assessment for the uploaded file
+    assert "assessments" in data
+    assert data["assessments"][0]["assessment"] in {"green", "amber", "red"}
