@@ -1433,7 +1433,9 @@ async def ofqual_search(
     qualifications: List[Dict] = []
 
     if Title:
-        organisations = await client.search(course=Title)
+        # Always look up the Pearson Education awarding organisation and
+        # restrict qualifications to those available to learners
+        organisations = await client.search()
         qualifications = await client.search_qualifications(course=Title)
 
     return templates.TemplateResponse(

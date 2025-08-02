@@ -22,8 +22,8 @@ class OfqualAOSearchClient:
         limit: int = 50,
     ) -> List[Dict]:
         """Return a list of awarding organisations matching the query."""
-        #search_terms = " ".join(filter(None, [subject or course, location]))
-        search_terms = "Pearson"
+        # Only search for the Pearson Education awarding organisation
+        search_terms = "Pearson Education"
         params = {"search": search_terms, "page": page, "limit": limit}
 
         headers = {}
@@ -53,7 +53,13 @@ class OfqualAOSearchClient:
     ) -> List[Dict]:
         """Return a list of qualifications matching the query."""
         search_terms = " ".join(filter(None, [course, location]))
-        params = {"search": search_terms, "page": page, "limit": limit}
+        params = {
+            "search": search_terms,
+            "page": page,
+            "limit": limit,
+            "awardingOrganisations": "Pearson Education",
+            "availability": "Available to learners",
+        }
 
         headers = {}
         if self.api_key:
