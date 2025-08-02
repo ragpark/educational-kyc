@@ -18,6 +18,7 @@ import asyncio
 import uuid
 import aiohttp
 import requests
+import logging
 
 
 def secure_filename(filename: str) -> str:
@@ -52,6 +53,7 @@ from app.vc_issue import create_verifiable_credential
 from app.vc_verify import verify_credential
 from app.qr_utils import generate_qr_code
 from app.pdf_utils import generate_credential_pdf
+from app.services.safeguarding_assessment import assess_safeguarding_policy
 from app.centre_submission import (
     CentreSubmission,
     ParentOrganisation,
@@ -71,6 +73,10 @@ processing_queue = {}
 documents_storage: Dict[str, List[Dict]] = {}
 # Directory to store uploaded files
 UPLOAD_DIR = os.path.join("app", "static", "uploads")
+
+# Logging configuration
+logging.basicConfig(level=logging.INFO)
+logger = logging.getLogger(__name__)
 
 # MCP wrapper instance (created during startup)
 mcp_wrapper: KYCContextSource | None = None
@@ -377,6 +383,11 @@ async def documents(request: Request):
     if not user:
         return RedirectResponse("/login", status_code=302)
     user_docs = documents_storage.get(user["name"], [])
+    logger.info(
+        "Rendering documents page for %s with %d documents",
+        user["name"],
+        len(user_docs),
+    )
     return templates.TemplateResponse(
         "documents.html", {"request": request, "user": user, "documents": user_docs}
     )
@@ -404,11 +415,19 @@ async def upload_user_documents(request: Request, files: List[UploadFile] = File
                 if not chunk:
                     break
                 out.write(chunk)
+        assessment = None
+        assessment_rationale = None
+        if "safeguard" in filename.lower():
+            logger.info("Assessing safeguarding policy for %s", filename)
+            assessment, assessment_rationale = await assess_safeguarding_policy(path)
+            logger.info("Assessment result for %s: %s", filename, assessment)
         user_docs.append(
             {
                 "name": file.filename,
                 "stored_name": stored_name,
                 "uploaded_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+                "assessment": assessment,
+                "assessment_rationale": assessment_rationale,
             }
         )
         saved.append(file.filename)
