@@ -34,7 +34,7 @@ async def assess_image_relevance(path: str) -> ImageAssessment:
         data_url = f"data:{mime_type};base64,{b64_img}"
 
         prompt = (
-            "Is this image relevant to a college teaching or learning environment? "
+            "Assess if this image shows a school or college teaching environment? The room and facilities can show learners or not, but the image should represent a room or laboraory or lecture theatre to be assessed as GREEN, otherwise return as RED."
             "Respond with one word: GREEN if relevant, RED if not."
         )
         client = OpenAI(api_key=api_key)
