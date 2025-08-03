@@ -61,70 +61,30 @@
         </div>
     </form>
 
-    {% if organisations or qualifications %}
+    {% if qualifications %}
     <div class="space-y-10">
-        {% if organisations %}
-        <form method="get" action="/centre-submission">
-            <input type="hidden" name="course" value="{{ Title }}">
-            <input type="hidden" name="organisation_name" id="organisation_name">
-            <h3 class="text-xl font-semibold mb-2">Organisations</h3>
-            <div class="overflow-x-auto">
-                <table class="min-w-full divide-y divide-gray-200">
-                    <thead class="bg-gray-50">
-                        <tr>
-                            <th></th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Name</th>
-                            <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Recognition Number</th>
-                        </tr>
-                    </thead>
-                    <tbody class="bg-white divide-y divide-gray-200">
-                        {% for org in organisations %}
-                        <tr>
-                            <td class="px-4 py-2"><input type="radio" name="organisation_id" value="{{ org.recognitionNumber or org['recognitionNumber'] }}" data-org-name="{{ org.name or org['name'] }}" required></td>
-                            <td class="px-4 py-2">{{ org.name or org['name'] }}</td>
-                            <td class="px-4 py-2">{{ org.recognitionNumber or org['recognitionNumber'] }}</td>
-                        </tr>
-                        {% endfor %}
-                    </tbody>
-                </table>
-            </div>
-            <div class="mt-4 text-right">
-                <button type="submit" class="bg-blue-600 text-white px-4 py-2 rounded-md">Use Selected Organisation</button>
-            </div>
-        </form>
-        {% endif %}
-
-        {% if qualifications %}
         <h3 class="text-xl font-semibold mb-2">Qualifications</h3>
         <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200">
+            <table class="min-w-full divide-y divide-gray-200 bg-white shadow rounded-lg overflow-hidden">
                 <thead class="bg-gray-50">
                     <tr>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
                         <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Number</th>
+                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Availability</th>
                     </tr>
                 </thead>
-                <tbody class="bg-white divide-y divide-gray-200">
+                <tbody class="divide-y divide-gray-200">
                     {% for qual in qualifications %}
-                    <tr>
+                    <tr class="hover:bg-gray-50">
                         <td class="px-4 py-2">{{ qual.title or qual['title'] }}</td>
                         <td class="px-4 py-2">{{ qual.qualificationNumber or qual['qualificationNumber'] }}</td>
+                        <td class="px-4 py-2">{{ qual.availability or qual['availability'] }}</td>
                     </tr>
                     {% endfor %}
                 </tbody>
             </table>
         </div>
-        {% endif %}
     </div>
     {% endif %}
 </div>
-<script>
-    const radios = document.querySelectorAll('input[name="organisation_id"]');
-    const nameInput = document.getElementById('organisation_name');
-    radios.forEach(r => {
-        r.addEventListener('change', () => {
-            nameInput.value = r.dataset.orgName;
-        });
-    });
-</script>
 {% endblock %}

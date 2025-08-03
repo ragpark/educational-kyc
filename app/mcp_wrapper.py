@@ -73,18 +73,6 @@ class KYCContextSource:
         """Fetch verification status for a given ID."""
         return await self._get(f"/verification/{verification_id}")
 
-    async def search_awarding_orgs(
-        self, *, subject: Optional[str] = None, course: Optional[str] = None
-    ) -> MCPDocument:
-        params = []
-        if subject:
-            params.append(f"subject={subject}")
-        if course:
-            params.append(f"course={course}")
-        query = "&".join(params)
-        path = f"/ofqual/awarding-organisations?{query}" if query else "/ofqual/awarding-organisations"
-        return await self._get(path)
-
     async def ofqual_search(
         self, *, course: Optional[str] = None, location: Optional[str] = None
     ) -> MCPDocument:
