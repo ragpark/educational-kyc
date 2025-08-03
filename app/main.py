@@ -1399,22 +1399,16 @@ async def validate_ukprn_endpoint(ukprn: str):
 
 
 @app.get("/ofqual/search", response_class=HTMLResponse)
-async def ofqual_search(
-    request: Request,
-    Title: Optional[str] = None,
-    Num: Optional[str] = None,
-    Status: Optional[str] = None,
-):
+async def ofqual_search(request: Request, Title: Optional[str] = None):
     """Search the Ofqual Register for qualifications.
 
-    Only the qualification title field is currently used to query the Ofqual
-    API. The remaining filter parameters are accepted for future use.
+    The query is limited to Pearson Education qualifications that are
+    available to learners.
     """
     client = OfqualQualificationsClient()
     qualifications: List[Dict] = []
 
     if Title:
-        # Restrict qualifications to Pearson Education and those available to learners
         qualifications = await client.search(course=Title)
 
     return templates.TemplateResponse(
@@ -1422,8 +1416,6 @@ async def ofqual_search(
         {
             "request": request,
             "Title": Title,
-            "Num": Num,
-            "Status": Status,
             "qualifications": qualifications,
         },
     )
