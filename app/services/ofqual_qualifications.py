@@ -31,7 +31,7 @@ class OfqualQualificationsClient:
             "search": search_terms,
             "page": page,
             "limit": limit,
-            "awardingOrganisations": "Pearson Education",
+            "Organisations": "Pearson Education",
             "availability": "Available to learners",
         }
 
