@@ -1,12 +1,8 @@
 from __future__ import annotations
-
 import asyncio
 import os
 import re
-
 import logging
-
-
 from datetime import datetime
 from typing import Optional, Tuple
 
@@ -14,8 +10,6 @@ try:
     from openai import OpenAI
 except Exception:  # pragma: no cover - openai optional
     OpenAI = None  # type: ignore
-
-
 
 logger = logging.getLogger(__name__)
 
@@ -25,7 +19,7 @@ logger = logging.getLogger(__name__)
 def _extract_text(path: str) -> str:
     """Return best-effort text extraction from the uploaded file."""
     try:
-        with open(path, "r", encoding="utf-8", errors="ignore") as f:
+        with open(path, "r",  errors="ignore") as f:
             return f.read()
     except Exception:
         return ""
@@ -66,14 +60,10 @@ async def assess_safeguarding_policy(path: str) -> Tuple[str, str]:
     api_key = os.getenv("OPENAI_API_KEY")
 
     if api_key and OpenAI:
-
         logger.info("Assessing safeguarding policy using OpenAI LLM")
-
         client = OpenAI(api_key=api_key)
         system_prompt = (
-            "You analyse learning centre safeguarding policy documents. "
-            "Given a document, respond with the rating GREEN, AMBER, or RED on the first line "
-            "followed by two sentences explaining the rating with this criteria where GREEN	Specific, current (within 2 years from today's date), names a DSL, includes staff training, aligns with UK guidance for AMBER	Mostly relevant but missing elements (DSL, update date, references) and for RED	Outdated, No date or the dates are in the past and has expired, generic, non-specific, or missing entirely."
+            "Analyse the text from the perspective of a learning centre's safeguarding policy documents. Given the text, respond with the rating GREEN, AMBER, or RED on the first line followed by two sentences explaining the rating with this criteria where GREEN indicates specific safeguarding text, it is current (within 2 years from today's date), names a DSL, includes staff training, aligns with UK guidance for AMBER	Mostly relevant but it has missing elements (DSL, update date, references) and mark as RED if the text is Outdated, No date or the dates are in the past and has expired, also mark as RED if the content is generic, non-specific, or missing entirely."
         )
         try:
             response = await asyncio.to_thread(
