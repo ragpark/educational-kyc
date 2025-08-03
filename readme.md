@@ -69,19 +69,19 @@ database using SQLAlchemy. Dataclasses in `app/models.py` define the schema for
 
 ### Example: Awarding Organisation Search
 
-Use the built-in client to retrieve awarding organisations for a given subject
+Use the built-in client to retrieve qualifications for a given subject
 and course.
 
 ```python
 import asyncio
-from app.services.ofqual_awarding_orgs import OfqualAOSearchClient
+from app.services.ofqual_qualifications import OfqualQualificationsClient
 
 
 async def demo():
-    client = OfqualAOSearchClient()
-    results = await client.search(subject="history", course="gcse")
-    for org in results:
-        print(org.get("name", org))
+    client = OfqualQualificationsClient()
+    results = await client.search(course="history gcse")
+    for qual in results:
+        print(qual.get("title", qual))
 
 
 asyncio.run(demo())
@@ -109,23 +109,21 @@ The JSON payload contains the raw content and context information returned by
 Alternatively you can call the FastAPI endpoint directly:
 
 ```
-GET /ofqual/awarding-organisations?subject=history&course=gcse
+GET /ofqual/search?Title=history%20gcse
 ```
 
 ### Example: Ofqual Register Search
 
-You can search both organisations and qualifications by course and location using `OfqualAOSearchClient`:
+You can search qualifications by course and location using `OfqualQualificationsClient`:
 
 ```python
 import asyncio
-from app.services.ofqual_awarding_orgs import OfqualAOSearchClient
+from app.services.ofqual_qualifications import OfqualQualificationsClient
 
 
 async def demo():
-    client = OfqualAOSearchClient()
-    organisations = await client.search(course="maths", location="london")
-    qualifications = await client.search_qualifications(course="maths", location="london")
-    print("Organisations:", len(organisations))
+    client = OfqualQualificationsClient()
+    qualifications = await client.search(course="maths", location="london")
     print("Qualifications:", len(qualifications))
 
 asyncio.run(demo())
@@ -155,8 +153,8 @@ async def demo():
     health = await source.health()
     print("Health status:", health.content)
 
-    orgs = await source.search_awarding_orgs(subject="maths")
-    print(orgs.content)
+    quals = await source.ofqual_search(course="maths")
+    print(quals.content)
 
     onboarding = await source.onboard_provider(
         {
