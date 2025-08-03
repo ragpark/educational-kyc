@@ -15,7 +15,6 @@ logger = logging.getLogger(__name__)
 
 async def assess_image_relevance(path: str) -> ImageAssessment:
     """Assess whether an image is relevant to a teaching environment.
-
     Uses a vision-capable model and returns GREEN, AMBER or RED. Defaults to RED
     if the model or API is unavailable.
     """
@@ -27,6 +26,9 @@ async def assess_image_relevance(path: str) -> ImageAssessment:
         with open(path, "rb") as f:
             img_bytes = f.read()
         b64_img = base64.b64encode(img_bytes).decode("ascii")
+
+      
+        # Detect MIME type for proper data URL format
         mime_type, _ = mimetypes.guess_type(path)
         mime_type = mime_type or "image/png"
         data_url = f"data:{mime_type};base64,{b64_img}"
@@ -47,9 +49,11 @@ async def assess_image_relevance(path: str) -> ImageAssessment:
                     ],
                 }
             ],
+
             # The Responses API requires at least 16 tokens; keep the cap low
             # while satisfying the minimum to avoid 400 errors.
             max_output_tokens=16,
+
         )
         result = resp.output_text.strip().lower()
         if result.startswith("green"):
@@ -60,3 +64,4 @@ async def assess_image_relevance(path: str) -> ImageAssessment:
     except Exception as exc:  # pragma: no cover - external API may fail
         logger.warning("Image assessment failed: %s", exc)
         return "red"
+
