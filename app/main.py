@@ -54,6 +54,7 @@ from app.vc_verify import verify_credential
 from app.qr_utils import generate_qr_code
 from app.pdf_utils import generate_credential_pdf
 from app.services.safeguarding_assessment import assess_safeguarding_policy
+from app.services.image_relevance import assess_image_relevance
 from app.centre_submission import (
     CentreSubmission,
     ParentOrganisation,
@@ -419,10 +420,16 @@ async def upload_user_documents(request: Request, files: List[UploadFile] = File
                 out.write(chunk)
         assessment = None
         assessment_rationale = None
+        image_relevance = None
         if "safeguard" in filename.lower():
             logger.info("Assessing safeguarding policy for %s", filename)
             assessment, assessment_rationale = await assess_safeguarding_policy(path)
             logger.info("Assessment result for %s: %s", filename, assessment)
+
+        if (file.content_type or "").startswith("image/"):
+            logger.info("Assessing image relevance for %s", filename)
+            image_relevance = await assess_image_relevance(path)
+            logger.info("Image assessment result for %s: %s", filename, image_relevance)
 
         user_docs.append(
             {
@@ -431,13 +438,38 @@ async def upload_user_documents(request: Request, files: List[UploadFile] = File
                 "uploaded_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
                 "assessment": assessment,
                 "assessment_rationale": assessment_rationale,
+                "image_relevance": image_relevance,
             }
         )
 
         saved.append(file.filename)
-        assessments.append({"name": file.filename, "assessment": assessment})
+        assessments.append(
+            {
+                "name": file.filename,
+                "assessment": assessment,
+                "image_relevance": image_relevance,
+            }
+        )
 
     return {"success": True, "files": saved, "assessments": assessments}
+
+
+@app.post("/documents/{doc_id}/classify")
+async def override_image_classification(
+    request: Request, doc_id: int, classification: str = Form(...)
+):
+    """Allow manual override of image relevance classification."""
+    user = get_current_user(request)
+    if not user:
+        return JSONResponse({"error": "Unauthorized"}, status_code=401)
+    docs = documents_storage.get(user["name"], [])
+    if 0 <= doc_id < len(docs):
+        docs[doc_id]["image_relevance"] = classification
+        logger.info(
+            "Image relevance for %s set to %s", docs[doc_id]["name"], classification
+        )
+        return RedirectResponse("/documents", status_code=303)
+    return JSONResponse({"error": "Not found"}, status_code=404)
 
 
 @app.get("/help", response_class=HTMLResponse)
