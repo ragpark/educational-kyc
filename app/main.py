@@ -33,7 +33,7 @@ def secure_filename(filename: str) -> str:
 from app.mcp_wrapper import KYCContextSource
 
 # Ofqual awarding organisation search
-from app.services.ofqual_awarding_orgs import OfqualAOSearchClient
+from app.services.ofqual_qualifications import OfqualQualificationsClient
 
 # Import the enhanced Companies House service (for quick checks)
 from app.services.companies_house_enhanced import (
@@ -1398,52 +1398,24 @@ async def validate_ukprn_endpoint(ukprn: str):
         return {"valid": False, "ukprn": ukprn, "error": f"Validation failed: {str(e)}"}
 
 
-@app.get("/ofqual/awarding-organisations", response_class=HTMLResponse)
-async def search_awarding_organisations(
-    request: Request, subject: Optional[str] = None, course: Optional[str] = None
-):
-    """Retrieve awarding organisations from Ofqual based on subject or course."""
-    client = OfqualAOSearchClient()
-    organisations = await client.search(subject=subject, course=course)
-    return templates.TemplateResponse(
-        "awarding_organisations.html",
-        {
-            "request": request,
-            "organisations": organisations,
-            "subject": subject,
-            "course": course,
-        },
-    )
-
-
 @app.get("/ofqual/search", response_class=HTMLResponse)
-async def ofqual_search(
-    request: Request,
-    Title: Optional[str] = None,
-    Num: Optional[str] = None,
-    Status: Optional[str] = None,
-):
-    """Search the Ofqual Register for organisations and qualifications.
+async def ofqual_search(request: Request, Title: Optional[str] = None):
+    """Search the Ofqual Register for qualifications.
 
-    Only the qualification title field is currently used to query the Ofqual API.
-    The remaining filter parameters are accepted for future use.
+    The query is limited to Pearson Education qualifications that are
+    available to learners.
     """
-    client = OfqualAOSearchClient()
-    organisations: List[Dict] = []
+    client = OfqualQualificationsClient()
     qualifications: List[Dict] = []
 
     if Title:
-        organisations = await client.search(course=Title)
-        qualifications = await client.search_qualifications(course=Title)
+        qualifications = await client.search(course=Title)
 
     return templates.TemplateResponse(
         "ofqual_search.html",
         {
             "request": request,
             "Title": Title,
-            "Num": Num,
-            "Status": Status,
-            "organisations": organisations,
             "qualifications": qualifications,
         },
     )
