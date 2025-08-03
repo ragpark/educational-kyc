@@ -68,6 +68,8 @@ from app.services.safeguarding_assessor import assess_safeguarding_document
 
 # In-memory storage for demo
 providers_db = []
+# Simplistic in-memory storage for qualification applications
+applications_db: List[Dict] = []
 centre_submissions: List[CentreSubmission] = []
 processing_queue = {}
 
@@ -325,8 +327,8 @@ async def applications(request: Request):
             {"request": request, "message": "Access restricted to learning providers"},
         )
     return templates.TemplateResponse(
-        "provider_dashboard.html",
-        {"request": request, "provider": None, "user": user},
+        "applications.html",
+        {"request": request, "applications": applications_db, "user": user},
     )
 
 
@@ -573,25 +575,29 @@ async def submit_centre_submission(request: Request):
 @app.post("/onboard")
 async def onboard_provider(request: Request, background_tasks: BackgroundTasks):
     """Process provider onboarding with orchestrated verification"""
-    form_data = await request.form()
+    # Support JSON payloads in addition to standard form submissions
+    if request.headers.get("content-type", "").startswith("application/json"):
+        incoming = await request.json()
+    else:
+        incoming = await request.form()
 
     verification_id = str(uuid.uuid4())
 
     provider_data = {
         "verification_id": verification_id,
-        "organisation_name": form_data.get("organisation_name"),
-        "trading_name": form_data.get("trading_name"),
-        "provider_type": form_data.get("provider_type"),
-        "company_number": form_data.get("company_number"),
-        "urn": form_data.get("urn"),  # Ofsted URN - now mandatory
-        "ukprn": form_data.get("ukprn"),  # UKPRN - now optional
-        "jcq_centre_number": form_data.get("jcq_centre_number"),
-        "postcode": form_data.get("postcode"),
-        "contact_email": form_data.get("contact_email"),
-        "address": form_data.get("address"),
+        "organisation_name": incoming.get("organisation_name"),
+        "trading_name": incoming.get("trading_name"),
+        "provider_type": incoming.get("provider_type"),
+        "company_number": incoming.get("company_number"),
+        "urn": incoming.get("urn"),  # Ofsted URN - now mandatory
+        "ukprn": incoming.get("ukprn"),  # UKPRN - now optional
+        "jcq_centre_number": incoming.get("jcq_centre_number"),
+        "postcode": incoming.get("postcode"),
+        "contact_email": incoming.get("contact_email"),
+        "address": incoming.get("address"),
         "qualifications_offered": (
-            form_data.get("qualifications_offered", "").split(",")
-            if form_data.get("qualifications_offered")
+            incoming.get("qualifications_offered", "").split(",")
+            if incoming.get("qualifications_offered")
             else []
         ),
     }
@@ -616,6 +622,22 @@ async def onboard_provider(request: Request, background_tasks: BackgroundTasks):
     }
 
     providers_db.append(new_provider)
+    # Also capture a corresponding qualification application entry
+    applications_db.append(
+        {
+            "id": len(applications_db) + 1,
+            "provider_organisation": provider_data["organisation_name"],
+            "postcode": provider_data.get("postcode"),
+            "provider_type": provider_data.get("provider_type"),
+            "company_number": provider_data.get("company_number"),
+            "urn": provider_data.get("urn"),
+            "awarding_organisation": "Pearson",
+            "rn": "RN153",
+            "qualification_number": "601/1234/X",
+            "qualification_title": "Level 3 Diploma in Childcare",
+            "status": "Pending",
+        }
+    )
     processing_queue[verification_id] = "started"
 
     # Start orchestrated KYC verification
