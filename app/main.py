@@ -1496,7 +1496,7 @@ async def ofqual_search(
             "Title": Title,
             "Num": Num,
             "Status": Status,
-            "qualifications": qualifications,
+            "qualifications": "BTEC",
         },
     )
 
