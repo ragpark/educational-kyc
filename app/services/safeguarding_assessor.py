@@ -35,9 +35,7 @@ async def assess_safeguarding_document(path: str) -> Assessment:
     try:
         client = OpenAI(api_key=api_key)
         prompt = (
-            "You are verifying a learning centre's safeguarding policy. "
-            "Consider if the document is relevant, complete and dated within the last two years. Apply GREEN when theSpecific, current (within 2 years), names a DSL, includes staff training, aligns with UK guidance, assign AMBER	Mostly relevant but missing elements (DSL, update date, references) and assign RED	if the text is Outdated and has expired, generic, non-specific, or missing entirely. "
-            "Respond with a single word: Green (good), Amber (partial), or Red (poor).\n\n"
+            "Analyse the text from the perspective of a learning centre's safeguarding policy documents. Be critical as the standard for green should be high. when assessing the text, respond with the rating GREEN, AMBER, or RED on the first line followed by two sentences explaining the rating with this criteria. The criteria is where GREEN indicates specific sand comprehensive safeguarding text spanning more than a couple of sentences, it is current (within 2 years from today's date), names a DSL, includes staff training, aligns with UK guidance for AMBER	if the content is mostly relevant but if it has missing elements (DSL, update dates, references) then mark as AMBER. Mark as RED if the text is Outdated, No date or the dates are in the past and has expired, also mark as RED if the content is generic, non-specific, or missing entirely"
             f"Document text:\n{text[:5000]}"
         )
         resp = client.responses.create(
