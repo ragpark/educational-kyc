@@ -2,62 +2,33 @@
 {% block title %}Ofqual Search{% endblock %}
 {% block content %}
 <div class="max-w-5xl mx-auto">
-    <h2 class="text-2xl font-semibold text-gray-900 mb-4">Search Ofqual Register</h2>
-    <form method="get" action="/ofqual/search">
-        <div >
-            <div class="searchForm">
-                <h2>Search ODQUAL</h2>
-
-                <!-- Qualification title -->
-                <div class="govuk-form-group ">
-                    <label for="Title">Qualification title</label>
-                    <input type="text" id="Title" maxlength="150" name="Title" value="{{ Title or '' }}">
-                </div>
-
-                <!-- Qualification number -->
-                <div>
-                    <label for="Num">Qualification number</label>
-                    <input type="text" id="Num" maxlength="10" name="Num" value="{{ Num or '' }}">
-                </div>
-
-                <!-- Qualification offer -->
-                <!-- Additional filter fields omitted for brevity -->
-
-                <input type="submit" value="Search">
-                <br>
-                <a href="/Search">Clear search</a>
-            </div>
-        </div>
-    </form>
-
-
-    <div class="space-y-10">
-
-        <h3 class="text-xl font-semibold mb-2">Qualifications</h3>
-        <div class="overflow-x-auto">
-            <table class="min-w-full divide-y divide-gray-200 bg-white shadow rounded-lg overflow-hidden">
-                <thead class="bg-gray-50">
-                    <tr>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Awarding organisation</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Number</th>
-                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Availability</th>
-                    </tr>
-                </thead>
-                <tbody class="divide-y divide-gray-200">
-                    {% for qual in qualifications %}
-                    <tr class="hover:bg-gray-50">
-                        <td class="px-4 py-2">{{ qual.title or qual['title'] }}</td>
-                        <td class="px-4 py-2">{{ qual.awardingOrganisation or qual['awardingOrganisation'] }}</td>
-                        <td class="px-4 py-2">{{ qual.qualificationNumber or qual['qualificationNumber'] }}</td>
-                        <td class="px-4 py-2">{{ qual.availability or qual['availability'] }}</td>
-                    </tr>
-                    {% endfor %}
-                </tbody>
-            </table>
-        </div>
-
-    </div>
+   <h2 class="text-2xl font-semibold text-gray-900 mb-4">Search Ofqual Qualifications</h2>
+  <form method="get" action="/ofqual/search" class="mb-8 flex gap-2">
+    <input class="govuk-input flex-1" type="text" id="Title" name="Title" placeholder="Qualification title" value="{{ Title or '' }}">
+    <button class="govuk-button" type="submit">Search</button>
+  </form>
+  {% if qualifications %}
+  <div class="overflow-x-auto">
+    <table class="min-w-full divide-y divide-gray-200 bg-white shadow rounded-lg overflow-hidden">
+      <thead class="bg-gray-50">
+        <tr>
+          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Title</th>
+          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Number</th>
+          <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Availability</th>
+        </tr>
+      </thead>
+      <tbody class="divide-y divide-gray-200">
+        {% for qual in qualifications %}
+        <tr class="hover:bg-gray-50">
+          <td class="px-4 py-2">{{ qual.title or qual['title'] }}</td>
+          <td class="px-4 py-2">{{ qual.qualificationNumber or qual['qualificationNumber'] }}</td>
+          <td class="px-4 py-2">{{ qual.availability or qual['availability'] }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+  </div>
+  {% endif %}
 
 </div>
 {% endblock %}
