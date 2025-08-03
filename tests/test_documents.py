@@ -4,14 +4,12 @@ from fastapi.testclient import TestClient
 from app.main import app, documents_storage
 from datetime import datetime
 
-
 client = TestClient(app)
 
 def test_documents_upload_requires_auth():
     documents_storage.clear()
     resp = client.post("/documents/upload", files={"files": ("test.txt", b"hi")})
     assert resp.status_code == 401
-
 
 def test_documents_upload_success():
     documents_storage.clear()

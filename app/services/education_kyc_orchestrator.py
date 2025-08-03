@@ -80,7 +80,6 @@ class UKEducationalKYCOrchestrator:
             "ofsted_rating",
             "esfa_funding_status",
             "qualification_validation",
-            "safeguarding_assessment",
             "financial_stability",
             "sanctions_screening",
             "risk_assessment"
