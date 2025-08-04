@@ -571,6 +571,18 @@ async def submit_centre_submission(request: Request):
 
     centre_submissions.append(submission)
 
+    # Add entry to applications list for display on /applications page
+    applications_db.append(
+        {
+            "id": len(applications_db) + 1,
+            "awarding_organisation": form.get("ao_name"),
+            "rn": form.get("ao_id"),
+            "qualification_number": form.get("qualification_id"),
+            "qualification_title": form.get("title"),
+            "status": "Pending",
+        }
+    )
+
     return templates.TemplateResponse(
         "centre_submission_success.html", {"request": request, "submission": submission}
     )
@@ -626,22 +638,7 @@ async def onboard_provider(request: Request, background_tasks: BackgroundTasks):
     }
 
     providers_db.append(new_provider)
-    # Also capture a corresponding qualification application entry
-    applications_db.append(
-        {
-            "id": len(applications_db) + 1,
-            "provider_organisation": provider_data["organisation_name"],
-            "postcode": provider_data.get("postcode"),
-            "provider_type": provider_data.get("provider_type"),
-            "company_number": provider_data.get("company_number"),
-            "urn": provider_data.get("urn"),
-            "awarding_organisation": "Pearson",
-            "rn": "RN153",
-            "qualification_number": "601/1234/X",
-            "qualification_title": "Level 3 Diploma in Childcare",
-            "status": "Pending",
-        }
-    )
+    # Application entries now originate from centre submissions
     processing_queue[verification_id] = "started"
 
     # Start orchestrated KYC verification
