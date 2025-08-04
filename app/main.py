@@ -529,6 +529,12 @@ async def override_image_classification(
     return JSONResponse({"error": "Not found"}, status_code=404)
 
 
+@app.get("/about", response_class=HTMLResponse)
+async def about_page(request: Request):
+    """Informational page about the service"""
+    return templates.TemplateResponse("about.html", {"request": request})
+
+
 @app.get("/help", response_class=HTMLResponse)
 async def help_page(request: Request):
     """Help and support page"""
