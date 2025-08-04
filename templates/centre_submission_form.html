@@ -21,17 +21,18 @@
             <h3 class="text-lg font-semibold text-gray-900 mb-4">Qualification Requested</h3>
             <a href="/ofqual/search" class="text-sm text-blue-600 underline">Search Ofqual Register</a>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="qualification_id">Qualification ID</label>
-                    <input type="text" id="qualification_id" name="qualification_id" value="{{ qualification_id or '' }}" required class="w-full border border-gray-300 rounded-md px-3 py-2">
-                </div>
+                    <label class="block text-sm font-medium text-gray-700 mb-2" for="ao_name">Awarding Org Name</label>
+                    <input type="text" id="ao_name" name="ao_name" value="{{ organisation_name or '' }}" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+                </div>                
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2" for="ao_id">Awarding Org ID</label>
                     <input type="text" id="ao_id" name="ao_id" value="{{ organisation_id or '' }}" required class="w-full border border-gray-300 rounded-md px-3 py-2">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="ao_name">Awarding Org Name</label>
-                    <input type="text" id="ao_name" name="ao_name" value="{{ organisation_name or '' }}" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    <label class="block text-sm font-medium text-gray-700 mb-2" for="qualification_id">Qualification ID</label>
+                    <input type="text" id="qualification_id" name="qualification_id" value="{{ qualification_id or '' }}" required class="w-full border border-gray-300 rounded-md px-3 py-2">
                 </div>
                 <div>
                     <label class="block text-sm font-medium text-gray-700 mb-2" for="title">Qualification Title</label>
