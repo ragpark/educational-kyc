@@ -1,1 +1,660 @@
+{% extends "base.html" %}
+{% block title %}About this site{% endblock %}
+{% block content %}
 
+
+    <script>
+        function scrollToSection(id) {
+            document.getElementById(id).scrollIntoView({ behavior: 'smooth' });
+        }
+        
+        function toggleSection(id) {
+            const section = document.getElementById(id);
+            const icon = document.querySelector(`[data-icon="${id}"]`);
+            if (section.classList.contains('hidden')) {
+                section.classList.remove('hidden');
+                icon.textContent = '−';
+            } else {
+                section.classList.add('hidden');
+                icon.textContent = '+';
+            }
+        }
+    </script>
+
+    <!-- Header -->
+    <header class="bg-blue-900 text-white shadow-lg">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-6">
+            <div class="flex items-center space-x-3">
+                <div class="bg-blue-700 p-2 rounded-lg">
+                    <svg class="w-8 h-8" fill="currentColor" viewBox="0 0 20 20">
+                        <path d="M10.394 2.08a1 1 0 00-.788 0l-7 3a1 1 0 000 1.84L5.25 8.051a.999.999 0 01.356-.257l4-1.714a1 1 0 11.788 1.84L7.667 9.088l1.94.831a1 1 0 00.787 0l7-3a1 1 0 000-1.84l-7-3zM3.31 9.397L5 10.12v4.102a8.969 8.969 0 00-1.05-.174 1 1 0 01-.89-.89 11.115 11.115 0 01.25-3.762zM9.3 16.573A9.026 9.026 0 007 14.935v-3.957l1.818.78a3 3 0 002.364 0l5.508-2.361a11.026 11.026 0 01.25 3.762 1 1 0 01-.89.89 8.968 8.968 0 00-5.35 2.524 1 1 0 01-1.4 0zM6 18a1 1 0 001-1v-2.065a8.935 8.935 0 00-2-.712V17a1 1 0 001 1z"/>
+                    </svg>
+                </div>
+                <div>
+                    <h1 class="text-3xl font-bold">Educational KYC</h1>
+                    <p class="text-blue-200">Help Guide for New Users</p>
+                </div>
+            </div>
+        </div>
+    </header>
+
+    <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8">
+        <div class="lg:flex lg:space-x-8">
+            <!-- Table of Contents Sidebar -->
+            <div class="lg:w-1/4 mb-8 lg:mb-0">
+                <div class="bg-white rounded-lg shadow-md p-6 sticky top-8">
+                    <h2 class="text-xl font-semibold text-gray-900 mb-4">Quick Navigation</h2>
+                    <nav class="space-y-2">
+                        <a href="#overview" onclick="scrollToSection('overview')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">What is Educational KYC?</a>
+                        <a href="#what-it-does" onclick="scrollToSection('what-it-does')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">What the System Does</a>
+                        <a href="#sections" onclick="scrollToSection('sections')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">Understanding Sections</a>
+                        <a href="#centre-requirements" onclick="scrollToSection('centre-requirements')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">Centre Application Requirements</a>
+                        <a href="#qualification-requirements" onclick="scrollToSection('qualification-requirements')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">Qualification Requirements</a>
+                        <a href="#process" onclick="scrollToSection('process')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">Application Process</a>
+                        <a href="#checklist" onclick="scrollToSection('checklist')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">Requirements Checklist</a>
+                        <a href="#tips" onclick="scrollToSection('tips')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">Success Tips</a>
+                        <a href="#support" onclick="scrollToSection('support')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">Getting Support</a>
+                    </nav>
+                </div>
+            </div>
+
+            <!-- Main Content -->
+            <div class="lg:w-3/4">
+                <!-- Overview Section -->
+                <section id="overview" class="bg-white rounded-lg shadow-md p-8 mb-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-blue-100 p-2 rounded-lg">
+                            <svg class="w-6 h-6 text-blue-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 16h-1v-4h-1m1-4h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">What is Educational KYC?</h2>
+                    </div>
+                    <p class="text-gray-700 text-lg leading-relaxed">
+                        The Educational KYC (Know Your Customer) system is a comprehensive verification platform specifically designed for UK educational and training providers. This system helps educational organisations obtain official verification and credentials by automatically checking their legitimacy against multiple UK regulatory databases and awarding organisations.
+                    </p>
+                </section>
+
+                <!-- What it Does Section -->
+                <section id="what-it-does" class="bg-white rounded-lg shadow-md p-8 mb-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-green-100 p-2 rounded-lg">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">What Does the System Do?</h2>
+                    </div>
+                    <p class="text-gray-700 mb-4">The Educational KYC platform streamlines the verification process for educational providers by automatically:</p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-2">🎓 Educational Verification</h4>
+                            <ul class="text-gray-700 space-y-1">
+                                <li>• Pearson Education qualification searches</li>
+                                <li>• Ofqual API integration</li>
+                                <li>• Ofsted inspection ratings</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-2">🏢 Regulatory Checks</h4>
+                            <ul class="text-gray-700 space-y-1">
+                                <li>• ESFA funding status verification</li>
+                                <li>• UKPRN validation</li>
+                                <li>• Companies House integration</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-2">📊 Risk Assessment</h4>
+                            <ul class="text-gray-700 space-y-1">
+                                <li>• Automated risk scoring</li>
+                                <li>• Compliance verification</li>
+                                <li>• Real-time results</li>
+                            </ul>
+                        </div>
+                        <div class="bg-gray-50 p-4 rounded-lg">
+                            <h4 class="font-semibold text-gray-900 mb-2">🔒 Security & Credentials</h4>
+                            <ul class="text-gray-700 space-y-1">
+                                <li>• GDPR compliance</li>
+                                <li>• Digital credential issuance</li>
+                                <li>• Audit trail maintenance</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Sections Overview -->
+                <section id="sections" class="bg-white rounded-lg shadow-md p-8 mb-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-purple-100 p-2 rounded-lg">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 11H5m14 0a2 2 0 012 2v6a2 2 0 01-2 2H5a2 2 0 01-2-2v-6a2 2 0 012-2m14 0V9a2 2 0 00-2-2M5 11V9a2 2 0 012-2m0 0V5a2 2 0 012-2h6a2 2 0 012 2v2M7 7h10"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">Understanding the Main Sections</h2>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="border border-gray-200 rounded-lg">
+                            <button onclick="toggleSection('home-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">Home</span>
+                                    <span class="font-medium">Dashboard</span>
+                                </div>
+                                <span data-icon="home-details" class="text-xl font-bold text-gray-400">+</span>
+                            </button>
+                            <div id="home-details" class="hidden px-4 pb-4 text-gray-700">
+                                Your central overview showing current application status, quick access to key functions, recent activity summary, and verification progress indicators.
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg">
+                            <button onclick="toggleSection('applications-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium">Applications</span>
+                                    <span class="font-medium">Track Applications</span>
+                                </div>
+                                <span data-icon="applications-details" class="text-xl font-bold text-gray-400">+</span>
+                            </button>
+                            <div id="applications-details" class="hidden px-4 pb-4 text-gray-700">
+                                Track and manage your submissions: view all submitted applications, monitor in-progress verifications, check application status updates, and access completed verification credentials.
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg">
+                            <button onclick="toggleSection('organisation-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <span class="bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full text-sm font-medium">My Organisation</span>
+                                    <span class="font-medium">Manage Details</span>
+                                </div>
+                                <span data-icon="organisation-details" class="text-xl font-bold text-gray-400">+</span>
+                            </button>
+                            <div id="organisation-details" class="hidden px-4 pb-4 text-gray-700">
+                                Manage your organisational details: update delivery sites information, maintain contact details, edit organisational structure, and configure centre locations.
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg">
+                            <button onclick="toggleSection('messages-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-medium">Messages</span>
+                                    <span class="font-medium">Communications</span>
+                                </div>
+                                <span data-icon="messages-details" class="text-xl font-bold text-gray-400">+</span>
+                            </button>
+                            <div id="messages-details" class="hidden px-4 pb-4 text-gray-700">
+                                Communication hub for application status updates, Awarding Organisation (AO) requests, system notifications, and support communications.
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg">
+                            <button onclick="toggleSection('documents-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-sm font-medium">Documents</span>
+                                    <span class="font-medium">File Management</span>
+                                </div>
+                                <span data-icon="documents-details" class="text-xl font-bold text-gray-400">+</span>
+                            </button>
+                            <div id="documents-details" class="hidden px-4 pb-4 text-gray-700">
+                                Document management centre: upload required verification documents, store commonly used files for reuse, manage document versions, and access document templates.
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg">
+                            <button onclick="toggleSection('profile-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-medium">User Profile</span>
+                                    <span class="font-medium">Account Settings</span>
+                                </div>
+                                <span data-icon="profile-details" class="text-xl font-bold text-gray-400">+</span>
+                            </button>
+                            <div id="profile-details" class="hidden px-4 pb-4 text-gray-700">
+                                Account management tools: update personal information, manage account settings, configure notification preferences, and access security settings.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Centre Requirements -->
+                <section id="centre-requirements" class="bg-white rounded-lg shadow-md p-8 mb-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-orange-100 p-2 rounded-lg">
+                            <svg class="w-6 h-6 text-orange-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">Requirements for Successful Centre Application</h2>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="bg-blue-50 border-l-4 border-blue-400 p-4">
+                            <h3 class="text-lg font-semibold text-blue-900 mb-3">Essential Organisation Information</h3>
+                            <div class="grid md:grid-cols-2 gap-4 text-gray-700">
+                                <div>
+                                    <strong>Organisation Name:</strong> Your official registered name
+                                </div>
+                                <div>
+                                    <strong>URN:</strong> Your institution's Unique Reference Number
+                                </div>
+                                <div>
+                                    <strong>Postcode:</strong> Your primary centre location postcode
+                                </div>
+                                <div>
+                                    <strong>Company Number:</strong> Companies House registration number
+                                </div>
+                                <div class="md:col-span-2">
+                                    <strong>Provider Type:</strong> Select from available categories (e.g., "Training Provider", "Further Education College")
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-green-50 border-l-4 border-green-400 p-4">
+                            <h3 class="text-lg font-semibold text-green-900 mb-3">Supporting Documentation</h3>
+                            <div class="grid md:grid-cols-2 gap-2 text-gray-700">
+                                <div>• Proof of centre address</div>
+                                <div>• Organisational structure documentation</div>
+                                <div>• Insurance certificates</div>
+                                <div>• Health and safety policies</div>
+                                <div>• Safeguarding policies</div>
+                                <div>• Quality assurance procedures</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-yellow-50 border-l-4 border-yellow-400 p-4">
+                            <h3 class="text-lg font-semibold text-yellow-900 mb-3">Delivery Site Information</h3>
+                            <p class="text-gray-700 mb-2">For each delivery location, provide:</p>
+                            <div class="grid md:grid-cols-2 gap-2 text-gray-700">
+                                <div>• Site address and postcode</div>
+                                <div>• Contact details for site manager</div>
+                                <div>• Facilities and equipment details</div>
+                                <div>• Health and safety compliance certificates</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Qualification Requirements -->
+                <section id="qualification-requirements" class="bg-white rounded-lg shadow-md p-8 mb-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-purple-100 p-2 rounded-lg">
+                            <svg class="w-6 h-6 text-purple-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M12 6.253v13m0-13C10.832 5.477 9.246 5 7.5 5S4.168 5.477 3 6.253v13C4.168 18.477 5.754 18 7.5 18s3.332.477 4.5 1.253m0-13C13.168 5.477 14.754 5 16.5 5c1.747 0 3.332.477 4.5 1.253v13C19.832 18.477 18.246 18 16.5 18c-1.746 0-3.332.477-4.5 1.253"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">Requirements for Successful Qualification Application</h2>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="bg-purple-50 border-l-4 border-purple-400 p-4">
+                            <h3 class="text-lg font-semibold text-purple-900 mb-3">Qualification Details Required</h3>
+                            <div class="space-y-2 text-gray-700">
+                                <div><strong>Qualification Title:</strong> Full official qualification name</div>
+                                <div><strong>Awarding Organisation:</strong> The body awarding the qualification</div>
+                                <div><strong>Qualification Level:</strong> Appropriate level designation</div>
+                                <div><strong>Subject Area:</strong> Primary subject or sector</div>
+                                <div><strong>Delivery Method:</strong> Face-to-face, online, or blended learning</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-indigo-50 border-l-4 border-indigo-400 p-4">
+                            <h3 class="text-lg font-semibold text-indigo-900 mb-3">Evidence Documentation</h3>
+                            <div class="grid md:grid-cols-2 gap-2 text-gray-700">
+                                <div>• Teaching and assessment strategies</div>
+                                <div>• Curriculum documentation</div>
+                                <div>• Staff qualifications and CVs</div>
+                                <div>• Resource and facility specifications</div>
+                                <div class="md:col-span-2">• Assessment and moderation procedures</div>
+                            </div>
+                        </div>
+
+                        <div class="bg-red-50 border-l-4 border-red-400 p-4">
+                            <h3 class="text-lg font-semibold text-red-900 mb-3">Compliance Requirements</h3>
+                            <div class="space-y-2 text-gray-700">
+                                <div><strong>Ofsted Requirements:</strong> Current inspection status and ratings</div>
+                                <div><strong>ESFA Status:</strong> Funding eligibility verification</div>
+                                <div><strong>Regulatory Compliance:</strong> Adherence to sector-specific regulations</div>
+                                <div><strong>Quality Assurance:</strong> Evidence of robust QA processes</div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Application Process -->
+                <section id="process" class="bg-white rounded-lg shadow-md p-8 mb-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-teal-100 p-2 rounded-lg">
+                            <svg class="w-6 h-6 text-teal-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 5H7a2 2 0 00-2 2v10a2 2 0 002 2h8a2 2 0 002-2V7a2 2 0 00-2-2h-2M9 5a2 2 0 002 2h2a2 2 0 002-2M9 5a2 2 0 012-2h2a2 2 0 012 2"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">Application Process Steps</h2>
+                    </div>
+                    
+                    <div class="space-y-6">
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">1</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">Initial Registration</h3>
+                                <ul class="text-gray-700 space-y-1">
+                                    <li>• Create your user account</li>
+                                    <li>• Verify your email address</li>
+                                    <li>• Complete your user profile</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">2</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">Organisation Setup</h3>
+                                <ul class="text-gray-700 space-y-1">
+                                    <li>• Navigate to "My Organisation"</li>
+                                    <li>• Enter all required organisational details</li>
+                                    <li>• Upload supporting documentation</li>
+                                    <li>• Add delivery site information</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-blue-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">3</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">Application Submission</h3>
+                                <ul class="text-gray-700 space-y-1">
+                                    <li>• Go to "Applications" section</li>
+                                    <li>• Select "New Application"</li>
+                                    <li>• Choose application type (Centre or Qualification)</li>
+                                    <li>• Complete all required fields</li>
+                                    <li>• Upload necessary supporting documents</li>
+                                    <li>• Review and submit application</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">4</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">Automated Verification</h3>
+                                <p class="text-gray-700 mb-2">The system will automatically:</p>
+                                <ul class="text-gray-700 space-y-1">
+                                    <li>• Verify organisation against Companies House</li>
+                                    <li>• Check Ofsted inspection records</li>
+                                    <li>• Validate ESFA funding status</li>
+                                    <li>• Search Ofqual qualification databases</li>
+                                    <li>• Calculate risk assessment score</li>
+                                </ul>
+                            </div>
+                        </div>
+
+                        <div class="flex items-start space-x-4">
+                            <div class="bg-green-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">5</div>
+                            <div>
+                                <h3 class="text-lg font-semibold text-gray-900 mb-2">Review and Approval</h3>
+                                <ul class="text-gray-700 space-y-1">
+                                    <li>• Monitor progress in "Applications" section</li>
+                                    <li>• Respond to messages or requests for additional information</li>
+                                    <li>• Await final verification outcome</li>
+                                    <li>• Download digital credential upon approval</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Requirements Checklist -->
+                <section id="checklist" class="bg-white rounded-lg shadow-md p-8 mb-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-emerald-100 p-2 rounded-lg">
+                            <svg class="w-6 h-6 text-emerald-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4m6 2a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">Common Requirements Checklist</h2>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-2 gap-6">
+                        <div class="bg-gray-50 p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">For Centre Applications</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded text-blue-600">
+                                    <span class="text-gray-700">Valid company registration</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded text-blue-600">
+                                    <span class="text-gray-700">Current Ofsted inspection (if applicable)</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded text-blue-600">
+                                    <span class="text-gray-700">Appropriate insurance coverage</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded text-blue-600">
+                                    <span class="text-gray-700">Health and safety compliance</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded text-blue-600">
+                                    <span class="text-gray-700">Safeguarding policies in place</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded text-blue-600">
+                                    <span class="text-gray-700">Qualified management structure</span>
+                                </label>
+                            </div>
+                        </div>
+
+                        <div class="bg-gray-50 p-6 rounded-lg">
+                            <h3 class="text-lg font-semibold text-gray-900 mb-4">For Qualification Applications</h3>
+                            <div class="space-y-2">
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded text-blue-600">
+                                    <span class="text-gray-700">Partnership with recognised Awarding Organisation</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded text-blue-600">
+                                    <span class="text-gray-700">Qualified teaching staff</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded text-blue-600">
+                                    <span class="text-gray-700">Appropriate facilities and resources</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded text-blue-600">
+                                    <span class="text-gray-700">Assessment and moderation procedures</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded text-blue-600">
+                                    <span class="text-gray-700">Quality assurance framework</span>
+                                </label>
+                                <label class="flex items-center space-x-2">
+                                    <input type="checkbox" class="rounded text-blue-600">
+                                    <span class="text-gray-700">Student support services</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Tips Section -->
+                <section id="tips" class="bg-white rounded-lg shadow-md p-8 mb-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-yellow-100 p-2 rounded-lg">
+                            <svg class="w-6 h-6 text-yellow-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9.663 17h4.673M12 3v1m6.364 1.636l-.707.707M21 12h-1M4 12H3m3.343-5.657l-.707-.707m2.828 9.9a5 5 0 117.072 0l-.548.547A3.374 3.374 0 0014 18.469V19a2 2 0 11-4 0v-.531c0-.895-.356-1.754-.988-2.386l-.548-.547z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">Tips for Successful Applications</h2>
+                    </div>
+                    
+                    <div class="grid md:grid-cols-3 gap-6">
+                        <div class="bg-blue-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-blue-900 mb-3">📋 Preparation</h3>
+                            <ul class="text-gray-700 space-y-1 text-sm">
+                                <li>• Gather all documents before starting</li>
+                                <li>• Ensure information is current and accurate</li>
+                                <li>• Verify company registration details</li>
+                                <li>• Check policies are up to date</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-green-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-green-900 mb-3">📄 Documentation</h3>
+                            <ul class="text-gray-700 space-y-1 text-sm">
+                                <li>• Upload clear, legible copies</li>
+                                <li>• Use descriptive file names</li>
+                                <li>• Keep file sizes reasonable</li>
+                                <li>• Use standard formats (PDF, JPG, PNG)</li>
+                            </ul>
+                        </div>
+
+                        <div class="bg-purple-50 p-4 rounded-lg">
+                            <h3 class="font-semibold text-purple-900 mb-3">💬 Communication</h3>
+                            <ul class="text-gray-700 space-y-1 text-sm">
+                                <li>• Respond promptly to messages</li>
+                                <li>• Provide complete information</li>
+                                <li>• Use Messages section for queries</li>
+                                <li>• Keep contact details updated</li>
+                            </ul>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Risk Assessment -->
+                <section class="bg-white rounded-lg shadow-md p-8 mb-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-red-100 p-2 rounded-lg">
+                            <svg class="w-6 h-6 text-red-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 19v-6a2 2 0 00-2-2H5a2 2 0 00-2 2v6a2 2 0 002 2h2a2 2 0 002-2zm0 0V9a2 2 0 012-2h2a2 2 0 012 2v10m-6 0a2 2 0 002 2h2a2 2 0 002-2m0 0V5a2 2 0 012-2h2a2 2 0 012 2v14a2 2 0 01-2 2h-2a2 2 0 01-2-2z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">Understanding Risk Assessment</h2>
+                    </div>
+                    
+                    <p class="text-gray-700 mb-4">The automated risk assessment considers:</p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="bg-blue-500 w-3 h-3 rounded-full"></div>
+                            <span class="text-gray-700"><strong>Company legitimacy</strong> via Companies House verification</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="bg-green-500 w-3 h-3 rounded-full"></div>
+                            <span class="text-gray-700"><strong>Educational track record</strong> through Ofsted ratings</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="bg-yellow-500 w-3 h-3 rounded-full"></div>
+                            <span class="text-gray-700"><strong>Financial stability</strong> via ESFA funding status</span>
+                        </div>
+                        <div class="flex items-center space-x-3 p-3 bg-gray-50 rounded-lg">
+                            <div class="bg-purple-500 w-3 h-3 rounded-full"></div>
+                            <span class="text-gray-700"><strong>Qualification validity</strong> through Ofqual checks</span>
+                        </div>
+                    </div>
+                    <div class="mt-4 p-4 bg-blue-50 rounded-lg">
+                        <p class="text-blue-900 font-medium">💡 Lower risk scores indicate higher trustworthiness and typically lead to faster approval times.</p>
+                    </div>
+                </section>
+
+                <!-- Support Section -->
+                <section id="support" class="bg-white rounded-lg shadow-md p-8 mb-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-gray-100 p-2 rounded-lg">
+                            <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8.228 9c.549-1.165 2.03-2 3.772-2 2.21 0 4 1.343 4 3 0 1.4-1.278 2.575-3.006 2.907-.542.104-.994.54-.994 1.093m0 3h.01M21 12a9 9 0 11-18 0 9 9 0 0118 0z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">Getting Support</h2>
+                    </div>
+                    
+                    <div class="space-y-4">
+                        <div class="flex items-start space-x-3 p-4 bg-gray-50 rounded-lg">
+                            <svg class="w-5 h-5 text-blue-600 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 10a8 8 0 11-16 0 8 8 0 0116 0zm-7-4a1 1 0 11-2 0 1 1 0 012 0zM9 9a1 1 0 000 2v3a1 1 0 001 1h1a1 1 0 100-2v-3a1 1 0 00-1-1H9z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                                <p class="text-gray-700"><strong>Use the "Help & Support" section</strong> for frequently asked questions</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3 p-4 bg-gray-50 rounded-lg">
+                            <svg class="w-5 h-5 text-green-600 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M18 5v8a2 2 0 01-2 2h-5l-5 4v-4H4a2 2 0 01-2-2V5a2 2 0 012-2h12a2 2 0 012 2zM7 8H5v2h2V8zm2 0h2v2H9V8zm6 0h-2v2h2V8z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                                <p class="text-gray-700"><strong>Contact support through the Messages system</strong> for personalised assistance</p>
+                            </div>
+                        </div>
+                        
+                        <div class="flex items-start space-x-3 p-4 bg-gray-50 rounded-lg">
+                            <svg class="w-5 h-5 text-purple-600 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                                <path fill-rule="evenodd" d="M4 4a2 2 0 00-2 2v4a2 2 0 002 2V6h10a2 2 0 00-2-2H4zm2 6a2 2 0 012-2h8a2 2 0 012 2v4a2 2 0 01-2 2H8a2 2 0 01-2-2v-4zm6 4a2 2 0 100-4 2 2 0 000 4z" clip-rule="evenodd"/>
+                            </svg>
+                            <div>
+                                <p class="text-gray-700"><strong>Provide your verification ID</strong> when contacting support for faster assistance</p>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- After Approval -->
+                <section class="bg-gradient-to-r from-green-50 to-blue-50 rounded-lg shadow-md p-8 mb-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-green-100 p-2 rounded-lg">
+                            <svg class="w-6 h-6 text-green-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">What Happens After Approval?</h2>
+                    </div>
+                    
+                    <p class="text-gray-700 mb-4">Upon successful verification, you will receive:</p>
+                    <div class="grid md:grid-cols-2 gap-4">
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="bg-green-100 text-green-600 p-1 rounded">🏆</span>
+                                <span class="font-semibold text-gray-900">Digital verification credential</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="bg-blue-100 text-blue-600 p-1 rounded">🔗</span>
+                                <span class="font-semibold text-gray-900">Unique credential URL</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="bg-purple-100 text-purple-600 p-1 rounded">📜</span>
+                                <span class="font-semibold text-gray-900">JSON-LD formatted certificate</span>
+                            </div>
+                        </div>
+                        <div class="bg-white p-4 rounded-lg shadow-sm">
+                            <div class="flex items-center space-x-2 mb-2">
+                                <span class="bg-yellow-100 text-yellow-600 p-1 rounded">✨</span>
+                                <span class="font-semibold text-gray-900">Qualified provider benefits</span>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="mt-6 p-4 bg-white rounded-lg border border-green-200">
+                        <p class="text-gray-700">
+                            <strong>Ongoing Compliance:</strong> Your verification status remains valid as long as your organisation maintains compliance with UK educational regulations and your information remains current and accurate.
+                        </p>
+                    </div>
+                </section>
+
+                <!-- Footer Notice -->
+                <div class="bg-gray-100 rounded-lg p-6 text-center">
+                    <p class="text-gray-600 text-sm italic">
+                        This system ensures compliance with UK educational regulations, GDPR data protection requirements, and maintains comprehensive audit trails for all verification activities.
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <!-- Back to Top Button -->
+    <button onclick="window.scrollTo({top: 0, behavior: 'smooth'})" 
+            class="fixed bottom-6 right-6 bg-blue-600 hover:bg-blue-700 text-white p-3 rounded-full shadow-lg transition-colors">
+        <svg class="w-5 h-5" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M5 10l7-7m0 0l7 7m-7-7v18"/>
+        </svg>
+    </button>
+{% endblock %}
