@@ -1,88 +1,115 @@
 {% extends "base.html" %}
 {% block title %}Qualification Approval{% endblock %}
 {% block content %}
-<div class="max-w-4xl mx-auto">
-    <div class="mb-8">
-        <h2 class="text-3xl font-bold text-gray-900 mb-2">Course and qualification selection</h2>
-        <p class="text-gray-600">Using the OFQUAL register select the courses and qualifications you want to offer. Upon submission your application will route to the correct AO.</p>
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8 py-12">
+    <div class="mb-10">
+        <h2 class="text-4xl font-bold tracking-tight text-gray-900 mb-3">Course and Qualification Selection</h2>
+        <p class="text-base text-gray-600">
+            Using the OFQUAL register, select the courses and qualifications you want to offer.
+            Upon submission, your application will be routed to the correct AO.
+        </p>
     </div>
-    <form method="POST" action="/centre-submission" class="bg-white rounded-lg shadow-md p-8 space-y-6">
-        <div class="border-b border-gray-200 pb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Application or Verification details</h3>
+
+    <form method="POST" action="/centre-submission" class="bg-white rounded-2xl shadow-lg p-10 space-y-10">
+        <!-- Verification Section -->
+        <section class="border-b border-gray-200 pb-8">
+            <h3 class="text-xl font-semibold text-gray-900 mb-6">Application or Verification Details</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="group_ukprn">Verification ID from your compliance check</label>
-                    <input type="text" id="verification_id" name="verification_id" required class="w-full border border-gray-300 rounded-md px-3 py-2" placeholder="e.g., 12345678">
+                    <label for="verification_id" class="block text-sm font-medium text-gray-700 mb-1">
+                        Verification ID from your compliance check
+                    </label>
+                    <input type="text" id="verification_id" name="verification_id" required
+                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-4 py-3"
+                        placeholder="e.g., 12345678">
                     <div id="verification-status" class="mt-2 text-xs text-red-600 hidden"></div>
                 </div>
             </div>
-        </div>
-        <div class="border-b border-gray-200 pb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Qualification Requested</h3>
-            <a href="/ofqual/search" class="text-sm text-blue-600 underline">Search Ofqual Register</a>
-            <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+        </section>
 
+        <!-- Qualification Section -->
+        <section class="border-b border-gray-200 pb-8">
+            <h3 class="text-xl font-semibold text-gray-900 mb-4">Qualification Requested</h3>
+            <a href="/ofqual/search" class="text-sm text-blue-600 hover:underline">Search Ofqual Register</a>
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mt-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="ao_name">Awarding Org Name</label>
-                    <input type="text" id="ao_name" name="ao_name" value="{{ organisation_name or '' }}" required class="w-full border border-gray-300 rounded-md px-3 py-2">
-                </div>                
-                <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="ao_id">Awarding Org ID</label>
-                    <input type="text" id="ao_id" name="ao_id" value="{{ organisation_id or '' }}" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    <label for="ao_name" class="block text-sm font-medium text-gray-700 mb-1">Awarding Org Name</label>
+                    <input type="text" id="ao_name" name="ao_name" value="{{ organisation_name or '' }}" required
+                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-4 py-3">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="qualification_id">Qualification ID</label>
-                    <input type="text" id="qualification_id" name="qualification_id" value="{{ qualification_id or '' }}" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    <label for="ao_id" class="block text-sm font-medium text-gray-700 mb-1">Awarding Org ID</label>
+                    <input type="text" id="ao_id" name="ao_id" value="{{ organisation_id or '' }}" required
+                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-4 py-3">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="title">Qualification Title</label>
-                    <input type="text" id="title" name="title" value="{{ qualification_title or '' }}" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    <label for="qualification_id" class="block text-sm font-medium text-gray-700 mb-1">Qualification ID</label>
+                    <input type="text" id="qualification_id" name="qualification_id" value="{{ qualification_id or '' }}" required
+                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-4 py-3">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="start_date">Start Date</label>
-                    <input type="date" id="start_date" name="start_date" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    <label for="title" class="block text-sm font-medium text-gray-700 mb-1">Qualification Title</label>
+                    <input type="text" id="title" name="title" value="{{ qualification_title or '' }}" required
+                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-4 py-3">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="cohort_size">Expected Cohort Size</label>
-                    <input type="number" id="cohort_size" name="cohort_size" required class="w-full border border-gray-300 rounded-md px-3 py-2" min="1">
+                    <label for="start_date" class="block text-sm font-medium text-gray-700 mb-1">Start Date</label>
+                    <input type="date" id="start_date" name="start_date" required
+                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-4 py-3">
+                </div>
+                <div>
+                    <label for="cohort_size" class="block text-sm font-medium text-gray-700 mb-1">Expected Cohort Size</label>
+                    <input type="number" id="cohort_size" name="cohort_size" min="1" required
+                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-4 py-3">
                 </div>
             </div>
-        </div>
-        <div class="border-b border-gray-200 pb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Approval Contact </h3>
+        </section>
+
+        <!-- Contact Section -->
+        <section class="border-b border-gray-200 pb-8">
+            <h3 class="text-xl font-semibold text-gray-900 mb-4">Approval Contact</h3>
             <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="staff_id">Staff ID</label>
-                    <input type="text" id="staff_id" name="staff_id" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    <label for="staff_id" class="block text-sm font-medium text-gray-700 mb-1">Staff ID</label>
+                    <input type="text" id="staff_id" name="staff_id" required
+                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-4 py-3">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="staff_role">Role</label>
-                    <input type="text" id="staff_role" name="staff_role" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    <label for="staff_role" class="block text-sm font-medium text-gray-700 mb-1">Role</label>
+                    <input type="text" id="staff_role" name="staff_role" required
+                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-4 py-3">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="staff_name">Name</label>
-                    <input type="text" id="staff_name" name="staff_name" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    <label for="staff_name" class="block text-sm font-medium text-gray-700 mb-1">Name</label>
+                    <input type="text" id="staff_name" name="staff_name" required
+                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-4 py-3">
                 </div>
                 <div>
-                    <label class="block text-sm font-medium text-gray-700 mb-2" for="staff_email">Email</label>
-                    <input type="email" id="staff_email" name="staff_email" required class="w-full border border-gray-300 rounded-md px-3 py-2">
+                    <label for="staff_email" class="block text-sm font-medium text-gray-700 mb-1">Email</label>
+                    <input type="email" id="staff_email" name="staff_email" required
+                        class="w-full rounded-xl border-gray-300 shadow-sm focus:border-blue-500 focus:ring-blue-500 text-sm px-4 py-3">
                 </div>
             </div>
-        </div>
-        <div class="pb-6">
-            <h3 class="text-lg font-semibold text-gray-900 mb-4">Compliance Declarations</h3>
-            <div class="space-y-3">
-                <div class="flex items-center">
-                    <input id="ofqual_ack" name="ofqual_ack" type="checkbox" required class="h-4 w-4 text-blue-600 border-gray-300 rounded">
-                    <label for="ofqual_ack" class="ml-2 block text-sm text-gray-700">Ofqual conditions acknowledged</label>
+        </section>
+
+        <!-- Declarations -->
+        <section class="pb-6">
+            <h3 class="text-xl font-semibold text-gray-900 mb-4">Compliance Declarations</h3>
+            <div class="space-y-4">
+                <div class="flex items-start gap-3">
+                    <input id="ofqual_ack" name="ofqual_ack" type="checkbox" required
+                        class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="ofqual_ack" class="text-sm text-gray-700">Ofqual conditions acknowledged</label>
                 </div>
-                <div class="flex items-center">
-                    <input id="gdpr_consent" name="gdpr_consent" type="checkbox" required class="h-4 w-4 text-blue-600 border-gray-300 rounded">
-                    <label for="gdpr_consent" class="ml-2 block text-sm text-gray-700">GDPR consent</label>
+                <div class="flex items-start gap-3">
+                    <input id="gdpr_consent" name="gdpr_consent" type="checkbox" required
+                        class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="gdpr_consent" class="text-sm text-gray-700">GDPR consent</label>
                 </div>
-                <div class="flex items-center">
-                    <input id="share_aos" name="share_aos" type="checkbox" required class="h-4 w-4 text-blue-600 border-gray-300 rounded">
-                    <label for="share_aos" class="ml-2 block text-sm text-gray-700">Share this data with appropriate AOs confirmed</label>
+                <div class="flex items-start gap-3">
+                    <input id="share_aos" name="share_aos" type="checkbox" required
+                        class="mt-1 h-4 w-4 text-blue-600 border-gray-300 rounded focus:ring-blue-500">
+                    <label for="share_aos" class="text-sm text-gray-700">Share this data with appropriate AOs confirmed</label>
                 </div>
             </div>
         </div>
@@ -92,9 +119,13 @@
                 <p class="text-xs text-gray-500 mb-1">Adds this qualification to your application pack.</p>
                 <button type="submit" class="bg-blue-600 text-white px-8 py-3 rounded-md hover:bg-blue-700">Add to application pack</button>
             </div>
+        </section>
+
+      
         </div>
     </form>
 </div>
+
 <script>
 // Disable all form fields until verification ID is validated
 const verificationInput = document.getElementById('verification_id');
