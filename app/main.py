@@ -535,10 +535,10 @@ async def about_page(request: Request):
     return templates.TemplateResponse("about.html", {"request": request})
 
 
-@app.get("/help", response_class=HTMLResponse)
-async def help_page(request: Request):
-    """Help and support page"""
-    return templates.TemplateResponse("help.html", {"request": request})
+@app.get("/about", response_class=HTMLResponse)
+async def about_page(request: Request):
+    """Informational page about the service"""
+    return templates.TemplateResponse("about.html", {"request": request})
 
 
 @app.get("/profile", response_class=HTMLResponse)
