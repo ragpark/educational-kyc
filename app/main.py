@@ -583,8 +583,11 @@ async def submit_centre_submission(request: Request):
         }
     )
 
+    # After adding to our in-memory store, show the updated applications table
+    user = get_current_user(request)
     return templates.TemplateResponse(
-        "centre_submission_success.html", {"request": request, "submission": submission}
+        "applications.html",
+        {"request": request, "applications": applications_db, "user": user},
     )
 
 
