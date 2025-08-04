@@ -310,13 +310,6 @@ async def login_form(request: Request):
         return RedirectResponse("/", status_code=302)
     return templates.TemplateResponse("login.html", {"request": request})
 
-@app.get("/about", response_class=HTMLResponse)
-
-    return templates.TemplateResponse(
-        "about.html",
-        {"request": request, "provider": None},
-    )
-
 @app.post("/login")
 async def login(request: Request, username: str = Form(...), password: str = Form(...)):
     """Handle login submissions"""
