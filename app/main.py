@@ -19,6 +19,7 @@ import uuid
 import aiohttp
 import requests
 import logging
+from authlib.integrations.starlette_client import OAuth, OAuthError
 
 
 def secure_filename(filename: str) -> str:
@@ -82,6 +83,8 @@ UPLOAD_DIR = os.path.join("app", "static", "uploads")
 logging.basicConfig(level=logging.INFO)
 logger = logging.getLogger(__name__)
 
+oauth = OAuth()
+
 # MCP wrapper instance (created during startup)
 mcp_wrapper: KYCContextSource | None = None
 
@@ -98,6 +101,22 @@ users = {
         "role": "awarding_organisation",
     },
 }
+
+oauth.register(
+    name="google",
+    client_id=os.getenv("GOOGLE_CLIENT_ID"),
+    client_secret=os.getenv("GOOGLE_CLIENT_SECRET"),
+    server_metadata_url="https://accounts.google.com/.well-known/openid-configuration",
+    client_kwargs={"scope": "openid email profile"},
+)
+
+oauth.register(
+    name="microsoft",
+    client_id=os.getenv("MICROSOFT_CLIENT_ID"),
+    client_secret=os.getenv("MICROSOFT_CLIENT_SECRET"),
+    server_metadata_url="https://login.microsoftonline.com/common/v2.0/.well-known/openid-configuration",
+    client_kwargs={"scope": "openid email profile"},
+)
 
 
 def get_current_user(request: Request):
@@ -303,6 +322,43 @@ async def login(request: Request, username: str = Form(...), password: str = For
         )
     request.session["user"] = username
     return RedirectResponse("/", status_code=302)
+
+
+@app.get("/auth/{provider}")
+async def auth(request: Request, provider: str):
+    """Start OAuth flow with the given provider"""
+    client = oauth.create_client(provider)
+    if not client:
+        return RedirectResponse("/login", status_code=302)
+    redirect_uri = request.url_for("auth_callback", provider=provider)
+    return await client.authorize_redirect(request, redirect_uri)
+
+
+@app.get("/auth/{provider}/callback")
+async def auth_callback(request: Request, provider: str):
+    """Handle OAuth callback"""
+    client = oauth.create_client(provider)
+    if not client:
+        return RedirectResponse("/login", status_code=302)
+    try:
+        token = await client.authorize_access_token(request)
+    except OAuthError:
+        return RedirectResponse("/login", status_code=302)
+    userinfo = token.get("userinfo")
+    if not userinfo:
+        try:
+            userinfo = await client.parse_id_token(request, token)
+        except Exception:
+            userinfo = {}
+    email = userinfo.get("email")
+    if email:
+        users.setdefault(
+            email,
+            {"name": userinfo.get("name", email), "password": None, "role": "external"},
+        )
+        request.session["user"] = email
+        return RedirectResponse("/", status_code=302)
+    return RedirectResponse("/login", status_code=302)
 
 
 @app.get("/logout")
