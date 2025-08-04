@@ -504,6 +504,8 @@ async def centre_submission_form(
     request: Request,
     organisation_id: Optional[str] = None,
     organisation_name: Optional[str] = None,
+    qualification_id: Optional[str] = None,
+    qualification_title: Optional[str] = None,
 ):
     return templates.TemplateResponse(
         "centre_submission_form.html",
@@ -511,6 +513,8 @@ async def centre_submission_form(
             "request": request,
             "organisation_id": organisation_id,
             "organisation_name": organisation_name,
+            "qualification_id": qualification_id,
+            "qualification_title": qualification_title,
         },
     )
 
