@@ -72,30 +72,56 @@ def run_etl(output_dir: str = None):
         skill_vec = DictVectorizer()
         skill_vec.fit(centre_skill_dicts + course_skill_dicts)
 
+        # Some datasets may not contain any courses. Fitting a OneHotEncoder on an
+        # empty list would raise an IndexError, so handle that case explicitly.
         delivery_enc = OneHotEncoder(handle_unknown="ignore")
-        delivery_enc.fit([[c["delivery_mode"]] for c in course_meta])
+        if course_meta:
+            delivery_enc.fit([[c["delivery_mode"]] for c in course_meta])
+            delivery_features = len(delivery_enc.categories_[0])
+        else:
+            delivery_features = 0
 
         rating_scaler = StandardScaler().fit(np.array(centre_ratings).reshape(-1, 1))
 
-        centre_lab_matrix = lab_vec.transform(centre_lab_dicts)
-        centre_skill_matrix = skill_vec.transform(centre_skill_dicts)
+        centre_lab_matrix = (
+            lab_vec.transform(centre_lab_dicts)
+            if centre_lab_dicts
+            else csr_matrix((0, len(lab_vec.get_feature_names_out())))
+        )
+        centre_skill_matrix = (
+            skill_vec.transform(centre_skill_dicts)
+            if centre_skill_dicts
+            else csr_matrix((0, len(skill_vec.get_feature_names_out())))
+        )
         centre_rating_matrix = rating_scaler.transform(np.array(centre_ratings).reshape(-1, 1))
         centre_delivery_zeros = csr_matrix(
-            np.zeros((centre_lab_matrix.shape[0], len(delivery_enc.categories_[0])))
+            np.zeros((centre_lab_matrix.shape[0], delivery_features))
         )
         centre_online_zeros = csr_matrix(np.zeros((centre_lab_matrix.shape[0], 1)))
         centre_features = hstack(
             [centre_lab_matrix, centre_skill_matrix, centre_rating_matrix, centre_delivery_zeros, centre_online_zeros]
         ).toarray()
 
-        course_lab_matrix = lab_vec.transform(course_lab_dicts)
-        course_skill_matrix = skill_vec.transform(course_skill_dicts)
-        course_delivery_matrix = delivery_enc.transform(
-            [[c["delivery_mode"]] for c in course_meta]
+        course_lab_matrix = (
+            lab_vec.transform(course_lab_dicts)
+            if course_lab_dicts
+            else csr_matrix((0, len(lab_vec.get_feature_names_out())))
         )
-        course_online_matrix = csr_matrix(
-            np.array([[1.0 if c["online_content_ok"] else 0.0] for c in course_meta])
+        course_skill_matrix = (
+            skill_vec.transform(course_skill_dicts)
+            if course_skill_dicts
+            else csr_matrix((0, len(skill_vec.get_feature_names_out())))
         )
+        if course_meta:
+            course_delivery_matrix = delivery_enc.transform(
+                [[c["delivery_mode"]] for c in course_meta]
+            )
+            course_online_matrix = csr_matrix(
+                np.array([[1.0 if c["online_content_ok"] else 0.0] for c in course_meta])
+            )
+        else:
+            course_delivery_matrix = csr_matrix(np.zeros((0, delivery_features)))
+            course_online_matrix = csr_matrix(np.zeros((0, 1)))
         course_rating_zeros = csr_matrix(np.zeros((len(course_meta), 1)))
         course_features = hstack(
             [course_lab_matrix, course_skill_matrix, course_rating_zeros, course_delivery_matrix, course_online_matrix]
