@@ -10,6 +10,12 @@
         </p>
     </div>
 
+    <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8" id="recommendation-section">
+    <h3 class="text-xl font-semibold text-gray-900 mb-4">Recommended Courses</h3>
+    <button type="button" id="recommend-btn" class="bg-green-600 text-white px-4 py-2 rounded-md mb-4">Get Recommendations</button>
+    <div id="recommendations" class="space-y-2"></div>
+    </div>
+
     <form method="POST" action="/centre-submission" class="bg-white rounded-2xl shadow-lg p-10 space-y-10">
         <!-- Verification Section -->
         <section class="border-b border-gray-200 pb-8">
@@ -112,7 +118,6 @@
                     <label for="share_aos" class="text-sm text-gray-700">Share this data with appropriate AOs confirmed</label>
                 </div>
             </div>
-        </div>
         <div class="pt-6 flex justify-between">
             <a href="/" class="text-gray-600 hover:text-gray-800">← Back to Dashboard</a>
             <div class="text-right">

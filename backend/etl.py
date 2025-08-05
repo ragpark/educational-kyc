@@ -7,6 +7,7 @@ from sqlalchemy.orm import joinedload
 from sklearn.feature_extraction import DictVectorizer
 from sklearn.preprocessing import OneHotEncoder, StandardScaler
 
+
 from .database import SessionLocal, init_db
 from .models import Centre, Course
 
@@ -14,6 +15,7 @@ from .models import Centre, Course
 def run_etl(output_dir: str = None):
     output_dir = output_dir or os.path.join(os.path.dirname(__file__), "data")
     os.makedirs(output_dir, exist_ok=True)
+
 
     # Ensure database schema exists before querying
     init_db()

@@ -16,6 +16,7 @@ def init_db():
 
     Base.metadata.create_all(bind=engine)
 
+
 def get_session():
     """Yield a SQLAlchemy session."""
     db = SessionLocal()

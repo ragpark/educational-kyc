@@ -91,6 +91,7 @@ Navigate to `http://localhost:8001` and enter a centre ID to view recommended
 courses. Results can be filtered by delivery mode and minimum similarity score,
 with radar charts showing how centre capabilities compare to course
 requirements.
+
 The centre submission form invokes `POST /build-recommendations` to generate
 the latest feature matrices before requesting recommendations.
 
