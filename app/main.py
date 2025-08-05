@@ -274,7 +274,7 @@ else:
     raise RuntimeError(f"Static directory not found: {static_dir}")
 
 # Expose the React dashboard for visual recommendations
-frontend_dir = Path(__file__).resolve().parent.parent / "frontend/index.html"
+frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
 if frontend_dir.is_dir():
     app.mount(
         "/recommendations",
