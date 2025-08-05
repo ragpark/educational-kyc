@@ -1,6 +1,6 @@
 # app/main.py - Updated with Educational KYC Orchestrator Integration
 
-from fastapi import FastAPI, Request, BackgroundTasks, Form, UploadFile, File
+from fastapi import FastAPI, Request, BackgroundTasks, Form, UploadFile, File, HTTPException
 from fastapi.responses import RedirectResponse, Response
 from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
@@ -67,12 +67,13 @@ from app.centre_submission import (
 )
 from app.services.safeguarding_assessor import assess_safeguarding_document
 
+import importlib
+
+
 try:
-    from backend.recommend import app as recommend_api
-    RECOMMENDER_AVAILABLE = True
+    from backend.etl import run_etl
 except Exception:
-    recommend_api = None
-    RECOMMENDER_AVAILABLE = False
+    run_etl = None
 
 # In-memory storage for demo
 providers_db = []
@@ -594,6 +595,28 @@ async def centre_submission_form(
             "recommendations_enabled": RECOMMENDER_AVAILABLE,
         },
     )
+
+
+@app.post("/build-recommendations")
+async def build_recommendations():
+    if run_etl is None:
+        raise HTTPException(status_code=500, detail="ETL not configured")
+    try:
+        run_etl()
+        import backend.recommend as recommend_module
+        importlib.reload(recommend_module)
+        # remove existing recommendation routes if any
+        app.router.routes = [
+            r
+            for r in app.router.routes
+            if not getattr(r, "path", "").startswith("/recommend")
+        ]
+        app.include_router(recommend_module.app.router)
+        global RECOMMENDER_AVAILABLE
+        RECOMMENDER_AVAILABLE = True
+        return {"status": "ok"}
+    except Exception as e:
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/centre-submission")

@@ -132,7 +132,6 @@
 </div>
 
 
-
 <script>
 // Disable all form fields until verification ID is validated
 const verificationInput = document.getElementById('verification_id');
@@ -195,35 +194,39 @@ verificationInput.addEventListener('input', function(e) {
 });
 
 const centreId = {{ centre_id | tojson }};
-const recommendationsEnabled = {{ recommendations_enabled | tojson }};
+
 const recommendBtn = document.getElementById('recommend-btn');
 const recContainer = document.getElementById('recommendations');
 if (recommendBtn) {
-    if (centreId === null || !recommendationsEnabled) {
+    if (centreId === null) {
         recommendBtn.disabled = true;
-        recommendBtn.textContent = 'Recommendations unavailable';
-    }
-    recommendBtn.addEventListener('click', async () => {
-        recommendBtn.disabled = true;
-        recommendBtn.textContent = 'Loading...';
-        try {
-            const resp = await fetch(`/recommend/${centreId}`);
-            const data = await resp.json();
+        recommendBtn.textContent = 'Centre unavailable';
+    } else {
+        recommendBtn.addEventListener('click', async () => {
+            recommendBtn.disabled = true;
             recContainer.innerHTML = '';
-            data.recommendations.forEach(r => {
-                const card = document.createElement('div');
-                card.className = 'border p-4 rounded-md';
-                card.innerHTML = `<div class="font-medium">${r.title}</div>` +
-                    `<div class=\"text-sm text-gray-600\">Score: ${(r.score * 100).toFixed(1)}%</div>`;
-                recContainer.appendChild(card);
-            });
-        } catch (_) {
-            recContainer.innerHTML = '<div class="text-red-600">Failed to load recommendations</div>';
-        } finally {
-            recommendBtn.disabled = false;
-            recommendBtn.textContent = 'Get Recommendations';
-        }
-    });
+            recommendBtn.textContent = 'Preparing...';
+            try {
+                await fetch('/build-recommendations', {method: 'POST'});
+                recommendBtn.textContent = 'Loading...';
+                const resp = await fetch(`/recommend/${centreId}`);
+                const data = await resp.json();
+                recContainer.innerHTML = '';
+                data.recommendations.forEach(r => {
+                    const card = document.createElement('div');
+                    card.className = 'border p-4 rounded-md';
+                    card.innerHTML = `<div class="font-medium">${r.title}</div>` +
+                        `<div class=\"text-sm text-gray-600\">Score: ${(r.score * 100).toFixed(1)}%</div>`;
+                    recContainer.appendChild(card);
+                });
+            } catch (_) {
+                recContainer.innerHTML = '<div class="text-red-600">Failed to load recommendations</div>';
+            } finally {
+                recommendBtn.disabled = false;
+                recommendBtn.textContent = 'Get Recommendations';
+            }
+        });
+    }
 }
 </script>
 {% endblock %}
