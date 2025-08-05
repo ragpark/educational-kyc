@@ -578,7 +578,6 @@ async def onboard_form(request: Request):
 # ---------------------------------------------------------------------------
 # Centre Submission workflow
 
-
 @app.get("/centre-submission", response_class=HTMLResponse)
 async def centre_submission_form(
     request: Request,
@@ -586,9 +585,12 @@ async def centre_submission_form(
     organisation_name: Optional[str] = None,
     qualification_id: Optional[str] = None,
     qualification_title: Optional[str] = None,
+):
+    # --- function body must be indented here ---
     user = get_current_user(request)
     centre_id = 1 if user and user.get("role") == "learning_centre" else None
     recommend_available = (run_etl is not None) or RECOMMENDER_AVAILABLE
+
     return templates.TemplateResponse(
         "centre_submission_form.html",
         {
@@ -601,7 +603,7 @@ async def centre_submission_form(
             "recommend_available": recommend_available,
         },
     )
-)
+
 
 @app.post("/build-recommendations")
 async def build_recommendations():
