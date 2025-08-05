@@ -81,7 +81,20 @@ def run_etl(output_dir: str = None):
         else:
             delivery_features = 0
 
-        rating_scaler = StandardScaler().fit(np.array(centre_ratings).reshape(-1, 1))
+        if centre_ratings:
+            rating_scaler = StandardScaler().fit(
+                np.array(centre_ratings).reshape(-1, 1)
+            )
+            centre_rating_matrix = csr_matrix(
+                rating_scaler.transform(
+                    np.array(centre_ratings).reshape(-1, 1)
+                )
+            )
+        else:
+            # No centres in the database. Fit scaler on a default value and
+            # create an empty rating matrix to keep feature dimensions
+            rating_scaler = StandardScaler().fit(np.array([[0.0]]))
+            centre_rating_matrix = csr_matrix((0, 1))
 
         centre_lab_matrix = (
             lab_vec.transform(centre_lab_dicts)
@@ -93,7 +106,6 @@ def run_etl(output_dir: str = None):
             if centre_skill_dicts
             else csr_matrix((0, len(skill_vec.get_feature_names_out())))
         )
-        centre_rating_matrix = rating_scaler.transform(np.array(centre_ratings).reshape(-1, 1))
         centre_delivery_zeros = csr_matrix(
             np.zeros((centre_lab_matrix.shape[0], delivery_features))
         )
