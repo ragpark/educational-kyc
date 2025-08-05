@@ -76,11 +76,7 @@ database using SQLAlchemy. Dataclasses in `app/models.py` define the schema for
 The repository now contains a small training course recommendation prototype.
 
 ```bash
-# rebuild feature matrices via the main app
-curl -X POST http://localhost:8000/build-recommendations
 
-# start the recommendation API (included in main app)
-uvicorn app.main:app --reload
 
 # open the demo dashboard (served statically)
 # e.g. using a simple file server
@@ -91,8 +87,10 @@ Navigate to `http://localhost:8001` and enter a centre ID to view recommended
 courses. Results can be filtered by delivery mode and minimum similarity score,
 with radar charts showing how centre capabilities compare to course
 requirements.
+
 The centre submission form invokes `POST /build-recommendations` to generate
 the latest feature matrices before requesting recommendations.
+
 
 ### Example: Qualification Search
 
