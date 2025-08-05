@@ -600,13 +600,17 @@ async def centre_submission_form(
             "qualification_id": qualification_id,
             "qualification_title": qualification_title,
             "centre_id": centre_id,
-            "recommend_available": recommend_available,
+        "recommend_available": recommend_available,
         },
     )
 
+class RecommendationBuildRequest(BaseModel):
+    centre_id: int
+    top_n: int | None = 10
+
 
 @app.post("/build-recommendations")
-async def build_recommendations():
+async def build_recommendations(payload: RecommendationBuildRequest):
     if run_etl is None:
         raise HTTPException(status_code=500, detail="ETL not configured")
     try:
@@ -622,9 +626,14 @@ async def build_recommendations():
         app.include_router(recommend_module.app.router)
         global RECOMMENDER_AVAILABLE
         RECOMMENDER_AVAILABLE = True
-        return {"status": "ok"}
+        result = recommend_module.recommend(
+            payload.centre_id, top_n=payload.top_n
+        )
+        return JSONResponse(content=result)
+    except HTTPException:
+        raise
     except Exception as e:
-        raise HTTPException(status_code=500, detail=str(e))
+        return JSONResponse(content={"detail": str(e)}, status_code=500)
 
 
 @app.post("/centre-submission")
