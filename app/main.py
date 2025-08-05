@@ -553,10 +553,11 @@ async def about_page(request: Request):
     return templates.TemplateResponse("about.html", {"request": request})
 
 
-@app.get("/about", response_class=HTMLResponse)
-async def about_page(request: Request):
-    """Informational page about the service"""
-    return templates.TemplateResponse("about.html", {"request": request})
+@app.get("/help", response_class=HTMLResponse)
+async def help_page(request: Request):
+    """Help and support page"""
+    return templates.TemplateResponse("help.html", {"request": request})
+
 
 
 @app.get("/profile", response_class=HTMLResponse)
@@ -677,16 +678,14 @@ async def submit_centre_submission(request: Request):
     centre_submissions.append(submission)
 
     # Add entry to applications list for display on /applications page
-    applications_db.append(
-        {
-            "id": len(applications_db) + 1,
-            "awarding_organisation": form.get("ao_name"),
-            "rn": form.get("ao_id"),
-            "qualification_number": form.get("qualification_id"),
-            "qualification_title": form.get("title"),
-            "status": "Pending",
-        }
-    )
+    applications_db.append({
+        "id": len(applications_db) + 1,
+        "awarding_organisation": form.get("ao_name"),
+        "rn": form.get("ao_id"),
+        "qualification_number": form.get("qualification_id"),
+        "qualification_title": form.get("title"),
+        "status": "Pending",
+    })
 
     # After adding to our in-memory store, show the updated applications table
     user = get_current_user(request)
