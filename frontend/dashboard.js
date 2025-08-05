@@ -1,5 +1,12 @@
 const { useState, useEffect, useRef } = React;
 
+// Determine initial centre ID from query string, defaulting to 1
+function getInitialCentreId() {
+  const params = new URLSearchParams(window.location.search);
+  const value = parseInt(params.get("centre_id"), 10);
+  return isNaN(value) ? 1 : value;
+}
+
 function RadarChart({ centre, course }) {
   const canvasRef = useRef(null);
   useEffect(() => {
@@ -42,7 +49,7 @@ function RadarChart({ centre, course }) {
 }
 
 function Dashboard() {
-  const [centreId, setCentreId] = useState(1);
+  const [centreId, setCentreId] = useState(getInitialCentreId());
   const [data, setData] = useState({ centre: { lab_capabilities: {}, skill_levels: {} }, recommendations: [] });
   const [modeFilter, setModeFilter] = useState({ online: true, onsite: true, hybrid: true });
   const [minScore, setMinScore] = useState(0);

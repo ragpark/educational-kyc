@@ -127,8 +127,7 @@
 {% if recommend_available %}
 <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8" id="recommendation-section">
     <h3 class="text-xl font-semibold text-gray-900 mb-4">Recommended Courses</h3>
-    <button type="button" id="recommend-btn" class="bg-green-600 text-white px-4 py-2 rounded-md mb-4">Get Recommendations</button>
-    <div id="recommendations" class="space-y-2"></div>
+    <button type="button" id="recommend-btn" class="bg-green-600 text-white px-4 py-2 rounded-md mb-4">View Recommendations</button>
 </div>
 
 <script>
@@ -194,7 +193,6 @@ verificationInput.addEventListener('input', function(e) {
 
 const centreId = {{ centre_id | tojson }};
 const recommendBtn = document.getElementById('recommend-btn');
-const recContainer = document.getElementById('recommendations');
 if (recommendBtn) {
     if (centreId === null) {
         recommendBtn.disabled = true;
@@ -202,37 +200,23 @@ if (recommendBtn) {
     } else {
         recommendBtn.addEventListener('click', async () => {
             recommendBtn.disabled = true;
-            recContainer.innerHTML = '';
             recommendBtn.textContent = 'Preparing...';
             try {
                 const buildResp = await fetch('/build-recommendations', {
                     method: 'POST',
                     headers: {'Content-Type': 'application/json'},
-                    body: JSON.stringify({centre_id: centreId})
+                    body: JSON.stringify({ centre_id: centreId })
                 });
-                const buildData = await buildResp.json();
                 if (!buildResp.ok) {
+                    const buildData = await buildResp.json();
                     throw new Error(buildData.detail || 'Failed to build recommendations');
                 }
-                recommendBtn.textContent = 'Loading...';
-                const resp = await fetch(`/recommend/${centreId}`);
-                const data = await resp.json();
-                if (!resp.ok) {
-                    throw new Error(data.detail || 'Failed to load recommendations');
-                }
-                recContainer.innerHTML = '';
-                data.recommendations.forEach(r => {
-                    const card = document.createElement('div');
-                    card.className = 'border p-4 rounded-md';
-                    card.innerHTML = `<div class="font-medium">${r.title}</div>` +
-                        `<div class="text-sm text-gray-600">Score: ${(r.score * 100).toFixed(1)}%</div>`;
-                    recContainer.appendChild(card);
-                });
+                window.open(`/recommendations?centre_id=${centreId}`, '_blank');
             } catch (err) {
-                recContainer.innerHTML = `<div class="text-red-600">${err.message}</div>`;
+                alert(err.message);
             } finally {
                 recommendBtn.disabled = false;
-                recommendBtn.textContent = 'Get Recommendations';
+                recommendBtn.textContent = 'View Recommendations';
             }
         });
     }

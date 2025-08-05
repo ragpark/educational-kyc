@@ -270,6 +270,16 @@ try:
 except RuntimeError:
     pass
 
+# Expose the React dashboard for visual recommendations
+try:
+    app.mount(
+        "/recommendations",
+        StaticFiles(directory="frontend", html=True),
+        name="recommendations",
+    )
+except RuntimeError:
+    pass
+
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request):
