@@ -67,6 +67,13 @@ from app.centre_submission import (
 )
 from app.services.safeguarding_assessor import assess_safeguarding_document
 
+try:
+    from backend.recommend import app as recommend_api
+    RECOMMENDER_AVAILABLE = True
+except Exception:
+    recommend_api = None
+    RECOMMENDER_AVAILABLE = False
+
 # In-memory storage for demo
 providers_db = []
 # Simplistic in-memory storage for qualification applications
@@ -236,6 +243,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET", "super-secret"))
+
+# Mount recommendation API routes
+if RECOMMENDER_AVAILABLE:
+    app.include_router(recommend_api.router)
 
 # Templates setup
 templates = Jinja2Templates(directory="templates")
@@ -568,6 +579,9 @@ async def centre_submission_form(
     qualification_id: Optional[str] = None,
     qualification_title: Optional[str] = None,
 ):
+    user = get_current_user(request)
+    centre_id = 1 if user and user.get("role") == "learning_centre" else None
+
     return templates.TemplateResponse(
         "centre_submission_form.html",
         {
@@ -576,6 +590,8 @@ async def centre_submission_form(
             "organisation_name": organisation_name,
             "qualification_id": qualification_id,
             "qualification_title": qualification_title,
+            "centre_id": centre_id,
+            "recommendations_enabled": RECOMMENDER_AVAILABLE,
         },
     )
 
