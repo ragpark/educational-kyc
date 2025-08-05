@@ -19,6 +19,7 @@ import uuid
 import aiohttp
 import requests
 import logging
+from pathlib import Path
 from authlib.integrations.starlette_client import OAuth, OAuthError
 
 
@@ -265,20 +266,24 @@ if RECOMMENDER_AVAILABLE:
 templates = Jinja2Templates(directory="templates")
 
 # Static files (will be created)
-try:
-    app.mount("/static", StaticFiles(directory="app/static"), name="static")
-except RuntimeError:
-    pass
+static_dir = Path(__file__).resolve().parent / "static"
+if static_dir.is_dir():
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+else:
+    logger.error("Static directory not found: %s", static_dir)
+    raise RuntimeError(f"Static directory not found: {static_dir}")
 
 # Expose the React dashboard for visual recommendations
-try:
+frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
+if frontend_dir.is_dir():
     app.mount(
         "/recommendations",
-        StaticFiles(directory="frontend", html=True),
+        StaticFiles(directory=frontend_dir, html=True),
         name="recommendations",
     )
-except RuntimeError:
-    pass
+else:
+    logger.error("Frontend directory not found: %s", frontend_dir)
+    raise RuntimeError(f"Frontend directory not found: {frontend_dir}")
 
 
 @app.get("/", response_class=HTMLResponse)
