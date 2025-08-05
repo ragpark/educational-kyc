@@ -126,6 +126,12 @@
     </form>
 </div>
 
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8" id="recommendation-section">
+    <h3 class="text-xl font-semibold text-gray-900 mb-4">Recommended Courses</h3>
+    <button type="button" id="recommend-btn" class="bg-green-600 text-white px-4 py-2 rounded-md mb-4">Get Recommendations</button>
+    <div id="recommendations" class="space-y-2"></div>
+</div>
+
 <script>
 // Disable all form fields until verification ID is validated
 const verificationInput = document.getElementById('verification_id');
@@ -186,5 +192,40 @@ verificationInput.addEventListener('input', function(e) {
         }
     }, 500);
 });
+
+const centreId = {{ centre_id | tojson }};
+const recommendBtn = document.getElementById('recommend-btn');
+const recContainer = document.getElementById('recommendations');
+if (recommendBtn) {
+    if (centreId === null) {
+        recommendBtn.disabled = true;
+        recommendBtn.textContent = 'Centre unavailable';
+    } else {
+        recommendBtn.addEventListener('click', async () => {
+            recommendBtn.disabled = true;
+            recContainer.innerHTML = '';
+            recommendBtn.textContent = 'Preparing...';
+            try {
+                await fetch('/build-recommendations', {method: 'POST'});
+                recommendBtn.textContent = 'Loading...';
+                const resp = await fetch(`/recommend/${centreId}`);
+                const data = await resp.json();
+                recContainer.innerHTML = '';
+                data.recommendations.forEach(r => {
+                    const card = document.createElement('div');
+                    card.className = 'border p-4 rounded-md';
+                    card.innerHTML = `<div class="font-medium">${r.title}</div>` +
+                        `<div class=\"text-sm text-gray-600\">Score: ${(r.score * 100).toFixed(1)}%</div>`;
+                    recContainer.appendChild(card);
+                });
+            } catch (_) {
+                recContainer.innerHTML = '<div class="text-red-600">Failed to load recommendations</div>';
+            } finally {
+                recommendBtn.disabled = false;
+                recommendBtn.textContent = 'Get Recommendations';
+            }
+        });
+    }
+}
 </script>
 {% endblock %}
