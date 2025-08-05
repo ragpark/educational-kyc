@@ -600,7 +600,7 @@ async def centre_submission_form(
             "recommend_available": recommend_available,
         },
     )
-
+)
 
 @app.post("/build-recommendations")
 async def build_recommendations():
