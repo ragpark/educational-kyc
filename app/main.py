@@ -279,7 +279,7 @@ if frontend_dir.is_dir():
     app.mount(
         "/recommendations",
         StaticFiles(directory=frontend_dir, html=True),
-        name="index.html",
+        name="recommendations",
     )
 else:
     logger.error("Frontend directory not found: %s", frontend_dir)
