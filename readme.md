@@ -13,6 +13,12 @@ A comprehensive Know Your Customer (KYC) verification system specifically design
 - Model Context Protocol (MCP) wrapper for AI integrations
 - REST onboarding API with MCP wrapper support
 
+📚 **Training Course Recommendations**
+- PostgreSQL & SQLAlchemy models for centres, labs, staff skills and courses
+- ETL pipeline with scikit-learn producing centre and course feature matrices
+- FastAPI service returning recommended courses for a centre
+- React/Tailwind dashboard visualising similarity scores and capability radar charts
+
 📊 **Risk Assessment**
 - Automated risk scoring
 - Educational-specific compliance checks
@@ -46,7 +52,7 @@ pip install -r requirements.txt
 uvicorn app.main:app --reload
 
 # create tables locally
-python -c "from app.database import init_db; init_db()"
+python -c "from backend.database import init_db; init_db()"
 
 ```
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/your-template-id)
@@ -64,6 +70,29 @@ The Railway deployment now provisions a **PostgreSQL** service for storing user
 accounts and provider applications. The FastAPI application connects to this
 database using SQLAlchemy. Dataclasses in `app/models.py` define the schema for
 `user_accounts` and `applications` tables, which support full CRUD operations.
+
+## Course Recommendation Engine
+
+The repository now contains a small training course recommendation prototype.
+
+```bash
+# rebuild feature matrices via the main app
+curl -X POST http://localhost:8000/build-recommendations
+
+# start the recommendation API (included in main app)
+uvicorn app.main:app --reload
+
+# open the demo dashboard (served statically)
+# e.g. using a simple file server
+python -m http.server --directory frontend 8001
+```
+
+Navigate to `http://localhost:8001` and enter a centre ID to view recommended
+courses. Results can be filtered by delivery mode and minimum similarity score,
+with radar charts showing how centre capabilities compare to course
+requirements.
+The centre submission form invokes `POST /build-recommendations` to generate
+the latest feature matrices before requesting recommendations.
 
 ### Example: Qualification Search
 
