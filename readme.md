@@ -77,6 +77,7 @@ The repository now contains a small training course recommendation prototype.
 
 ```bash
 
+
 # open the demo dashboard (served statically)
 # e.g. using a simple file server
 python -m http.server --directory frontend 8001

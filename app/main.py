@@ -69,6 +69,12 @@ from app.services.safeguarding_assessor import assess_safeguarding_document
 
 import importlib
 
+try:
+    from backend.recommend import app as recommend_api
+    RECOMMENDER_AVAILABLE = True
+except Exception:
+    recommend_api = None
+    RECOMMENDER_AVAILABLE = False
 
 try:
     from backend.etl import run_etl
@@ -582,7 +588,8 @@ async def centre_submission_form(
 ):
     user = get_current_user(request)
     centre_id = 1 if user and user.get("role") == "learning_centre" else None
-
+    recommend_available = (run_etl is not None) or RECOMMENDER_AVAILABLE
+    
     return templates.TemplateResponse(
         "centre_submission_form.html",
         {
@@ -592,7 +599,7 @@ async def centre_submission_form(
             "qualification_id": qualification_id,
             "qualification_title": qualification_title,
             "centre_id": centre_id,
-            "recommendations_enabled": RECOMMENDER_AVAILABLE,
+            "recommend_available": recommend_available,
         },
     )
 

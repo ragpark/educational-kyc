@@ -130,6 +130,12 @@
         </div>
     </form>
 </div>
+{% if recommend_available %}
+<div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8" id="recommendation-section">
+    <h3 class="text-xl font-semibold text-gray-900 mb-4">Recommended Courses</h3>
+    <button type="button" id="recommend-btn" class="bg-green-600 text-white px-4 py-2 rounded-md mb-4">Get Recommendations</button>
+    <div id="recommendations" class="space-y-2"></div>
+</div>
 
 
 <script>
@@ -194,7 +200,6 @@ verificationInput.addEventListener('input', function(e) {
 });
 
 const centreId = {{ centre_id | tojson }};
-
 const recommendBtn = document.getElementById('recommend-btn');
 const recContainer = document.getElementById('recommendations');
 if (recommendBtn) {
@@ -229,4 +234,5 @@ if (recommendBtn) {
     }
 }
 </script>
+{% endif %}
 {% endblock %}
