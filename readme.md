@@ -54,6 +54,9 @@ uvicorn app.main:app --reload
 # create tables locally
 python -c "from backend.database import init_db; init_db()"
 
+# populate with example centres and courses before running ETL/recommendations
+python -m backend.seed_data
+
 ```
 [![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/your-template-id)
 
@@ -74,6 +77,13 @@ database using SQLAlchemy. Dataclasses in `app/models.py` define the schema for
 ## Course Recommendation Engine
 
 The repository now contains a small training course recommendation prototype.
+
+Before generating feature matrices or running the recommendation API, seed the
+database with sample data:
+
+```bash
+python -m backend.seed_data
+```
 
 ```bash
 # rebuild feature matrices via the main app
