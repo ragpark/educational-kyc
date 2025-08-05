@@ -90,7 +90,7 @@
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h4 class="font-semibold text-gray-900 mb-2">🎓 Educational Verification</h4>
                             <ul class="text-gray-700 space-y-1">
-                                <li>• Pearson Education qualification searches</li>
+                                <li>• AO's qualification in OFQUAL</li>
                                 <li>• Ofqual API integration</li>
                                 <li>• Ofsted inspection ratings</li>
                             </ul>
@@ -138,12 +138,12 @@
                             <button onclick="toggleSection('home-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
                                 <div class="flex items-center space-x-3">
                                     <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">Home</span>
-                                    <span class="font-medium">Dashboard</span>
+                                    <span class="font-medium">Cente Approval</span>
                                 </div>
                                 <span data-icon="home-details" class="text-xl font-bold text-gray-400">+</span>
                             </button>
                             <div id="home-details" class="hidden px-4 pb-4 text-gray-700">
-                                Your central overview showing current application status, quick access to key functions, recent activity summary, and verification progress indicators.
+                                Shows new learning centre applications by AO. Provides quick access to key functions, credentials and status reports, and verification progress indicators.
                             </div>
                         </div>
 
@@ -151,12 +151,12 @@
                             <button onclick="toggleSection('applications-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
                                 <div class="flex items-center space-x-3">
                                     <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium">Applications</span>
-                                    <span class="font-medium">Track Applications</span>
+                                    <span class="font-medium">Qualification Approval</span>
                                 </div>
                                 <span data-icon="applications-details" class="text-xl font-bold text-gray-400">+</span>
                             </button>
                             <div id="applications-details" class="hidden px-4 pb-4 text-gray-700">
-                                Track and manage your submissions: view all submitted applications, monitor in-progress verifications, check application status updates, and access completed verification credentials.
+                                Track and manage your submissions: view all submitted applications to deliver qualifications, monitor in-progress verifications, check application status updates, and access completed verification credentials.
                             </div>
                         </div>
 
@@ -164,25 +164,12 @@
                             <button onclick="toggleSection('organisation-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
                                 <div class="flex items-center space-x-3">
                                     <span class="bg-yellow-100 text-yellow-600 px-3 py-1 rounded-full text-sm font-medium">My Organisation</span>
-                                    <span class="font-medium">Manage Details</span>
+                                    <span class="font-medium">Qualification Selection</span>
                                 </div>
                                 <span data-icon="organisation-details" class="text-xl font-bold text-gray-400">+</span>
                             </button>
                             <div id="organisation-details" class="hidden px-4 pb-4 text-gray-700">
-                                Manage your organisational details: update delivery sites information, maintain contact details, edit organisational structure, and configure centre locations.
-                            </div>
-                        </div>
-
-                        <div class="border border-gray-200 rounded-lg">
-                            <button onclick="toggleSection('messages-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
-                                <div class="flex items-center space-x-3">
-                                    <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-medium">Messages</span>
-                                    <span class="font-medium">Communications</span>
-                                </div>
-                                <span data-icon="messages-details" class="text-xl font-bold text-gray-400">+</span>
-                            </button>
-                            <div id="messages-details" class="hidden px-4 pb-4 text-gray-700">
-                                Communication hub for application status updates, Awarding Organisation (AO) requests, system notifications, and support communications.
+                                Search for, select and add OFQUAL registered courses to your application pack(s).
                             </div>
                         </div>
 
@@ -190,12 +177,12 @@
                             <button onclick="toggleSection('documents-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
                                 <div class="flex items-center space-x-3">
                                     <span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-sm font-medium">Documents</span>
-                                    <span class="font-medium">File Management</span>
+                                    <span class="font-medium">AI supported Evidence locker</span>
                                 </div>
                                 <span data-icon="documents-details" class="text-xl font-bold text-gray-400">+</span>
                             </button>
                             <div id="documents-details" class="hidden px-4 pb-4 text-gray-700">
-                                Document management centre: upload required verification documents, store commonly used files for reuse, manage document versions, and access document templates.
+                                Document management centre: upload required verification documents, store commonly used files for reuse, manage document versions, and access document templates. Uploaded documents assessed in realtime by AI to determine relevance, safety and accuracy. When all indicators are Green, your are ready to submit.
                             </div>
                         </div>
 
@@ -203,12 +190,12 @@
                             <button onclick="toggleSection('profile-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
                                 <div class="flex items-center space-x-3">
                                     <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-medium">User Profile</span>
-                                    <span class="font-medium">Account Settings</span>
+                                    <span class="font-medium">Verify a Centre</span>
                                 </div>
                                 <span data-icon="profile-details" class="text-xl font-bold text-gray-400">+</span>
                             </button>
                             <div id="profile-details" class="hidden px-4 pb-4 text-gray-700">
-                                Account management tools: update personal information, manage account settings, configure notification preferences, and access security settings.
+                                A means to validate a Centres QR code to establish validity and a current licence to operate
                             </div>
                         </div>
                     </div>
@@ -347,9 +334,10 @@
                             <div>
                                 <h3 class="text-lg font-semibold text-gray-900 mb-2">Organisation Setup</h3>
                                 <ul class="text-gray-700 space-y-1">
-                                    <li>• Navigate to "My Organisation"</li>
+                                    <li>• Navigate to "Centre Approval"</li>
                                     <li>• Enter all required organisational details</li>
-                                    <li>• Upload supporting documentation</li>
+                                    <li>• Generate your Licence to Operate (QR Code and Verification ID)</li>                                    
+                                    <li>• Upload supporting documentation to the Evidence locker</li>
                                     <li>• Add delivery site information</li>
                                 </ul>
                             </div>
@@ -360,11 +348,10 @@
                             <div>
                                 <h3 class="text-lg font-semibold text-gray-900 mb-2">Application Submission</h3>
                                 <ul class="text-gray-700 space-y-1">
-                                    <li>• Go to "Applications" section</li>
-                                    <li>• Select "New Application"</li>
-                                    <li>• Choose application type (Centre or Qualification)</li>
-                                    <li>• Complete all required fields</li>
-                                    <li>• Upload necessary supporting documents</li>
+                                    <li>• Go to "Qualification Approval" section</li>
+                                    <li>• Add the Verification ID from the Centre Approval step </li>
+                                    <li>• Search for the course using the OFQUAL Search tool, Select the course to add it to the Approval form</li>
+                                    <li>• Complete all remaining fields</li>                                
                                     <li>• Review and submit application</li>
                                 </ul>
                             </div>
@@ -378,8 +365,8 @@
                                 <ul class="text-gray-700 space-y-1">
                                     <li>• Verify organisation against Companies House</li>
                                     <li>• Check Ofsted inspection records</li>
-                                    <li>• Validate ESFA funding status</li>
-                                    <li>• Search Ofqual qualification databases</li>
+                                    <li>• Validate UKPRN and URN identifiers</li>
+                                    <li>• Validate Postcode and other data</li>
                                     <li>• Calculate risk assessment score</li>
                                 </ul>
                             </div>
