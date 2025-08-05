@@ -81,6 +81,9 @@ try:
 except Exception:
     run_etl = None
 
+# Whether recommendations can be built or served
+RECOMMEND_AVAILABLE = (run_etl is not None) or RECOMMENDER_AVAILABLE
+
 # In-memory storage for demo
 providers_db = []
 # Simplistic in-memory storage for qualification applications
@@ -201,6 +204,9 @@ async def lifespan(app: FastAPI):
 
     if api_status["orchestrator_available"]:
         print("✓ Certify3 KYC Orchestrator available")
+
+    if not RECOMMEND_AVAILABLE:
+        print("⚠ Recommendation engine not configured - button disabled")
 
     # Add sample data
     sample_providers = [
@@ -589,7 +595,6 @@ async def centre_submission_form(
     # --- function body must be indented here ---
     user = get_current_user(request)
     centre_id = 1 if user and user.get("role") == "learning_centre" else None
-    recommend_available = (run_etl is not None) or RECOMMENDER_AVAILABLE
 
     return templates.TemplateResponse(
         "centre_submission_form.html",
@@ -600,7 +605,7 @@ async def centre_submission_form(
             "qualification_id": qualification_id,
             "qualification_title": qualification_title,
             "centre_id": centre_id,
-        "recommend_available": recommend_available,
+            "recommend_available": RECOMMEND_AVAILABLE,
         },
     )
 
@@ -624,8 +629,9 @@ async def build_recommendations(payload: RecommendationBuildRequest):
             if not getattr(r, "path", "").startswith("/recommend")
         ]
         app.include_router(recommend_module.app.router)
-        global RECOMMENDER_AVAILABLE
+        global RECOMMENDER_AVAILABLE, RECOMMEND_AVAILABLE
         RECOMMENDER_AVAILABLE = True
+        RECOMMEND_AVAILABLE = True
         result = recommend_module.recommend(
             payload.centre_id, top_n=payload.top_n
         )
@@ -633,7 +639,8 @@ async def build_recommendations(payload: RecommendationBuildRequest):
     except HTTPException:
         raise
     except Exception as e:
-        return JSONResponse(content={"detail": str(e)}, status_code=500)
+        logger.exception("Recommendation ETL failed")
+        raise HTTPException(status_code=500, detail=str(e))
 
 
 @app.post("/centre-submission")
