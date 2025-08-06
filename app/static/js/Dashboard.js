@@ -1,6 +1,6 @@
 const { useState, useEffect, useRef } = React;
 
-// Determine initial centre ID from the query string, defaulting to 1
+// Determine initial centre ID from the query string, defaulting to 1.
 function getInitialCentreId() {
   const params = new URLSearchParams(window.location.search);
   const value = parseInt(params.get("centre_id"), 10);
