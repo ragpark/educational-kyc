@@ -59,6 +59,71 @@ function RadarChart({ centre, course }) {
   return <canvas ref={canvasRef} className="w-full h-64"></canvas>;
 }
 
+function MatrixHeatmap({ centre, course }) {
+  const minLabReq = Array.isArray(course.min_lab_req) ? course.min_lab_req : [];
+  const skillPrereqs = Array.isArray(course.skill_prereqs)
+    ? course.skill_prereqs
+    : [];
+  const labels = Array.from(
+    new Set([
+      ...Object.keys(centre.lab_capabilities || {}),
+      ...minLabReq,
+      ...Object.keys(centre.skill_levels || {}),
+      ...skillPrereqs,
+    ])
+  );
+  const centreData = labels.map(
+    (l) => centre.lab_capabilities[l] || centre.skill_levels[l] || 0
+  );
+  const courseData = labels.map((l) =>
+    minLabReq.includes(l) || skillPrereqs.includes(l) ? 1 : 0
+  );
+  const maxCentre = Math.max(...centreData, 1);
+
+  return (
+    <div className="overflow-x-auto">
+      <table className="border-collapse text-xs">
+        <thead>
+          <tr>
+            <th className="p-1 border"></th>
+            {labels.map((label) => (
+              <th key={label} className="p-1 border">
+                {label}
+              </th>
+            ))}
+          </tr>
+        </thead>
+        <tbody>
+          <tr>
+            <th className="p-1 border text-left">Centre</th>
+            {centreData.map((v, i) => (
+              <td
+                key={`c-${i}`}
+                className="w-8 h-8 border text-[10px]"
+                style={{ backgroundColor: `rgba(59,130,246,${v / maxCentre})` }}
+              >
+                {v}
+              </td>
+            ))}
+          </tr>
+          <tr>
+            <th className="p-1 border text-left">Course</th>
+            {courseData.map((v, i) => (
+              <td
+                key={`p-${i}`}
+                className="w-8 h-8 border text-[10px]"
+                style={{ backgroundColor: `rgba(16,185,129,${v})` }}
+              >
+                {v}
+              </td>
+            ))}
+          </tr>
+        </tbody>
+      </table>
+    </div>
+  );
+}
+
 function Dashboard() {
   const [centreId, setCentreId] = useState(getInitialCentreId());
   const [data, setData] = useState({
@@ -73,6 +138,7 @@ function Dashboard() {
   });
   const [minScore, setMinScore] = useState(0);
   const [open, setOpen] = useState(null);
+  const [chartType, setChartType] = useState("radar");
 
   const fetchData = async () => {
     setError(null);
@@ -97,6 +163,10 @@ function Dashboard() {
   const filtered = data.recommendations.filter(
     (c) => modeFilter[c.delivery_mode] && c.score >= minScore
   );
+
+  useEffect(() => {
+    setChartType("radar");
+  }, [open]);
 
   return (
     <div className="space-y-4">
@@ -172,8 +242,40 @@ function Dashboard() {
             ></div>
           </div>
           {open === idx && (
-            <div className="mt-4">
-              <RadarChart centre={data.centre} course={course} />
+            <div className="mt-4 space-y-2" onClick={(e) => e.stopPropagation()}>
+              <div className="flex space-x-2">
+                <button
+                  className={`px-2 py-1 text-sm rounded ${
+                    chartType === "radar"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200"
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setChartType("radar");
+                  }}
+                >
+                  Radar
+                </button>
+                <button
+                  className={`px-2 py-1 text-sm rounded ${
+                    chartType === "heatmap"
+                      ? "bg-blue-500 text-white"
+                      : "bg-gray-200"
+                  }`}
+                  onClick={(e) => {
+                    e.stopPropagation();
+                    setChartType("heatmap");
+                  }}
+                >
+                  Heatmap
+                </button>
+              </div>
+              {chartType === "radar" ? (
+                <RadarChart centre={data.centre} course={course} />
+              ) : (
+                <MatrixHeatmap centre={data.centre} course={course} />
+              )}
             </div>
           )}
         </div>
