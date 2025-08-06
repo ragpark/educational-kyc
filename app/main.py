@@ -6,7 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 import os
@@ -273,6 +273,10 @@ else:
     logger.error("Static directory not found: %s", static_dir)
     raise RuntimeError(f"Static directory not found: {static_dir}")
 
+# Serve the legacy recommendations dashboard assets
+frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
+
+
 # Expose the React dashboard for visual recommendations
 @app.get("/recommendations", response_class=HTMLResponse)
 async def recommendations(request: Request):
@@ -281,6 +285,16 @@ async def recommendations(request: Request):
     if not centre_id:
         return RedirectResponse("/login", status_code=302)
     return templates.TemplateResponse("recommendation.html", {"request": request, "centre_id": centre_id})
+
+
+@app.get("/recommendations/{path:path}")
+async def recommendations_static(path: str):
+    if path in ("", "index.htm"):
+        path = "index.html"
+    file_path = frontend_dir / path
+    if not file_path.is_file():
+        raise HTTPException(status_code=404)
+    return FileResponse(file_path)
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request):
