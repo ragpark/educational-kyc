@@ -211,8 +211,8 @@ if (recommendBtn) {
                     const buildData = await buildResp.json();
                     throw new Error(buildData.detail || 'Failed to build recommendations');
                 }
-                // Include trailing slash so the static frontend is served correctly
-                window.open(`/recommendations/?centre_id=${centreId}`, '_blank');
+                // Open the recommendations dashboard for the centre
+                window.open(`/recommendations/index.htm?centre_id=${centreId}`, '_blank');
             } catch (err) {
                 alert(err.message);
             } finally {
