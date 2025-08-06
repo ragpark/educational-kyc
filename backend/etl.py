@@ -48,6 +48,17 @@ def run_etl(output_dir: str = None):
                     "labs": list(lab_dict.keys()),
                     "skills": list(skill_dict.keys()),
                     "online_rating": rating,
+                    "years_operating": getattr(c, "years_operating", 0),
+                    "offers_similar_courses": getattr(
+                        c, "offers_similar_courses", False
+                    ),
+                    "standards_verification": getattr(
+                        c, "standards_verification", "unknown"
+                    ),
+                    "years_known_ao": getattr(c, "years_known_ao", 0),
+                    "late_payment_history": getattr(
+                        c, "late_payment_history", False
+                    ),
                 }
             )
 
