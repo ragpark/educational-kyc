@@ -62,7 +62,7 @@ function RadarChart({ centre, course }) {
 function Dashboard() {
   const [centreId, setCentreId] = useState(getInitialCentreId());
   const [data, setData] = useState({
-    centre: { lab_capabilities: {}, skill_levels: {} },
+    centre: { lab_capabilities: {}, skill_levels: {}, risk_score: 0, partner_tier: "" },
     recommendations: [],
   });
   const [error, setError] = useState(null);
@@ -84,7 +84,7 @@ function Dashboard() {
     } catch (err) {
       setError(err.message);
       setData({
-        centre: { lab_capabilities: {}, skill_levels: {} },
+        centre: { lab_capabilities: {}, skill_levels: {}, risk_score: 0, partner_tier: "" },
         recommendations: [],
       });
     }
@@ -114,6 +114,22 @@ function Dashboard() {
         >
           Load
         </button>
+      </div>
+      <div className="bg-white p-4 rounded shadow">
+        <div className="flex justify-between text-sm mb-1">
+          <span>Risk Score</span>
+          <span>{data.centre.partner_tier} ({data.centre.risk_score.toFixed(1)})</span>
+        </div>
+        <div className="w-full bg-gray-200 rounded h-4 relative">
+          <div
+            className="bg-green-500 h-4 rounded"
+            style={{ width: `${(data.centre.risk_score / 10) * 100}%` }}
+          ></div>
+          <div className="absolute inset-0 flex justify-between text-xs px-1">
+            <span>0</span>
+            <span>10</span>
+          </div>
+        </div>
       </div>
       <div className="flex space-x-4">
         {Object.keys(modeFilter).map((mode) => (

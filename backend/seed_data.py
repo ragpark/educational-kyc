@@ -16,6 +16,11 @@ def seed():
             location="London",
             capacity=500,
             online_rating=4.5,
+            years_operating=5,
+            offers_similar_courses=True,
+            standards_verification="good",
+            years_known_ao=3,
+            late_payment_history=False,
         )
         centre1.labs = [
             CentreLab(lab_type="IT Lab", capability=0.9),
@@ -29,6 +34,11 @@ def seed():
             location="Manchester",
             capacity=300,
             online_rating=4.0,
+            years_operating=2,
+            offers_similar_courses=False,
+            standards_verification="poor",
+            years_known_ao=1,
+            late_payment_history=True,
         )
         centre2.labs = [
             CentreLab(lab_type="Data Lab", capability=0.7),
