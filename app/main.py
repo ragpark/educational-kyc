@@ -641,7 +641,10 @@ async def build_recommendations(payload: RecommendationBuildRequest):
         app.router.routes = [
             r
             for r in app.router.routes
-            if not getattr(r, "path", "").startswith("/recommend")
+            if not (
+                getattr(r, "path", "").startswith("/recommend")
+                and not getattr(r, "path", "").startswith("/recommendations")
+            )
         ]
         app.include_router(recommend_module.app.router)
         global RECOMMENDER_AVAILABLE, RECOMMEND_AVAILABLE
