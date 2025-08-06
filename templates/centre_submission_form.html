@@ -214,7 +214,7 @@ if (recommendBtn) {
                     throw new Error(buildData.detail || 'Failed to build recommendations');
                 }
                 // Open the recommendations dashboard for the centre
-                window.open(`/recommendations/index.htm?centre_id=${centreId}`, '_blank');
+                window.open(`/recommendations`, '_blank');
             } catch (err) {
                 alert(err.message);
             } finally {
