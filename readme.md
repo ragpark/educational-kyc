@@ -105,22 +105,10 @@ requirements.
 The centre submission form invokes `POST /build-recommendations` to generate
 the latest feature matrices before requesting recommendations.
 
-### How recommendations work
+**How recommendations work**
 
-The recommendation engine models each centre and course using features drawn
-from the relational database. `centres` link to their available labs and staff
-skills via the `centre_labs` and `centre_staff_skills` tables, while courses
-list required labs and prerequisite skills in `courses` and `course_tags`.
-During ETL these attributes are vectorised with scikit‑learn's
-`DictVectorizer`, `OneHotEncoder` and `StandardScaler` to build comparable
-feature matrices for centres and courses. When a recommendation is requested,
-the API computes cosine similarity between the centre's feature vector and all
-course vectors, filtering out options that lack required labs or have online
-content unsuitable for low‑rated centres. Results are sorted by similarity and
-annotated with a risk score and partner tier. The React dashboard fetches this
-data and overlays centre capabilities against course requirements using a
-Chart.js radar chart, allowing users to explore how well each course matches a
-particular centre's resources.
+The recommendation engine models each centre and course using features drawn from the relational database. centres link to their available labs and staff skills via the centre_labs and centre_staff_skills tables, while courses list required labs and prerequisite skills in courses and course_tags. During ETL these attributes are vectorised with scikit‑learn's DictVectorizer, OneHotEncoder and StandardScaler to build comparable feature matrices for centres and courses. When a recommendation is requested, the API computes cosine similarity between the centre's feature vector and all course vectors, filtering out options that lack required labs or have online content unsuitable for low‑rated centres. Results are sorted by similarity and annotated with a risk score and partner tier. The React dashboard fetches this data and overlays centre capabilities against course requirements using a Chart.js radar chart, allowing users to explore how well each course matches a particular centre's resources.
+This approach implements a content-based filtering recommendation system, which matches centres to courses based on intrinsic attributes rather than user behaviour patterns. Unlike collaborative filtering systems that learn from user preferences and ratings, this design focuses on objective resource compatibility - matching centre capabilities (labs, staff skills) directly against course requirements (prerequisite skills, technical needs). This content-based approach is well-suited to the domain since course delivery success depends fundamentally on whether a centre has the physical infrastructure and expertise required, rather than subjective preferences that might benefit from collaborative patterns. The system essentially answers "Can this centre deliver this course effectively?" by quantifying how well their resources align with the course's technical demands.
 
 ### Example: Qualification Search
 
