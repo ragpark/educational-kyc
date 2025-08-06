@@ -277,10 +277,10 @@ else:
 @app.get("/recommendations", response_class=HTMLResponse)
 async def recommendations(request: Request):
     """Course and Centre Matching recommendations page"""
-    user = get_current_user(request)
+    centre_id = get_current_user(request)
     if not user:
         return RedirectResponse("/login", status_code=302)
-    return templates.TemplateResponse("recommendation.html", {"request": request, "user": user})
+    return templates.TemplateResponse("recommendation.html", {"request": request, "centre_id": centre_id})
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request):
