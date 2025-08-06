@@ -278,7 +278,7 @@ else:
 async def recommendations(request: Request):
     """Course and Centre Matching recommendations page"""
     centre_id = get_current_user(request)
-    if not user:
+    if not centre_id:
         return RedirectResponse("/login", status_code=302)
     return templates.TemplateResponse("recommendation.html", {"request": request, "centre_id": centre_id})
 
