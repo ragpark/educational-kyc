@@ -86,14 +86,16 @@
             Simulate Progress
         </button>
     </div>
-    <div id="root"></div>
-    <script type="text/babel" src="{{ url_for('static', path='js/Dashboard.js') }}"></script>
-    
+
     <!-- Debug Console -->
     <div id="debugConsole" class="mt-8 p-4 bg-gray-100 rounded-lg text-sm font-mono">
         <strong>Debug Console:</strong><br>
         <div id="debugOutput">Ready to debug...</div>
     </div>
+
+    <div id="root">Dashboard</div>
+    <script type="text/babel" src="{{ url_for('static', path='js/Dashboard.js') }}"></script>
+    
 </div>
 
 <script>
