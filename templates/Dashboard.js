@@ -77,7 +77,7 @@ function Dashboard() {
   const fetchData = async () => {
     setError(null);
     try {
-      const res = await fetch(`/recommend/${centreId}?top_n=20`);
+      const res = await fetch(`/recommend/1?top_n=20`);
       if (!res.ok) throw new Error(`Request failed: ${res.status}`);
       const json = await res.json();
       setData(json);
