@@ -1809,4 +1809,4 @@ def simulate_jcq_check(centre_number: str) -> Dict:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
+    uvicorn.run(app, --proxy-headers, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
