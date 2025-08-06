@@ -1,128 +1,128 @@
 {% extends "base.html" %}
 {% block title %}Course and Centre Matching{% endblock %}
 {% block content %}
-<script src="https://unpkg.com/react@18/umd/react.development.js" crossorigin></script>    <
-<script src="https://unpkg.com/react-dom@18/umd/react-dom.development.js" crossorigin></script>
-<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
-<script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
 <h1 class="text-2xl font-bold mb-4">Courses & Centre Matching service</h1>
 
 <div class="max-w-4xl mx-auto">
-        <h2 class="text-2xl font-bold text-center mb-12 text-gray-800">Development Progression</h2>
+    <h2 class="text-2xl font-bold text-center mb-12 text-gray-800">Development Progression</h2>
+    
+    <!-- Progress Container -->
+    <div class="relative flex items-center justify-between w-full">
         
-        <!-- Progress Container -->
-        <div class="relative flex items-center justify-between w-full">
-            
-            <!-- Progress Line Background -->
-            <div class="absolute top-6 left-6 right-6 h-1 bg-gray-300 rounded-full"></div>
-            
-            <!-- Progress Line Active (you can adjust this width to show current progress) -->
-            <div class="absolute top-6 left-6 h-1 bg-blue-500 rounded-full" style="width: 0%"></div>
-            
-            <!-- Stage 1: Developer -->
-            <div class="relative flex flex-col items-center z-10" style="flex: 1;">
-                <div class="w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-                    <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
-                    </svg>
-                </div>
-                <div class="mt-4 text-center">
-                    <h3 class="text-sm font-semibold text-gray-800">Developer</h3>
-                    <p class="text-xs text-gray-600 mt-1">Foundation Stage</p>
-                </div>
+        <!-- Progress Line Background -->
+        <div class="absolute top-6 left-6 right-6 h-1 bg-gray-300 rounded-full"></div>
+        
+        <!-- Progress Line Active -->
+        <div id="progressLine" class="absolute top-6 left-6 h-1 bg-blue-500 rounded-full" style="width: 0%"></div>
+        
+        <!-- Stage 1: Developer -->
+        <div class="relative flex flex-col items-center z-10" style="flex: 1;">
+            <div class="progress-circle w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
+                </svg>
             </div>
-            
-            <!-- Stage 2: Established -->
-            <div class="relative flex flex-col items-center z-10" style="flex: 1;">
-                <div class="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
-                    </svg>
-                </div>
-                <div class="mt-4 text-center">
-                    <h3 class="text-sm font-semibold text-gray-800">Established</h3>
-                    <p class="text-xs text-gray-600 mt-1">Growing Stage</p>
-                </div>
-            </div>
-            
-            <!-- Stage 3: To Industry -->
-            <div class="relative flex flex-col items-center z-10" style="flex: 1;">
-                <div class="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
-                    </svg>
-                </div>
-                <div class="mt-4 text-center">
-                    <h3 class="text-sm font-semibold text-gray-800">To Industry</h3>
-                    <p class="text-xs text-gray-600 mt-1">Scaling Stage</p>
-                </div>
-            </div>
-            
-            <!-- Stage 4: Strategic (closer spacing) -->
-            <div class="relative flex flex-col items-center z-10 ml-8">
-                <div class="w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-                    <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
-                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
-                    </svg>
-                </div>
-                <div class="mt-4 text-center">
-                    <h3 class="text-sm font-semibold text-gray-800">Strategic</h3>
-                    <p class="text-xs text-gray-600 mt-1">Leadership Stage</p>
-                </div>
+            <div class="mt-4 text-center">
+                <h3 class="text-sm font-semibold text-gray-800">Developer</h3>
+                <p class="text-xs text-gray-600 mt-1">Foundation Stage</p>
             </div>
         </div>
         
-        <!-- Interactive Demo (Optional) -->
-        <div class="mt-12 text-center">
-            <button id="progressBtn" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
-                Simulate Progress
-            </button>
+        <!-- Stage 2: Established -->
+        <div class="relative flex flex-col items-center z-10" style="flex: 1;">
+            <div class="progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
+                </svg>
+            </div>
+            <div class="mt-4 text-center">
+                <h3 class="text-sm font-semibold text-gray-800">Established</h3>
+                <p class="text-xs text-gray-600 mt-1">Growing Stage</p>
+            </div>
         </div>
-            <div id="root" class="p-4"></div>
-            <script type="text/babel" src="Dashboard.js"></script>
+        
+        <!-- Stage 3: To Industry -->
+        <div class="relative flex flex-col items-center z-10" style="flex: 1;">
+            <div class="progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
+                </svg>
+            </div>
+            <div class="mt-4 text-center">
+                <h3 class="text-sm font-semibold text-gray-800">To Industry</h3>
+                <p class="text-xs text-gray-600 mt-1">Scaling Stage</p>
+            </div>
+        </div>
+        
+        <!-- Stage 4: Strategic -->
+        <div class="relative flex flex-col items-center z-10 ml-8">
+            <div class="progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                    <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
+                </svg>
+            </div>
+            <div class="mt-4 text-center">
+                <h3 class="text-sm font-semibold text-gray-800">Strategic</h3>
+                <p class="text-xs text-gray-600 mt-1">Leadership Stage</p>
+            </div>
+        </div>
     </div>
+    
+    <!-- Interactive Demo -->
+    <div class="mt-12 text-center">
+        <button id="progressBtn" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+            Simulate Progress
+        </button>
+    </div>
+</div>
 
-    <script>
-        const progressBtn = document.getElementById('progressBtn');
-        const progressLine = document.querySelector('.absolute.bg-blue-500');
-        const circles = document.querySelectorAll('.w-12.h-12');
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    const progressBtn = document.getElementById('progressBtn');
+    const progressLine = document.getElementById('progressLine');
+    const circles = document.querySelectorAll('.progress-circle');
+    
+    let currentStage = 0;
+    const stages = [0, 33.33, 66.66, 85]; // Percentages for each stage
+    
+    progressBtn.addEventListener('click', function() {
+        currentStage = (currentStage + 1) % 5; // 5 to reset after completion
         
-        let currentStage = 0;
-        const stages = [0, 33.33, 66.66, 85]; // Percentages for each stage (note smaller gap at end)
-        
-        progressBtn.addEventListener('click', () => {
-            currentStage = (currentStage + 1) % 5; // 5 to reset after completion
-            
-            if (currentStage === 0) {
-                // Reset
-                progressLine.style.width = '0%';
-                circles.forEach((circle, index) => {
-                    if (index === 0) {
-                        circle.className = 'w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg';
-                    } else {
-                        circle.className = 'w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg';
-                    }
-                });
-                progressBtn.textContent = 'Simulate Progress';
-            } else {
-                // Update progress
-                progressLine.style.width = stages[currentStage - 1] + '%';
-                
-                circles.forEach((circle, index) => {
-                    if (index < currentStage) {
-                        circle.className = 'w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg';
-                    } else {
-                        circle.className = 'w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg';
-                    }
-                });
-                
-                if (currentStage === 4) {
-                    progressBtn.textContent = 'Reset Progress';
-                    progressLine.style.width = '100%';
+        if (currentStage === 0) {
+            // Reset
+            progressLine.style.width = '0%';
+            circles.forEach(function(circle, index) {
+                if (index === 0) {
+                    circle.className = 'progress-circle w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg';
+                    circle.querySelector('svg').className = 'w-6 h-6 text-white';
+                } else {
+                    circle.className = 'progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg';
+                    circle.querySelector('svg').className = 'w-6 h-6 text-gray-600';
                 }
+            });
+            progressBtn.textContent = 'Simulate Progress';
+        } else {
+            // Update progress
+            progressLine.style.width = stages[currentStage - 1] + '%';
+            
+            circles.forEach(function(circle, index) {
+                if (index < currentStage) {
+                    circle.className = 'progress-circle w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg';
+                    circle.querySelector('svg').className = 'w-6 h-6 text-white';
+                } else {
+                    circle.className = 'progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg';
+                    circle.querySelector('svg').className = 'w-6 h-6 text-gray-600';
+                }
+            });
+            
+            if (currentStage === 4) {
+                progressBtn.textContent = 'Reset Progress';
+                progressLine.style.width = '100%';
             }
-        });
-    </script>
-
+        }
+    });
+});
+</script>
 
 {% endblock %}
