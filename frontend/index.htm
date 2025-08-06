@@ -2,6 +2,14 @@
 {% block title %}Course and Centre Matching{% endblock %}
 {% block content %}
 
+<!-- Add Tailwind CSS if not in base template -->
+<script src="https://cdn.tailwindcss.com"></script>
+
+<!-- Debug: Simple test to see if template renders at all -->
+<div style="background-color: red; color: white; padding: 10px; margin: 10px;">
+    DEBUG: If you see this red box, the template is loading but Tailwind CSS might be missing.
+</div>
+
 <h1 class="text-2xl font-bold mb-4">Courses & Centre Matching service</h1>
 
 <div class="max-w-4xl mx-auto">
@@ -14,11 +22,11 @@
         <div class="absolute top-6 left-6 right-6 h-1 bg-gray-300 rounded-full"></div>
         
         <!-- Progress Line Active -->
-        <div id="progressLine" class="absolute top-6 left-6 h-1 bg-blue-500 rounded-full" style="width: 0%"></div>
+        <div id="progressLine" class="absolute top-6 left-6 h-1 bg-blue-500 rounded-full transition-all duration-500 ease-in-out" style="width: 0%"></div>
         
         <!-- Stage 1: Developer -->
         <div class="relative flex flex-col items-center z-10" style="flex: 1;">
-            <div class="progress-circle w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
+            <div class="progress-circle w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-300">
                 <svg class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 20l4-16m4 4l4 4-4 4M6 16l-4-4 4-4"></path>
                 </svg>
@@ -31,8 +39,8 @@
         
         <!-- Stage 2: Established -->
         <div class="relative flex flex-col items-center z-10" style="flex: 1;">
-            <div class="progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-300">
+                <svg class="w-6 h-6 text-gray-600 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M19 21V5a2 2 0 00-2-2H7a2 2 0 00-2 2v16m14 0h2m-2 0h-5m-9 0H3m2 0h5M9 7h1m-1 4h1m4-4h1m-1 4h1m-5 10v-5a1 1 0 011-1h2a1 1 0 011 1v5m-4 0h4"></path>
                 </svg>
             </div>
@@ -44,8 +52,8 @@
         
         <!-- Stage 3: To Industry -->
         <div class="relative flex flex-col items-center z-10" style="flex: 1;">
-            <div class="progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-300">
+                <svg class="w-6 h-6 text-gray-600 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"></path>
                 </svg>
             </div>
@@ -57,8 +65,8 @@
         
         <!-- Stage 4: Strategic -->
         <div class="relative flex flex-col items-center z-10 ml-8">
-            <div class="progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg">
-                <svg class="w-6 h-6 text-gray-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+            <div class="progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-300">
+                <svg class="w-6 h-6 text-gray-600 transition-all duration-300" fill="none" stroke="currentColor" viewBox="0 0 24 24">
                     <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M9 12l2 2 4-4M7.835 4.697a3.42 3.42 0 001.946-.806 3.42 3.42 0 014.438 0 3.42 3.42 0 001.946.806 3.42 3.42 0 013.138 3.138 3.42 3.42 0 00.806 1.946 3.42 3.42 0 010 4.438 3.42 3.42 0 00-.806 1.946 3.42 3.42 0 01-3.138 3.138 3.42 3.42 0 00-1.946.806 3.42 3.42 0 01-4.438 0 3.42 3.42 0 00-1.946-.806 3.42 3.42 0 01-3.138-3.138 3.42 3.42 0 00-.806-1.946 3.42 3.42 0 010-4.438 3.42 3.42 0 00.806-1.946 3.42 3.42 0 013.138-3.138z"></path>
                 </svg>
             </div>
@@ -71,57 +79,93 @@
     
     <!-- Interactive Demo -->
     <div class="mt-12 text-center">
-        <button id="progressBtn" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors">
+        <button id="progressBtn" class="px-6 py-2 bg-blue-500 text-white rounded-lg hover:bg-blue-600 transition-colors focus:outline-none focus:ring-2 focus:ring-blue-500">
             Simulate Progress
         </button>
+    </div>
+    
+    <!-- Debug Console -->
+    <div id="debugConsole" class="mt-8 p-4 bg-gray-100 rounded-lg text-sm font-mono">
+        <strong>Debug Console:</strong><br>
+        <div id="debugOutput">Ready to debug...</div>
     </div>
 </div>
 
 <script>
+function debugLog(message) {
+    const output = document.getElementById('debugOutput');
+    if (output) {
+        output.innerHTML += '<br>' + new Date().toLocaleTimeString() + ': ' + message;
+    }
+    console.log(message);
+}
+
 document.addEventListener('DOMContentLoaded', function() {
+    debugLog('DOM Content Loaded');
+    
     const progressBtn = document.getElementById('progressBtn');
     const progressLine = document.getElementById('progressLine');
     const circles = document.querySelectorAll('.progress-circle');
+    
+    debugLog('Found ' + circles.length + ' progress circles');
+    debugLog('Progress button found: ' + (progressBtn ? 'Yes' : 'No'));
+    debugLog('Progress line found: ' + (progressLine ? 'Yes' : 'No'));
+    
+    if (!progressBtn || !progressLine || circles.length === 0) {
+        debugLog('ERROR: Missing required elements!');
+        return;
+    }
     
     let currentStage = 0;
     const stages = [0, 33.33, 66.66, 85]; // Percentages for each stage
     
     progressBtn.addEventListener('click', function() {
+        debugLog('Button clicked, current stage: ' + currentStage);
+        
         currentStage = (currentStage + 1) % 5; // 5 to reset after completion
         
         if (currentStage === 0) {
             // Reset
+            debugLog('Resetting progress');
             progressLine.style.width = '0%';
             circles.forEach(function(circle, index) {
                 if (index === 0) {
-                    circle.className = 'progress-circle w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg';
-                    circle.querySelector('svg').className = 'w-6 h-6 text-white';
+                    circle.className = 'progress-circle w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-300';
+                    const svg = circle.querySelector('svg');
+                    if (svg) svg.className = 'w-6 h-6 text-white transition-all duration-300';
                 } else {
-                    circle.className = 'progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg';
-                    circle.querySelector('svg').className = 'w-6 h-6 text-gray-600';
+                    circle.className = 'progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-300';
+                    const svg = circle.querySelector('svg');
+                    if (svg) svg.className = 'w-6 h-6 text-gray-600 transition-all duration-300';
                 }
             });
             progressBtn.textContent = 'Simulate Progress';
         } else {
             // Update progress
+            debugLog('Updating progress to stage: ' + currentStage);
             progressLine.style.width = stages[currentStage - 1] + '%';
             
             circles.forEach(function(circle, index) {
                 if (index < currentStage) {
-                    circle.className = 'progress-circle w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg';
-                    circle.querySelector('svg').className = 'w-6 h-6 text-white';
+                    circle.className = 'progress-circle w-12 h-12 bg-blue-500 rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-300';
+                    const svg = circle.querySelector('svg');
+                    if (svg) svg.className = 'w-6 h-6 text-white transition-all duration-300';
                 } else {
-                    circle.className = 'progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg';
-                    circle.querySelector('svg').className = 'w-6 h-6 text-gray-600';
+                    circle.className = 'progress-circle w-12 h-12 bg-gray-300 rounded-full flex items-center justify-center border-4 border-white shadow-lg transition-all duration-300';
+                    const svg = circle.querySelector('svg');
+                    if (svg) svg.className = 'w-6 h-6 text-gray-600 transition-all duration-300';
                 }
             });
             
             if (currentStage === 4) {
                 progressBtn.textContent = 'Reset Progress';
                 progressLine.style.width = '100%';
+                debugLog('Progress complete!');
             }
         }
     });
+    
+    debugLog('Script initialized successfully');
 });
 </script>
 
