@@ -21,6 +21,9 @@ import requests
 import logging
 from pathlib import Path
 from authlib.integrations.starlette_client import OAuth, OAuthError
+from sqlalchemy import inspect, text
+
+from app.database import engine
 
 
 def secure_filename(filename: str) -> str:
@@ -264,6 +267,35 @@ if RECOMMENDER_AVAILABLE:
 
 # Templates setup
 templates = Jinja2Templates(directory="templates")
+inspector = inspect(engine)
+
+
+def fetch_table_data(table: str):
+    columns = [col["name"] for col in inspector.get_columns(table)]
+    pk = inspector.get_pk_constraint(table).get("constrained_columns", [None])[0]
+    with engine.connect() as conn:
+        result = conn.execute(text(f'SELECT * FROM "{table}"'))
+        rows = [dict(row._mapping) for row in result]
+    return columns, rows, pk
+
+
+def insert_row(table: str, data: Dict):
+    cols = ", ".join(f'"{c}"' for c in data.keys())
+    vals = ", ".join(f':{c}' for c in data.keys())
+    with engine.begin() as conn:
+        conn.execute(text(f'INSERT INTO "{table}" ({cols}) VALUES ({vals})'), data)
+
+
+def update_row(table: str, pk_col: str, pk_val: str, data: Dict):
+    set_clause = ", ".join(f'"{c}" = :{c}' for c in data.keys())
+    data["_pk"] = pk_val
+    with engine.begin() as conn:
+        conn.execute(text(f'UPDATE "{table}" SET {set_clause} WHERE "{pk_col}" = :_pk'), data)
+
+
+def delete_row(table: str, pk_col: str, pk_val: str):
+    with engine.begin() as conn:
+        conn.execute(text(f'DELETE FROM "{table}" WHERE "{pk_col}" = :_pk'), {"_pk": pk_val})
 
 # Static files (will be created)
 static_dir = Path(__file__).resolve().parent / "static"
@@ -370,6 +402,63 @@ async def login(request: Request, username: str = Form(...), password: str = For
         )
     request.session["user"] = username
     return RedirectResponse("/", status_code=302)
+
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin(request: Request, table: str | None = None):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    tables = inspector.get_table_names()
+    if table and table in tables:
+        columns, rows, pk = fetch_table_data(table)
+        return templates.TemplateResponse(
+            "admin.html",
+            {
+                "request": request,
+                "tables": tables,
+                "table": table,
+                "columns": columns,
+                "rows": rows,
+                "pk": pk,
+            },
+        )
+    return templates.TemplateResponse(
+        "admin.html", {"request": request, "tables": tables, "table": None}
+    )
+
+
+@app.post("/admin/{table}/create")
+async def admin_create(request: Request, table: str):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    form = await request.form()
+    data = {k: v for k, v in form.items() if v != ""}
+    insert_row(table, data)
+    return RedirectResponse(f"/admin?table={table}", status_code=303)
+
+
+@app.post("/admin/{table}/update/{pk_value}")
+async def admin_update(request: Request, table: str, pk_value: str):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    form = await request.form()
+    data = {k: v for k, v in form.items()}
+    pk = inspector.get_pk_constraint(table).get("constrained_columns", [None])[0]
+    update_row(table, pk, pk_value, data)
+    return RedirectResponse(f"/admin?table={table}", status_code=303)
+
+
+@app.post("/admin/{table}/delete/{pk_value}")
+async def admin_delete(request: Request, table: str, pk_value: str):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    pk = inspector.get_pk_constraint(table).get("constrained_columns", [None])[0]
+    delete_row(table, pk, pk_value)
+    return RedirectResponse(f"/admin?table={table}", status_code=303)
 
 
 @app.get("/auth/{provider}")
