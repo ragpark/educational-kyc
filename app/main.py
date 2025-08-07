@@ -272,6 +272,7 @@ inspector = inspect(engine)
 
 
 def fetch_table_data(table: str):
+
     columns_info = inspector.get_columns(table)
     columns = [col["name"] for col in columns_info]
     pk = inspector.get_pk_constraint(table).get("constrained_columns", [None])[0]
@@ -285,6 +286,7 @@ def fetch_table_data(table: str):
                 if isinstance(mapping.get(name), list):
                     mapping[name] = ", ".join(mapping[name])
             rows.append(mapping)
+
     return columns, rows, pk
 
 
@@ -474,6 +476,7 @@ async def admin_create(request: Request, table: str):
         return RedirectResponse("/login", status_code=302)
     form = await request.form()
     data = parse_form_data(table, dict(form))
+
     insert_row(table, data)
     return RedirectResponse(f"/admin?table={table}", status_code=303)
 
@@ -485,6 +488,7 @@ async def admin_update(request: Request, table: str, pk_value: str):
         return RedirectResponse("/login", status_code=302)
     form = await request.form()
     data = parse_form_data(table, dict(form))
+
     pk = inspector.get_pk_constraint(table).get("constrained_columns", [None])[0]
     update_row(table, pk, pk_value, data)
     return RedirectResponse(f"/admin?table={table}", status_code=303)
