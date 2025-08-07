@@ -1,0 +1,59 @@
+{% extends "base.html" %}
+{% block title %}Admin{% endblock %}
+{% block content %}
+<h1 class="text-2xl font-bold mb-4">Admin</h1>
+{% if table %}
+  <div class="mb-4"><a href="/admin" class="text-indigo-600">&larr; Back to tables</a></div>
+  <h2 class="text-xl font-semibold mb-2">Table: {{ table }}</h2>
+  <div class="overflow-x-auto">
+    <table class="min-w-full bg-white border border-gray-200">
+      <thead>
+        <tr>
+          {% for col in columns %}
+          <th class="px-2 py-1 border-b">{{ col }}</th>
+          {% endfor %}
+          <th class="px-2 py-1 border-b">Actions</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for row in rows %}
+        <tr>
+          <form method="post" action="/admin/{{ table }}/update/{{ row[pk] }}">
+            {% for col in columns %}
+            <td class="px-2 py-1 border-b">
+              <input class="w-full border px-2 py-1" name="{{ col }}" value="{{ row[col] if row[col] is not none else '' }}">
+            </td>
+            {% endfor %}
+            <td class="px-2 py-1 border-b">
+              <button type="submit" class="bg-indigo-600 text-white px-2 py-1 rounded">Update</button>
+          </form>
+              <form method="post" action="/admin/{{ table }}/delete/{{ row[pk] }}" class="inline">
+                <button type="submit" class="bg-red-600 text-white px-2 py-1 rounded">Delete</button>
+              </form>
+            </td>
+        </tr>
+        {% endfor %}
+        <tr>
+          <form method="post" action="/admin/{{ table }}/create">
+            {% for col in columns %}
+            <td class="px-2 py-1 border-b">
+              <input class="w-full border px-2 py-1" name="{{ col }}">
+            </td>
+            {% endfor %}
+            <td class="px-2 py-1 border-b">
+              <button type="submit" class="bg-green-600 text-white px-2 py-1 rounded">Create</button>
+            </td>
+          </form>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+{% else %}
+  <h2 class="text-xl font-semibold mb-2">Tables</h2>
+  <ul class="list-disc pl-5">
+    {% for t in tables %}
+    <li><a class="text-indigo-600" href="/admin?table={{ t }}">{{ t }}</a></li>
+    {% endfor %}
+  </ul>
+{% endif %}
+{% endblock %}
