@@ -276,6 +276,7 @@ def fetch_table_data(table: str):
     with engine.connect() as conn:
         result = conn.execute(text(f'SELECT * FROM "{table}"'))
         rows = [dict(row._mapping) for row in result]
+
     return columns, rows, pk
 
 
