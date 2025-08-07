@@ -275,7 +275,8 @@ def fetch_table_data(table: str):
     pk = inspector.get_pk_constraint(table).get("constrained_columns", [None])[0]
     with engine.connect() as conn:
         result = conn.execute(text(f'SELECT * FROM "{table}"'))
-        rows = [dict(row) for row in result]
+        rows = [dict(row._mapping) for row in result]
+
     return columns, rows, pk
 
 
