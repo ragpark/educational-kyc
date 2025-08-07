@@ -73,6 +73,9 @@ from app.centre_submission import (
 from app.services.safeguarding_assessor import assess_safeguarding_document
 
 import importlib
+from difflib import SequenceMatcher
+from backend.database import SessionLocal as BackendSessionLocal
+from backend.models import Course
 
 try:
     from backend.recommend import app as recommend_api
@@ -708,6 +711,58 @@ async def override_image_classification(
         )
         return RedirectResponse("/documents", status_code=303)
     return JSONResponse({"error": "Not found"}, status_code=404)
+
+
+def suggest_courses_from_text(text: str) -> List[Dict[str, float]]:
+    """Return best matching courses for given text using fuzzy matching."""
+    try:
+        session = BackendSessionLocal()
+    except Exception:
+        return []
+    suggestions: List[Dict[str, float]] = []
+    try:
+        courses = session.query(Course).all()
+        lowered = text.lower()
+        for course in courses:
+            course_text = f"{course.title} {course.description or ''}".lower()
+            score = SequenceMatcher(None, lowered, course_text).ratio()
+            suggestions.append({"id": course.id, "title": course.title, "score": round(score, 2)})
+        suggestions.sort(key=lambda x: x["score"], reverse=True)
+        return suggestions[:5]
+    except Exception:
+        return []
+    finally:
+        session.close()
+
+
+@app.get("/tna", response_class=HTMLResponse)
+async def tna_form(request: Request):
+    """Display Training Needs Analysis upload form."""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    return templates.TemplateResponse("tna_upload.html", {"request": request, "suggestions": None})
+
+
+@app.post("/tna", response_class=HTMLResponse)
+async def tna_upload(request: Request, file: UploadFile = File(...)):
+    """Handle Training Needs Analysis file upload and suggest courses."""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    filename = secure_filename(file.filename or "tna.txt")
+    stored_name = f"{uuid.uuid4().hex}_{filename}"
+    path = os.path.join(UPLOAD_DIR, stored_name)
+    content = await file.read()
+    with open(path, "wb") as out:
+        out.write(content)
+    text = content.decode("utf-8", errors="ignore")
+    suggestions = suggest_courses_from_text(text)
+    return templates.TemplateResponse(
+        "tna_upload.html",
+        {"request": request, "suggestions": suggestions, "uploaded": True, "filename": file.filename},
+    )
 
 
 @app.get("/about", response_class=HTMLResponse)
