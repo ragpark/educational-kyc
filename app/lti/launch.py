@@ -4,7 +4,7 @@ router = APIRouter(prefix="/lti")
 
 @router.post("/launch")
 async def lti_launch(request: Request):
-    """Handle LTI launch requests.
+    """Handle LTI launch requests
 
     The original implementation referenced an undefined variable
     `state_val` when validating the request. This caused a
