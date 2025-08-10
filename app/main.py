@@ -61,6 +61,7 @@ from app.qr_utils import generate_qr_code
 from app.pdf_utils import generate_credential_pdf
 from app.services.safeguarding_assessment import assess_safeguarding_policy
 from app.services.image_relevance import assess_image_relevance
+from app.lti import lti_router
 from app.centre_submission import (
     CentreSubmission,
     ParentOrganisation,
@@ -264,6 +265,9 @@ app.add_middleware(
     allow_headers=["*"],
 )
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET", "super-secret"))
+
+# Mount LTI routes
+app.include_router(lti_router)
 
 # Mount recommendation API routes
 if RECOMMENDER_AVAILABLE:
