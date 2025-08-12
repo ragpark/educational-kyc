@@ -1,162 +1,188 @@
 # Educational Provider KYC System
 
-A comprehensive Know Your Customer (KYC) verification system specifically designed for UK educational and training providers.
+A comprehensive Know Your Customer (KYC) verification platform specifically designed for UK educational and training providers. This system helps educational organisations obtain official verification and credentials by automatically checking their legitimacy against multiple UK regulatory databases and awarding organisations.
 
-## Features
+## What is Educational KYC?
 
-🎓 **Educational Provider Verification**
-- Education qualification search via Ofqual API
-- Ofsted inspection ratings
-- ESFA funding status verification
-- UKPRN validation
-- Companies House integration
+The Educational KYC system streamlines the verification process for educational providers, enabling them to:
+- Obtain official verification and digital credentials
+- Match their capabilities with suitable course offerings
+- Assess partnership maturity with Awarding Organisations
+- Maintain compliance with UK educational regulations
+
+## Core Features
+
+### 🎓 Educational Provider Verification
+- **Pearson Education qualification searches** via Ofqual API
+- **Ofsted inspection ratings** verification
+- **ESFA funding status** verification
+- **UKPRN validation** for registered providers
+- **Companies House integration** for organisational verification
 - Model Context Protocol (MCP) wrapper for AI integrations
 - REST onboarding API with MCP wrapper support
 
-📚 **Training Course Recommendations**
+### 📚 Training Course Recommendations System
+
+#### How It Works
+Our recommendation engine uses **content-based filtering** to match centres with courses based on objective resource compatibility. Unlike collaborative filtering systems that learn from user preferences, this approach focuses on answering: *"Can this centre deliver this course effectively?"*
+
+**Technical Implementation:**
 - PostgreSQL & SQLAlchemy models for centres, labs, staff skills and courses
 - ETL pipeline with scikit-learn producing centre and course feature matrices
 - FastAPI service returning recommended courses for a centre
 - React/Tailwind dashboard visualising similarity scores and capability radar charts
 
-📊 **Risk Assessment**
-- Automated risk scoring
-- Educational-specific compliance checks
-- Real-time verification results
+**The Matching Process:**
+1. **Centre Profile Analysis** - Examines available laboratories, staff qualifications, technical expertise
+2. **Course Requirements Mapping** - Maps courses by required facilities, skills, equipment needs
+3. **Smart Matching Algorithm** - Calculates compatibility using cosine similarity between feature vectors
+4. **Results Visualisation** - Interactive radar charts showing capability alignment
 
-🔒 **Security & Compliance**
+#### Partnership Maturity Tiers
+Each recommendation includes a partnership tier reflecting your relationship with the Awarding Organisation:
+- **Tier 1: New Partner** - Initial engagement, basic verification complete
+- **Tier 2: Developing Partner** - Active delivery, building track record
+- **Tier 3: Established Partner** - Proven delivery success, strong relationship
+- **Tier 4: Strategic Partner** - Long-term collaboration, premium status
+
+### 📊 Risk Assessment
+- **Automated risk scoring** considering multiple factors
+- **Educational-specific compliance checks**
+- **Real-time verification results**
+- Lower risk scores indicate higher trustworthiness and faster approval
+
+### 🔒 Security & Compliance
 - UK educational regulations compliance
-- Data protection (GDPR)
-- Audit trail maintenance
+- GDPR data protection
+- Comprehensive audit trail maintenance
+- Digital credential issuance upon approval
 
 ## Information Architecture
 
-The app now includes a global navigation bar linking to:
+The application features a global navigation structure:
 
-- **Home** – dashboard overview
-- **Applications** – track submitted and in‑progress applications
-- **My Organisation** – manage organisational details and delivery sites
-- **Messages** – application updates and AO requests
-- **Documents** – upload and reuse common documents
-- **Help & Support** – FAQs and guidance
-- **User Profile** – account management and settings
+- **Centre Approval** – Dashboard for centre verification and approval status
+- **Qualification Approvals** – Track and manage qualification approval applications
+- **Qualification Selection** – Browse and select qualifications suitable for your centre
+- **Evidence** – Submit and manage evidence documents for applications
+- **Verify** – Document verification and validation status
+- **About** – Account management and system information
 
-## Quick Start
+## Application Process
+
+### Requirements for Centre Applications
+**Essential Information:**
+- Organisation legal name and trading name
+- Company registration number
+- UKPRN (if applicable)
+- Main contact details
+- Registered and trading addresses
+
+**Supporting Documentation:**
+- Certificate of incorporation
+- Proof of address
+- Insurance certificates
+- Safeguarding policy
+- Health & safety policy
+- Equality & diversity policy
+
+**Delivery Site Information:**
+- Complete address for each location
+- Site contact details
+- Available facilities and equipment
+- Laboratory specifications
+- Accessibility information
+
+### Requirements for Qualification Applications
+- Qualification title and level
+- Awarding organisation details
+- Proposed start date
+- Delivery method and duration
+- Assessment strategy
+- Internal verification procedures
+- Staff CVs and qualifications
+- Resources and equipment list
+
+## Technical Documentation
+
+### Quick Start
 
 This application is deployed on Railway.app with PostgreSQL and Redis.
 
-### Local Development
-
+#### Local Development
 ```bash
 pip install -r requirements.txt
 uvicorn app.main:app --reload
 
-# create tables locally
+# Create tables locally
 python -c "from backend.database import init_db; init_db()"
 
-# populate with example centres and courses before running ETL/recommendations
+# Populate with example centres and courses before running ETL/recommendations
 python -m backend.seed_data
-
 ```
-[![Deploy on Railway](https://railway.app/button.svg)](https://railway.app/template/your-template-id)
 
-## Quick Deploy
+### Deploy on Railway
 
-1. Click the "Deploy on Railway" button above
+#### Quick Deploy
+1. Click the "Deploy on Railway" button
 2. Connect your GitHub account
 3. Railway will automatically deploy the app
 4. Your app will be live in 2-3 minutes!
 
-## Architecture Overview
+### Architecture Overview
 
-The Railway deployment now provisions a **PostgreSQL** service for storing user
-accounts and provider applications. The FastAPI application connects to this
-database using SQLAlchemy. Dataclasses in `app/models.py` define the schema for
-`user_accounts` and `applications` tables, which support full CRUD operations.
+The Railway deployment provisions a PostgreSQL service for storing user accounts and provider applications. The FastAPI application connects to this database using SQLAlchemy. Dataclasses in `app/models.py` define the schema for `user_accounts` and `applications` tables, which support full CRUD operations.
 
-## Course Recommendation Engine
+### Course Recommendation Engine Setup
 
-The repository now contains a small training course recommendation prototype.
-
-Before generating feature matrices or running the recommendation API, seed the
-database with sample data:
+Before generating feature matrices or running the recommendation API, seed the database:
 
 ```bash
 python -m backend.seed_data
-```
 
-```bash
-# rebuild feature matrices via the main app
+# Rebuild feature matrices via the main app
 curl -X POST http://localhost:8000/build-recommendations
 
-# start the recommendation API (included in main app)
+# Start the recommendation API (included in main app)
 uvicorn app.main:app --reload
 
-# open the demo dashboard (served statically)
-# e.g. using a simple file server
+# Open the demo dashboard (served statically)
 python -m http.server --directory frontend 8001
 ```
 
-Navigate to `http://localhost:8001` and enter a centre ID to view recommended
-courses. Results can be filtered by delivery mode and minimum similarity score,
-with radar charts showing how centre capabilities compare to course
-requirements.
+Navigate to `http://localhost:8001` and enter a centre ID to view recommended courses. Results can be filtered by delivery mode and minimum similarity score, with radar charts showing how centre capabilities compare to course requirements.
 
-The centre submission form invokes `POST /build-recommendations` to generate
-the latest feature matrices before requesting recommendations.
+### Technical Details: How Recommendations Work
 
-**How recommendations work**
+The recommendation engine models each centre and course using features drawn from the relational database:
 
-The recommendation engine models each centre and course using features drawn from the relational database. centres link to their available labs and staff skills via the centre_labs and centre_staff_skills tables, while courses list required labs and prerequisite skills in courses and course_tags. During ETL these attributes are vectorised with scikit‑learn's DictVectorizer, OneHotEncoder and StandardScaler to build comparable feature matrices for centres and courses. When a recommendation is requested, the API computes cosine similarity between the centre's feature vector and all course vectors, filtering out options that lack required labs or have online content unsuitable for low‑rated centres. Results are sorted by similarity and annotated with a risk score and partner tier. The React dashboard fetches this data and overlays centre capabilities against course requirements using a Chart.js radar chart, allowing users to explore how well each course matches a particular centre's resources.
-This approach implements a content-based filtering recommendation system, which matches centres to courses based on intrinsic attributes rather than user behaviour patterns. Unlike collaborative filtering systems that learn from user preferences and ratings, this design focuses on objective resource compatibility - matching centre capabilities (labs, staff skills) directly against course requirements (prerequisite skills, technical needs). This content-based approach is well-suited to the domain since course delivery success depends fundamentally on whether a centre has the physical infrastructure and expertise required, rather than subjective preferences that might benefit from collaborative patterns. The system essentially answers "Can this centre deliver this course effectively?" by quantifying how well their resources align with the course's technical demands.
+- **Centres** link to available labs and staff skills via `centre_labs` and `centre_staff_skills` tables
+- **Courses** list required labs and prerequisite skills in `courses` and `course_tags`
+- **ETL Process** vectorises attributes with scikit-learn's `DictVectorizer`, `OneHotEncoder` and `StandardScaler`
+- **Similarity Computation** uses cosine similarity between centre and course feature vectors
+- **Filtering** removes unsuitable options based on required labs and online content restrictions
+- **Results** are sorted by similarity and annotated with risk score and partner tier
 
-### Example: Qualification Search
+### API Examples
 
-Use the built-in client to retrieve Pearson Education qualifications by title.
+#### Qualification Search
 ```python
 import asyncio
 from app.services.ofqual_qualifications import OfqualQualificationsClient
+
 async def demo():
     client = OfqualQualificationsClient()
     results = await client.search(course="history gcse")
     for qual in results:
         print(qual.get("title", qual))
 
-
 asyncio.run(demo())
 ```
 
-### MCP Wrapper Endpoint
-
-
-Once the server is running you can access the wrapper via HTTP. If deploying on Railway make sure the `MCP_BASE_URL` environment variable matches your service URL; otherwise the wrapper defaults to `http://localhost:$PORT`.
-Calling `/mcp/health` returns the underlying `/health` response wrapped in the MCP metadata:
-
-```bash
-curl http://localhost:$PORT/mcp/health
-
-
-```
-
-The JSON payload contains the raw content and context information returned by
-`KYCContextSource`.
-
-
-Alternatively you can call the FastAPI endpoint directly:
-
-```
-GET /ofqual/search?Title=history%20gcse
-```
-
-### Example: Ofqual Register Search
-
-
-You can search Pearson Education qualifications by title using `OfqualQualificationsClient`:
-
+#### Ofqual Register Search
 ```python
 import asyncio
 from app.services.ofqual_awarding_orgs import OfqualAOSearchClient
-
 
 async def demo():
     client = OfqualAOSearchClient()
@@ -168,51 +194,43 @@ async def demo():
 asyncio.run(demo())
 ```
 
-Or via the new endpoint:
-
+Or via endpoint:
 ```
 GET /ofqual/search?course=maths&location=london
 ```
 
-### Using the MCP Wrapper
+### MCP Wrapper Integration
 
-The `KYCContextSource` class provides a simple Model Context Protocol (MCP)
-interface to the application's endpoints. Each call returns an `MCPDocument`
-containing the raw response and metadata.
+The `KYCContextSource` class provides a Model Context Protocol (MCP) interface:
 
 ```python
 import asyncio
 import os
 from app.mcp_wrapper import KYCContextSource
 
-
 async def demo():
     default_base = f"http://localhost:{os.getenv('PORT', '8000')}"
     source = KYCContextSource(base_url=os.getenv("MCP_BASE_URL", default_base))
+    
     health = await source.health()
     print("Health status:", health.content)
-
+    
     orgs = await source.search_awarding_orgs(subject="maths")
     print(orgs.content)
-
-    onboarding = await source.onboard_provider(
-        {
-            "organisation_name": "Demo School",
-            "urn": "123456",
-            "postcode": "AB1 2CD",
-        }
-    )
+    
+    onboarding = await source.onboard_provider({
+        "organisation_name": "Demo School",
+        "urn": "123456",
+        "postcode": "AB1 2CD",
+    })
     print(onboarding.content)
 
 asyncio.run(demo())
 ```
 
-`onboard_provider` posts the given details to `/api/onboard` and returns the
-wrapped response, allowing automated client integrations.
+### REST API Onboarding
 
-## REST API Onboarding
-
-You can submit provider details directly via JSON using the `/api/onboard` endpoint. The payload must conform to the `ProviderAPIRequest` schema used by the application.
+Submit provider details via JSON to `/api/onboard`:
 
 ```json
 {
@@ -224,27 +242,64 @@ You can submit provider details directly via JSON using the `/api/onboard` endpo
 }
 ```
 
-The endpoint runs the full KYC orchestration and returns the verification ID, risk score, and a link to the credential page. If the application is approved, the JSON‑LD credential is included in the response.
-
+Response includes verification ID, risk score, and credential:
 ```json
 {
   "verification_id": "11111111-2222-3333-4444-555555555555",
   "status": "approved",
   "risk_score": 0.12,
-  "credential_url": "https://example.com/credential/11111111-2222-3333-4444-555555555555",
+  "credential_url": "https://example.com/credential/...",
   "credential": { "@context": "https://www.w3.org/2018/credentials/v1" }
 }
 ```
 
-For applications still processing, poll `/api/provider-status/<verification_id>` until the status changes from `processing`.
-
+For applications still processing, poll `/api/provider-status/<verification_id>` until status changes.
 
 ### Running Tests
-
-To run the automated tests locally, install the dependencies and execute `pytest`:
 
 ```bash
 pip install -r requirements.txt
 pip install pytest
 pytest
 ```
+
+## Tips for Successful Applications
+
+### 📋 Preparation
+- Gather all documents before starting
+- Ensure information is current and accurate
+- Verify company registration details
+- Check policies are up to date
+
+### 📄 Documentation
+- Upload clear, legible copies
+- Use descriptive file names
+- Keep file sizes reasonable
+- Use standard formats (PDF, JPG, PNG)
+
+### 💬 Communication
+- Respond promptly to messages
+- Provide complete information
+- Use Messages section for queries
+- Keep contact details updated
+
+## What Happens After Approval?
+
+Upon successful verification, you receive:
+- Digital verification credential
+- Unique verification ID
+- Access to course recommendations
+- Partnership tier assignment
+- Ongoing compliance monitoring
+
+Your verification status remains valid as long as your organisation maintains compliance with UK educational regulations and your information remains current and accurate.
+
+## Support
+
+- Use the "Help & Support" section for FAQs
+- Contact support through the Messages system
+- Provide your verification ID for faster assistance
+
+---
+
+This system ensures compliance with UK educational regulations, GDPR data protection requirements, and maintains comprehensive audit trails for all verification activities.
