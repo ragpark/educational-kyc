@@ -235,7 +235,7 @@ function Dashboard() {
             <h3 className="text-xl font-semibold">{course.title}</h3>
             <div className="flex items-center space-x-2">
               <span className="text-sm">{(course.score * 100).toFixed(1)}%</span>
-              {course.score > 0.45 && (
+              {course.score > 0.01 && (
                 <span className="text-xs bg-green-500 text-white px-2 py-1 rounded">
                   Pre-approved
                 </span>
