@@ -57,11 +57,8 @@ Each recommendation includes a partnership tier reflecting your relationship wit
 - Digital credential issuance upon approval
 
 ### ⚙️ Additional Technical Capabilities
-- **Orchestrated KYC checks** leverage a combined workflow that calls real APIs like Companies House, UKRLP and sanction screening when configured, falling back to internal logic otherwise
-- **LTI launch endpoint** (`/lti/launch`) enables integration with Learning Tools Interoperability platforms
 - **AI document and image analysis** assesses safeguarding policies and classroom images using OpenAI models with heuristic fallbacks
 - **Verifiable credential toolchain** issues W3C credentials, generates QR codes and PDFs, and validates signatures and revocation status
-- **Model Context Protocol API** provides programmatic health checks, provider onboarding, status queries and Ofqual search
 
 ## Information Architecture
 
