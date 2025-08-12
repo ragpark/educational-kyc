@@ -193,8 +193,8 @@ function Dashboard() {
         <div className="w-full bg-gray-200 rounded h-4 relative">
           <div
             className="bg-green-500 h-4 rounded"
-            style={{ width: `${(data.centre.risk_score / 10) * 100}%` }}
-          ></div>
+            style={{ width: `${(data.centre.risk_score / 10) * 100}%` }}>            
+          </div>
           <div className="absolute inset-0 flex justify-between text-xs px-1">
             <span>0</span>
             <span>10</span>
@@ -233,8 +233,13 @@ function Dashboard() {
         >
           <div className="flex justify-between items-center">
             <h3 className="text-xl font-semibold">{course.title}</h3>
-            <div className="flex items-center space-x-2">
+            <div className="flex items-center space-x-2">Approval status:
               <span className="text-sm">{(course.score * 100).toFixed(1)}%</span>
+                {course.score > 0.01 && (
+                  <span className="text-xs bg-green-500 text-white px-2 py-1 rounded">
+                    Pre-approved
+                    </span>
+              )}
             </div>
           </div>
           <div className="w-full bg-gray-200 rounded h-2 mt-2">
