@@ -18,8 +18,8 @@ The Educational KYC system streamlines the verification process for educational 
 - **ESFA funding status** verification
 - **UKPRN validation** for registered providers
 - **Companies House integration** for organisational verification
-- Model Context Protocol (MCP) wrapper for AI integrations
-- REST onboarding API with MCP wrapper support
+- **Model Context Protocol (MCP) wrapper** for AI integrations
+- **REST onboarding API** with MCP wrapper support and integration with downstream services
 
 ### 📚 Training Course Recommendations System
 
