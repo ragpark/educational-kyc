@@ -232,7 +232,7 @@ function Dashboard() {
           onClick={() => setOpen(open === idx ? null : idx)}
         >
           <div className="flex justify-between items-center">
-            <h3 className="text-xl font-semibold">{course.title}</h3>
+            <h3 className="text-xl font-semibold">{course.title}:</h3>
             <div className="flex items-center space-x-2">Approval status:
               <span className="text-sm">{(course.score * 100).toFixed(1)}%</span>
                 {course.score > 0.01 && (
