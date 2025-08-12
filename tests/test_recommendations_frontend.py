@@ -14,3 +14,4 @@ def test_dashboard_js_served():
     resp = client.get("/recommendations/Dashboard.js")
     assert resp.status_code == 200
     assert "getInitialCentreId" in resp.text
+    assert "Pre-approved" in resp.text
