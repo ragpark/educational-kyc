@@ -282,6 +282,35 @@ pytest
 - Use Messages section for queries
 - Keep contact details updated
 
+### Digital Credential System & QR Code Verification
+How the Credential System Works
+Upon successful centre application approval, organisations receive a digital credential with a unique QR code. This credential serves as a gatekeeper for the qualification approval process:
+🎫 Digital Credential Features
+
+Unique QR Code - Required for all qualification applications
+Verification Gateway - Fast-tracks approved centres through qualification approvals
+Performance Tracking - Links to your centre's delivery track record
+Revocable Status - Can be suspended or revoked for compliance issues
+
+🔒 Safeguarding the Qualification Process
+The QR code requirement ensures that:
+
+Only verified centres can apply for qualification approvals
+Fast-track processing for centres with good standing
+Protection against bad actors - Centres with poor track records cannot proceed
+Quality assurance - Maintains standards across the education sector
+
+⚠️ Credential Revocation
+QR codes may be revoked for:
+
+Poor delivery performance or student outcomes
+Compliance violations or regulatory breaches
+Failed quality audits or inspections
+Unresolved complaints or safeguarding issues
+Failure to maintain required documentation or insurance
+
+Important: Once revoked, a centre must undergo a full re-verification process and address all identified issues before a new credential can be issued.
+
 ## What Happens After Approval?
 
 Upon successful verification, you receive:
