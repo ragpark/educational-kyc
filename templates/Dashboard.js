@@ -117,7 +117,7 @@ function Dashboard() {
       </div>
       <div className="bg-white p-4 rounded shadow">
         <div className="flex justify-between text-sm mb-1">
-          <span>Risk Score</span>
+          <span>Risk Scores</span>
           <span>{data.centre.partner_tier} ({data.centre.risk_score.toFixed(1)})</span>
         </div>
         <div className="w-full bg-gray-200 rounded h-4 relative">
