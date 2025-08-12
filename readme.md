@@ -13,7 +13,7 @@ The Educational KYC system streamlines the verification process for educational 
 ## Core Features
 
 ### 🎓 Educational Provider Verification
-- **Pearson Education qualification searches** via Ofqual API
+- **Education qualification searches** via Ofqual API
 - **Ofsted inspection ratings** verification
 - **ESFA funding status** verification
 - **UKPRN validation** for registered providers
