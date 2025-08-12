@@ -5,7 +5,7 @@ A comprehensive Know Your Customer (KYC) verification system specifically design
 ## Features
 
 🎓 **Educational Provider Verification**
-- Pearson Education qualification search via Ofqual API
+- Education qualification search via Ofqual API
 - Ofsted inspection ratings
 - ESFA funding status verification
 - UKPRN validation
