@@ -6,7 +6,7 @@ from starlette.middleware.sessions import SessionMiddleware
 from fastapi.staticfiles import StaticFiles
 from fastapi.templating import Jinja2Templates
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import HTMLResponse, JSONResponse
+from fastapi.responses import HTMLResponse, JSONResponse, FileResponse
 from pydantic import BaseModel
 from contextlib import asynccontextmanager
 import os
@@ -19,7 +19,12 @@ import uuid
 import aiohttp
 import requests
 import logging
+from pathlib import Path
 from authlib.integrations.starlette_client import OAuth, OAuthError
+from sqlalchemy import inspect, text, ARRAY, Boolean, Float, Integer
+import ast
+
+from app.database import engine
 
 
 def secure_filename(filename: str) -> str:
@@ -56,6 +61,7 @@ from app.qr_utils import generate_qr_code
 from app.pdf_utils import generate_credential_pdf
 from app.services.safeguarding_assessment import assess_safeguarding_policy
 from app.services.image_relevance import assess_image_relevance
+from app.lti import lti_router
 from app.centre_submission import (
     CentreSubmission,
     ParentOrganisation,
@@ -68,12 +74,24 @@ from app.centre_submission import (
 from app.services.safeguarding_assessor import assess_safeguarding_document
 
 import importlib
+from difflib import SequenceMatcher
+from backend.database import SessionLocal as BackendSessionLocal
+from backend.models import Course
 
+try:
+    from backend.recommend import app as recommend_api
+    RECOMMENDER_AVAILABLE = True
+except Exception:
+    recommend_api = None
+    RECOMMENDER_AVAILABLE = False
 
 try:
     from backend.etl import run_etl
 except Exception:
     run_etl = None
+
+# Whether recommendations can be built or served
+RECOMMEND_AVAILABLE = (run_etl is not None) or RECOMMENDER_AVAILABLE
 
 # In-memory storage for demo
 providers_db = []
@@ -196,6 +214,9 @@ async def lifespan(app: FastAPI):
     if api_status["orchestrator_available"]:
         print("✓ Certify3 KYC Orchestrator available")
 
+    if not RECOMMEND_AVAILABLE:
+        print("⚠ Recommendation engine not configured - button disabled")
+
     # Add sample data
     sample_providers = [
         {
@@ -245,19 +266,115 @@ app.add_middleware(
 )
 app.add_middleware(SessionMiddleware, secret_key=os.getenv("SESSION_SECRET", "super-secret"))
 
+# Mount LTI routes
+app.include_router(lti_router)
+
 # Mount recommendation API routes
 if RECOMMENDER_AVAILABLE:
     app.include_router(recommend_api.router)
 
 # Templates setup
 templates = Jinja2Templates(directory="templates")
+inspector = inspect(engine)
+
+
+def fetch_table_data(table: str):
+
+    columns_info = inspector.get_columns(table)
+    columns = [col["name"] for col in columns_info]
+    pk = inspector.get_pk_constraint(table).get("constrained_columns", [None])[0]
+    with engine.connect() as conn:
+        result = conn.execute(text(f'SELECT * FROM "{table}"'))
+        rows = []
+        for row in result:
+            mapping = dict(row._mapping)
+            for c in columns_info:
+                name = c["name"]
+                if isinstance(mapping.get(name), list):
+                    mapping[name] = ", ".join(mapping[name])
+            rows.append(mapping)
+
+    return columns, rows, pk
+
+
+def insert_row(table: str, data: Dict):
+    cols = ", ".join(f'"{c}"' for c in data.keys())
+    vals = ", ".join(f':{c}' for c in data.keys())
+    with engine.begin() as conn:
+        conn.execute(text(f'INSERT INTO "{table}" ({cols}) VALUES ({vals})'), data)
+
+
+def update_row(table: str, pk_col: str, pk_val: str, data: Dict):
+    set_clause = ", ".join(f'"{c}" = :{c}' for c in data.keys())
+    data["_pk"] = pk_val
+    with engine.begin() as conn:
+        conn.execute(text(f'UPDATE "{table}" SET {set_clause} WHERE "{pk_col}" = :_pk'), data)
+
+
+def delete_row(table: str, pk_col: str, pk_val: str):
+    with engine.begin() as conn:
+        conn.execute(text(f'DELETE FROM "{table}" WHERE "{pk_col}" = :_pk'), {"_pk": pk_val})
+
+
+def parse_form_data(table: str, form: Dict[str, str]) -> Dict:
+    columns = {c["name"]: c["type"] for c in inspector.get_columns(table)}
+    data: Dict = {}
+    for key, val in form.items():
+        if val in (None, ""):
+            continue
+        col_type = columns.get(key)
+        if isinstance(col_type, ARRAY):
+            parsed = None
+            try:
+                parsed = json.loads(val)
+            except json.JSONDecodeError:
+                try:
+                    parsed = ast.literal_eval(val)
+                except (ValueError, SyntaxError):
+                    parsed = [v.strip() for v in val.split(",") if v.strip()]
+            if not isinstance(parsed, list):
+                parsed = [parsed]
+            data[key] = parsed
+        elif isinstance(col_type, Boolean):
+            data[key] = str(val).lower() in {"true", "1", "yes", "on"}
+        elif isinstance(col_type, Integer):
+            data[key] = int(val)
+        elif isinstance(col_type, Float):
+            data[key] = float(val)
+        else:
+            data[key] = val
+    return data
 
 # Static files (will be created)
-try:
-    app.mount("/static", StaticFiles(directory="app/static"), name="static")
-except RuntimeError:
-    pass
+static_dir = Path(__file__).resolve().parent / "static"
+if static_dir.is_dir():
+    app.mount("/static", StaticFiles(directory=static_dir), name="static")
+else:
+    logger.error("Static directory not found: %s", static_dir)
+    raise RuntimeError(f"Static directory not found: {static_dir}")
 
+# Serve the legacy recommendations dashboard assets
+frontend_dir = Path(__file__).resolve().parent.parent / "frontend"
+
+
+# Expose the React dashboard for visual recommendations
+@app.get("/recommendations", response_class=HTMLResponse)
+async def recommendations(request: Request):
+    """Course and Centre Matching recommendations page"""
+    centre_id = get_current_user(request)
+    if not centre_id:
+        return RedirectResponse("/login", status_code=302)
+    return templates.TemplateResponse("recommendation.html", {"request": request, "centre_id": centre_id})
+
+
+@app.get("/recommendations/{path:path}")
+async def recommendations_static(path: str):
+    if path in ("", "index.htm"):
+        path = "index.html"
+    file_path = frontend_dir / path
+    if not file_path.is_file():
+        raise HTTPException(status_code=404)
+    return FileResponse(file_path)
 
 @app.get("/", response_class=HTMLResponse)
 async def dashboard(request: Request):
@@ -333,6 +450,65 @@ async def login(request: Request, username: str = Form(...), password: str = For
         )
     request.session["user"] = username
     return RedirectResponse("/", status_code=302)
+
+
+@app.get("/admin", response_class=HTMLResponse)
+async def admin(request: Request, table: str | None = None):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    tables = inspector.get_table_names()
+    if table and table in tables:
+        columns, rows, pk = fetch_table_data(table)
+        return templates.TemplateResponse(
+            "admin.html",
+            {
+                "request": request,
+                "tables": tables,
+                "table": table,
+                "columns": columns,
+                "rows": rows,
+                "pk": pk,
+            },
+        )
+    return templates.TemplateResponse(
+        "admin.html", {"request": request, "tables": tables, "table": None}
+    )
+
+
+@app.post("/admin/{table}/create")
+async def admin_create(request: Request, table: str):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    form = await request.form()
+    data = parse_form_data(table, dict(form))
+
+    insert_row(table, data)
+    return RedirectResponse(f"/admin?table={table}", status_code=303)
+
+
+@app.post("/admin/{table}/update/{pk_value}")
+async def admin_update(request: Request, table: str, pk_value: str):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    form = await request.form()
+    data = parse_form_data(table, dict(form))
+
+    pk = inspector.get_pk_constraint(table).get("constrained_columns", [None])[0]
+    update_row(table, pk, pk_value, data)
+    return RedirectResponse(f"/admin?table={table}", status_code=303)
+
+
+@app.post("/admin/{table}/delete/{pk_value}")
+async def admin_delete(request: Request, table: str, pk_value: str):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    pk = inspector.get_pk_constraint(table).get("constrained_columns", [None])[0]
+    delete_row(table, pk, pk_value)
+    return RedirectResponse(f"/admin?table={table}", status_code=303)
 
 
 @app.get("/auth/{provider}")
@@ -541,16 +717,69 @@ async def override_image_classification(
     return JSONResponse({"error": "Not found"}, status_code=404)
 
 
-@app.get("/about", response_class=HTMLResponse)
-async def about_page(request: Request):
-    """Informational page about the service"""
-    return templates.TemplateResponse("about.html", {"request": request})
+def suggest_courses_from_text(text: str) -> List[Dict[str, float]]:
+    """Return best matching courses for given text using fuzzy matching."""
+    try:
+        session = BackendSessionLocal()
+    except Exception:
+        return []
+    suggestions: List[Dict[str, float]] = []
+    try:
+        courses = session.query(Course).all()
+        lowered = text.lower()
+        for course in courses:
+            course_text = f"{course.title} {course.description or ''}".lower()
+            score = SequenceMatcher(None, lowered, course_text).ratio()
+            suggestions.append({"id": course.id, "title": course.title, "score": round(score, 2)})
+        suggestions.sort(key=lambda x: x["score"], reverse=True)
+        return suggestions[:5]
+    except Exception:
+        return []
+    finally:
+        session.close()
+
+
+@app.get("/tna", response_class=HTMLResponse)
+async def tna_form(request: Request):
+    """Display Training Needs Analysis upload form."""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    return templates.TemplateResponse("tna_upload.html", {"request": request, "suggestions": None})
+
+
+@app.post("/tna", response_class=HTMLResponse)
+async def tna_upload(request: Request, file: UploadFile = File(...)):
+    """Handle Training Needs Analysis file upload and suggest courses."""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+    os.makedirs(UPLOAD_DIR, exist_ok=True)
+    filename = secure_filename(file.filename or "tna.txt")
+    stored_name = f"{uuid.uuid4().hex}_{filename}"
+    path = os.path.join(UPLOAD_DIR, stored_name)
+    content = await file.read()
+    with open(path, "wb") as out:
+        out.write(content)
+    text = content.decode("utf-8", errors="ignore")
+    suggestions = suggest_courses_from_text(text)
+    return templates.TemplateResponse(
+        "tna_upload.html",
+        {"request": request, "suggestions": suggestions, "uploaded": True, "filename": file.filename},
+    )
 
 
 @app.get("/about", response_class=HTMLResponse)
 async def about_page(request: Request):
     """Informational page about the service"""
     return templates.TemplateResponse("about.html", {"request": request})
+
+
+@app.get("/help", response_class=HTMLResponse)
+async def help_page(request: Request):
+    """Help and support page"""
+    return templates.TemplateResponse("help.html", {"request": request})
+
 
 
 @app.get("/profile", response_class=HTMLResponse)
@@ -571,7 +800,6 @@ async def onboard_form(request: Request):
 # ---------------------------------------------------------------------------
 # Centre Submission workflow
 
-
 @app.get("/centre-submission", response_class=HTMLResponse)
 async def centre_submission_form(
     request: Request,
@@ -580,6 +808,7 @@ async def centre_submission_form(
     qualification_id: Optional[str] = None,
     qualification_title: Optional[str] = None,
 ):
+    # --- function body must be indented here ---
     user = get_current_user(request)
     centre_id = 1 if user and user.get("role") == "learning_centre" else None
 
@@ -592,13 +821,17 @@ async def centre_submission_form(
             "qualification_id": qualification_id,
             "qualification_title": qualification_title,
             "centre_id": centre_id,
-            "recommendations_enabled": RECOMMENDER_AVAILABLE,
+            "recommend_available": RECOMMEND_AVAILABLE,
         },
     )
 
+class RecommendationBuildRequest(BaseModel):
+    centre_id: int
+    top_n: int | None = 10
+
 
 @app.post("/build-recommendations")
-async def build_recommendations():
+async def build_recommendations(payload: RecommendationBuildRequest):
     if run_etl is None:
         raise HTTPException(status_code=500, detail="ETL not configured")
     try:
@@ -609,13 +842,23 @@ async def build_recommendations():
         app.router.routes = [
             r
             for r in app.router.routes
-            if not getattr(r, "path", "").startswith("/recommend")
+            if not (
+                getattr(r, "path", "").startswith("/recommend")
+                and not getattr(r, "path", "").startswith("/recommendations")
+            )
         ]
         app.include_router(recommend_module.app.router)
-        global RECOMMENDER_AVAILABLE
+        global RECOMMENDER_AVAILABLE, RECOMMEND_AVAILABLE
         RECOMMENDER_AVAILABLE = True
-        return {"status": "ok"}
+        RECOMMEND_AVAILABLE = True
+        result = recommend_module.recommend(
+            payload.centre_id, top_n=payload.top_n
+        )
+        return JSONResponse(content=result)
+    except HTTPException:
+        raise
     except Exception as e:
+        logger.exception("Recommendation ETL failed")
         raise HTTPException(status_code=500, detail=str(e))
 
 
@@ -672,16 +915,14 @@ async def submit_centre_submission(request: Request):
     centre_submissions.append(submission)
 
     # Add entry to applications list for display on /applications page
-    applications_db.append(
-        {
-            "id": len(applications_db) + 1,
-            "awarding_organisation": form.get("ao_name"),
-            "rn": form.get("ao_id"),
-            "qualification_number": form.get("qualification_id"),
-            "qualification_title": form.get("title"),
-            "status": "Pending",
-        }
-    )
+    applications_db.append({
+        "id": len(applications_db) + 1,
+        "awarding_organisation": form.get("ao_name"),
+        "rn": form.get("ao_id"),
+        "qualification_number": form.get("qualification_id"),
+        "qualification_title": form.get("title"),
+        "status": "Pending",
+    })
 
     # After adding to our in-memory store, show the updated applications table
     user = get_current_user(request)
@@ -1773,4 +2014,4 @@ def simulate_jcq_check(centre_number: str) -> Dict:
 if __name__ == "__main__":
     import uvicorn
 
-    uvicorn.run(app, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
+    uvicorn.run(app, --proxy-headers, host="0.0.0.0", port=int(os.getenv("PORT", 8000)))
