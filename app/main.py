@@ -559,7 +559,7 @@ async def logout(request: Request):
 
 
 # ---------------------------------------------------------------------------
-# New navigation pages for refactored information architecture
+# New navigation pages for refactored information architecture page
 
 
 @app.get("/applications", response_class=HTMLResponse)
