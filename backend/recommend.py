@@ -7,6 +7,8 @@ import numpy as np
 from fastapi import FastAPI, HTTPException
 from sklearn.metrics.pairwise import cosine_similarity
 
+from .risk import calculate_risk_score, classify_partner
+
 DATA_DIR = os.path.join(os.path.dirname(__file__), "data")
 
 centre_features = joblib.load(os.path.join(DATA_DIR, "centre_feature_matrix.pkl"))
@@ -28,6 +30,8 @@ def recommend(centre_id: int, top_n: int = 10):
     centre_info = centre_meta[idx]
     owned_labs = set(centre_info["labs"])
     rating = centre_info["online_rating"]
+    risk_score = calculate_risk_score(centre_info)
+    partner_tier = classify_partner(risk_score)
 
     sims = cosine_similarity(centre_vec, course_features)[0]
     results: List[dict] = []
@@ -53,6 +57,8 @@ def recommend(centre_id: int, top_n: int = 10):
             "id": centre_id,
             "lab_capabilities": centre_info["lab_capabilities"],
             "skill_levels": centre_info["skill_levels"],
+            "risk_score": risk_score,
+            "partner_tier": partner_tier,
         },
         "recommendations": results[:top_n],
     }

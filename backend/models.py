@@ -11,6 +11,11 @@ class Centre(Base):
     location = Column(String)
     capacity = Column(Integer)
     online_rating = Column(Float)
+    years_operating = Column(Integer, default=0)
+    offers_similar_courses = Column(Boolean, default=False)
+    standards_verification = Column(String, default="unknown")
+    years_known_ao = Column(Integer, default=0)
+    late_payment_history = Column(Boolean, default=False)
 
     labs = relationship("CentreLab", back_populates="centre", cascade="all, delete-orphan")
     skills = relationship("CentreStaffSkill", back_populates="centre", cascade="all, delete-orphan")

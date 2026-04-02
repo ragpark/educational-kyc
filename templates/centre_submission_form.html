@@ -10,10 +10,24 @@
         </p>
     </div>
 
+    <div class="mb-6">
+        <div class="flex flex-wrap items-center gap-3">
+            <a href="/tna" class="text-sm text-blue-600 hover:underline">Upload Training Needs Analysis</a>
+            <button
+                type="button"
+                id="open-chatbot-modal"
+                class="text-sm bg-indigo-600 text-white px-3 py-2 rounded-md hover:bg-indigo-700 transition"
+            >
+                Open application assistant
+            </button>
+            <span class="text-xs text-gray-500">Optional chatbot-style guidance while completing this form.</span>
+        </div>
+    </div>
+
+    {% if recommend_available %}
     <div class="max-w-5xl mx-auto px-4 sm:px-6 lg:px-8" id="recommendation-section">
-    <h3 class="text-xl font-semibold text-gray-900 mb-4">Recommended Courses</h3>
-    <button type="button" id="recommend-btn" class="bg-green-600 text-white px-4 py-2 rounded-md mb-4">Get Recommendations</button>
-    <div id="recommendations" class="space-y-2"></div>
+        <h3 class="text-xl font-semibold text-gray-900 mb-4">Recommended Courses</h3>
+        <button type="button" id="recommend-btn" class="bg-green-600 text-white px-4 py-2 rounded-md mb-4">View Recommendations</button>
     </div>
 
     <form method="POST" action="/centre-submission" class="bg-white rounded-2xl shadow-lg p-10 space-y-10">
@@ -131,6 +145,33 @@
     </form>
 </div>
 
+<div id="chatbot-modal" class="fixed inset-0 z-50 hidden" aria-hidden="true">
+    <div id="chatbot-overlay" class="absolute inset-0 bg-black bg-opacity-50"></div>
+    <div class="relative h-full flex items-center justify-center px-4">
+        <div class="w-full max-w-xl bg-white rounded-2xl shadow-2xl overflow-hidden">
+            <div class="px-5 py-4 bg-indigo-600 text-white flex items-center justify-between">
+                <h4 class="text-lg font-semibold">Centre Submission Assistant</h4>
+                <button type="button" id="close-chatbot-modal" class="text-white hover:text-indigo-100" aria-label="Close assistant">✕</button>
+            </div>
+            <div id="chatbot-messages" class="h-80 overflow-y-auto p-4 space-y-3 bg-gray-50"></div>
+            <div class="px-4 py-3 border-t border-gray-200">
+                <div class="flex gap-2">
+                    <input
+                        id="chatbot-input"
+                        type="text"
+                        class="flex-1 rounded-lg border-gray-300 text-sm px-3 py-2 focus:ring-indigo-500 focus:border-indigo-500"
+                        placeholder="Ask about fields, dates, or form steps..."
+                    >
+                    <button type="button" id="chatbot-send" class="bg-indigo-600 text-white px-4 py-2 rounded-lg hover:bg-indigo-700">Send</button>
+                </div>
+                <p class="text-xs text-gray-500 mt-2">
+                    Try: “What is verification ID?”, “What should I enter for cohort size?”, “How do I find qualification ID?”
+                </p>
+            </div>
+        </div>
+    </div>
+</div>
+
 
 <script>
 // Disable all form fields until verification ID is validated
@@ -194,9 +235,7 @@ verificationInput.addEventListener('input', function(e) {
 });
 
 const centreId = {{ centre_id | tojson }};
-
 const recommendBtn = document.getElementById('recommend-btn');
-const recContainer = document.getElementById('recommendations');
 if (recommendBtn) {
     if (centreId === null) {
         recommendBtn.disabled = true;
@@ -204,29 +243,112 @@ if (recommendBtn) {
     } else {
         recommendBtn.addEventListener('click', async () => {
             recommendBtn.disabled = true;
-            recContainer.innerHTML = '';
             recommendBtn.textContent = 'Preparing...';
             try {
-                await fetch('/build-recommendations', {method: 'POST'});
-                recommendBtn.textContent = 'Loading...';
-                const resp = await fetch(`/recommend/${centreId}`);
-                const data = await resp.json();
-                recContainer.innerHTML = '';
-                data.recommendations.forEach(r => {
-                    const card = document.createElement('div');
-                    card.className = 'border p-4 rounded-md';
-                    card.innerHTML = `<div class="font-medium">${r.title}</div>` +
-                        `<div class=\"text-sm text-gray-600\">Score: ${(r.score * 100).toFixed(1)}%</div>`;
-                    recContainer.appendChild(card);
+                const buildResp = await fetch('/build-recommendations', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({ centre_id: centreId })
                 });
-            } catch (_) {
-                recContainer.innerHTML = '<div class="text-red-600">Failed to load recommendations</div>';
+                if (!buildResp.ok) {
+                    const buildData = await buildResp.json();
+                    throw new Error(buildData.detail || 'Failed to build recommendations');
+                }
+                // Open the recommendations dashboard for the centre
+                window.open(`/recommendations`, '_blank');
+            } catch (err) {
+                alert(err.message);
             } finally {
                 recommendBtn.disabled = false;
-                recommendBtn.textContent = 'Get Recommendations';
+                recommendBtn.textContent = 'View Recommendations';
             }
         });
     }
 }
+
+const chatbotModal = document.getElementById('chatbot-modal');
+const chatbotOverlay = document.getElementById('chatbot-overlay');
+const openChatbotModalBtn = document.getElementById('open-chatbot-modal');
+const closeChatbotModalBtn = document.getElementById('close-chatbot-modal');
+const chatbotMessages = document.getElementById('chatbot-messages');
+const chatbotInput = document.getElementById('chatbot-input');
+const chatbotSend = document.getElementById('chatbot-send');
+
+function addChatMessage(text, sender = 'bot') {
+    if (!chatbotMessages) return;
+    const wrapper = document.createElement('div');
+    const bubble = document.createElement('div');
+    wrapper.className = sender === 'user' ? 'flex justify-end' : 'flex justify-start';
+    bubble.className = sender === 'user'
+        ? 'bg-indigo-600 text-white text-sm px-3 py-2 rounded-xl max-w-[85%]'
+        : 'bg-white border border-gray-200 text-gray-800 text-sm px-3 py-2 rounded-xl max-w-[85%]';
+    bubble.textContent = text;
+    wrapper.appendChild(bubble);
+    chatbotMessages.appendChild(wrapper);
+    chatbotMessages.scrollTop = chatbotMessages.scrollHeight;
+}
+
+function chatbotReply(message) {
+    const text = message.toLowerCase();
+    if (text.includes('verification')) {
+        return 'Enter the verification ID from your compliance check. The form unlocks once this ID is confirmed and not revoked.';
+    }
+    if (text.includes('cohort')) {
+        return 'Cohort size is your expected number of learners for this qualification intake. Use a whole number greater than 0.';
+    }
+    if (text.includes('qualification') && text.includes('id')) {
+        return 'Use the Ofqual qualification number. You can click “Search Ofqual Register” in the form to find and prefill this.';
+    }
+    if (text.includes('ao') || text.includes('awarding')) {
+        return 'AO means Awarding Organisation. Enter the AO name and AO ID that matches your selected qualification.';
+    }
+    if (text.includes('start date')) {
+        return 'Choose the planned learner start date for delivery of this qualification.';
+    }
+    if (text.includes('staff') || text.includes('contact')) {
+        return 'Provide details for the responsible approval contact so the AO can follow up if needed.';
+    }
+    if (text.includes('declaration') || text.includes('gdpr') || text.includes('consent')) {
+        return 'All declarations are required before submitting. They confirm compliance, consent, and data sharing with relevant AOs.';
+    }
+    return 'I can help with verification ID, qualification details, AO fields, cohort size, dates, staff contact, and declarations. What would you like to complete next?';
+}
+
+function openChatbotModal() {
+    if (!chatbotModal) return;
+    chatbotModal.classList.remove('hidden');
+    chatbotModal.setAttribute('aria-hidden', 'false');
+    if (chatbotMessages && chatbotMessages.childElementCount === 0) {
+        addChatMessage('Hi, I can guide you through this form step-by-step. Ask me anything about the fields.');
+    }
+    chatbotInput?.focus();
+}
+
+function closeChatbotModal() {
+    if (!chatbotModal) return;
+    chatbotModal.classList.add('hidden');
+    chatbotModal.setAttribute('aria-hidden', 'true');
+}
+
+function sendChatMessage() {
+    const message = chatbotInput?.value?.trim();
+    if (!message) return;
+    addChatMessage(message, 'user');
+    chatbotInput.value = '';
+    window.setTimeout(() => addChatMessage(chatbotReply(message), 'bot'), 150);
+}
+
+openChatbotModalBtn?.addEventListener('click', openChatbotModal);
+closeChatbotModalBtn?.addEventListener('click', closeChatbotModal);
+chatbotOverlay?.addEventListener('click', closeChatbotModal);
+chatbotSend?.addEventListener('click', sendChatMessage);
+chatbotInput?.addEventListener('keydown', (event) => {
+    if (event.key === 'Enter') {
+        event.preventDefault();
+        sendChatMessage();
+    }
+});
 </script>
+
+{% endif %}
 {% endblock %}

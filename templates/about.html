@@ -48,6 +48,7 @@
                         <a href="#overview" onclick="scrollToSection('overview')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">What is Educational KYC?</a>
                         <a href="#what-it-does" onclick="scrollToSection('what-it-does')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">What the System Does</a>
                         <a href="#sections" onclick="scrollToSection('sections')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">Understanding Sections</a>
+                        <a href="#recommendations" onclick="scrollToSection('recommendations')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">Course Recommendations</a>
                         <a href="#centre-requirements" onclick="scrollToSection('centre-requirements')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">Centre Application Requirements</a>
                         <a href="#qualification-requirements" onclick="scrollToSection('qualification-requirements')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">Qualification Requirements</a>
                         <a href="#process" onclick="scrollToSection('process')" class="block text-blue-600 hover:text-blue-800 py-1 transition-colors">Application Process</a>
@@ -90,7 +91,7 @@
                         <div class="bg-gray-50 p-4 rounded-lg">
                             <h4 class="font-semibold text-gray-900 mb-2">🎓 Educational Verification</h4>
                             <ul class="text-gray-700 space-y-1">
-                                <li>• AO's qualification in OFQUAL</li>
+                                <li>• Pearson Education qualification searches</li>
                                 <li>• Ofqual API integration</li>
                                 <li>• Ofsted inspection ratings</li>
                             </ul>
@@ -138,12 +139,12 @@
                             <button onclick="toggleSection('home-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
                                 <div class="flex items-center space-x-3">
                                     <span class="bg-blue-100 text-blue-600 px-3 py-1 rounded-full text-sm font-medium">Home</span>
-                                    <span class="font-medium">Cente Approval</span>
+                                    <span class="font-medium">Centre Approval</span>
                                 </div>
                                 <span data-icon="home-details" class="text-xl font-bold text-gray-400">+</span>
                             </button>
                             <div id="home-details" class="hidden px-4 pb-4 text-gray-700">
-                                Shows new learning centre applications by AO. Provides quick access to key functions, credentials and status reports, and verification progress indicators.
+                                Your central overview showing new centre approval applications and their status, quick access to key functions,  and verification progress indicators, including links to Centre credentials and revocation tools.
                             </div>
                         </div>
 
@@ -151,12 +152,12 @@
                             <button onclick="toggleSection('applications-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
                                 <div class="flex items-center space-x-3">
                                     <span class="bg-green-100 text-green-600 px-3 py-1 rounded-full text-sm font-medium">Applications</span>
-                                    <span class="font-medium">Qualification Approval</span>
+                                    <span class="font-medium">Qualifcation Approvals</span>
                                 </div>
                                 <span data-icon="applications-details" class="text-xl font-bold text-gray-400">+</span>
                             </button>
                             <div id="applications-details" class="hidden px-4 pb-4 text-gray-700">
-                                Track and manage your submissions: view all submitted applications to deliver qualifications, monitor in-progress verifications, check application status updates, and access completed verification credentials.
+                                Track and manage new qualification approvals: view all submitted applications, monitor in-progress verifications, check application status updates, and access completed verification credentials.
                             </div>
                         </div>
 
@@ -169,7 +170,20 @@
                                 <span data-icon="organisation-details" class="text-xl font-bold text-gray-400">+</span>
                             </button>
                             <div id="organisation-details" class="hidden px-4 pb-4 text-gray-700">
-                                Search for, select and add OFQUAL registered courses to your application pack(s).
+                                Search OFQUAL for courses for easy addition to applicaiton packs. Access intelligent Course and Centre matching AI services that visually matches Centres & courses based on facilities, risk, history and partner tier.
+                            </div>
+                        </div>
+
+                        <div class="border border-gray-200 rounded-lg">
+                            <button onclick="toggleSection('messages-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
+                                <div class="flex items-center space-x-3">
+                                    <span class="bg-red-100 text-red-600 px-3 py-1 rounded-full text-sm font-medium">Messages</span>
+                                    <span class="font-medium">Evidence</span>
+                                </div>
+                                <span data-icon="messages-details" class="text-xl font-bold text-gray-400">+</span>
+                            </button>
+                            <div id="messages-details" class="hidden px-4 pb-4 text-gray-700">
+                                A secure digital locker for uploading and sharing evidence and improtant documents in support of applications. AI enriched to provide Red, Amber and Green signals about the relevance, accuracy and timeliness of your content to reduce the risk of delay or rejection.
                             </div>
                         </div>
 
@@ -177,12 +191,12 @@
                             <button onclick="toggleSection('documents-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
                                 <div class="flex items-center space-x-3">
                                     <span class="bg-indigo-100 text-indigo-600 px-3 py-1 rounded-full text-sm font-medium">Documents</span>
-                                    <span class="font-medium">AI supported Evidence locker</span>
+                                    <span class="font-medium">Verify</span>
                                 </div>
                                 <span data-icon="documents-details" class="text-xl font-bold text-gray-400">+</span>
                             </button>
                             <div id="documents-details" class="hidden px-4 pb-4 text-gray-700">
-                                Document management centre: upload required verification documents, store commonly used files for reuse, manage document versions, and access document templates. Uploaded documents assessed in realtime by AI to determine relevance, safety and accuracy. When all indicators are Green, your are ready to submit.
+                                A means to validate the Certify3 QR Code and JSON credentials to ensure the centre is approved to operate in the UK.
                             </div>
                         </div>
 
@@ -190,12 +204,200 @@
                             <button onclick="toggleSection('profile-details')" class="w-full flex items-center justify-between p-4 text-left hover:bg-gray-50 transition-colors">
                                 <div class="flex items-center space-x-3">
                                     <span class="bg-gray-100 text-gray-600 px-3 py-1 rounded-full text-sm font-medium">User Profile</span>
-                                    <span class="font-medium">Verify a Centre</span>
+                                    <span class="font-medium">About</span>
                                 </div>
                                 <span data-icon="profile-details" class="text-xl font-bold text-gray-400">+</span>
                             </button>
                             <div id="profile-details" class="hidden px-4 pb-4 text-gray-700">
-                                A means to validate a Centres QR code to establish validity and a current licence to operate
+                                This page. Learn how the Certify3 site works and how to use it.
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- Course Recommendations Section -->
+                <section id="recommendations" class="bg-white rounded-lg shadow-md p-8 mb-8">
+                    <div class="flex items-center space-x-3 mb-6">
+                        <div class="bg-indigo-100 p-2 rounded-lg">
+                            <svg class="w-6 h-6 text-indigo-600" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M13 10V3L4 14h7v7l9-11h-7z"/>
+                            </svg>
+                        </div>
+                        <h2 class="text-2xl font-bold text-gray-900">Course Recommendations System</h2>
+                    </div>
+                    
+                    <div class="bg-indigo-50 border-l-4 border-indigo-400 p-4 mb-6">
+                        <p class="text-indigo-900 font-medium mb-2">💡 What are Course Recommendations?</p>
+                        <p class="text-gray-700">
+                            The recommendation system helps you identify which courses your centre is best equipped to deliver successfully. It matches your centre's capabilities—including available laboratories, staff expertise, and resources—against course requirements to suggest the most suitable qualifications for your organisation.
+                        </p>
+                    </div>
+
+                    <div class="space-y-6">
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">How Recommendations Benefit Your Centre</h3>
+                            <div class="grid md:grid-cols-3 gap-4">
+                                <div class="bg-green-50 p-4 rounded-lg border border-green-200">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <span class="bg-green-100 text-green-600 p-1 rounded text-sm">🎯</span>
+                                        <span class="font-semibold text-green-900">Smart Matching</span>
+                                    </div>
+                                    <p class="text-gray-700 text-sm">Find courses that align perfectly with your existing facilities and staff expertise</p>
+                                </div>
+                                
+                                <div class="bg-blue-50 p-4 rounded-lg border border-blue-200">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <span class="bg-blue-100 text-blue-600 p-1 rounded text-sm">⚡</span>
+                                        <span class="font-semibold text-blue-900">Efficiency</span>
+                                    </div>
+                                    <p class="text-gray-700 text-sm">Save time by focusing on qualifications you're already equipped to deliver</p>
+                                </div>
+                                
+                                <div class="bg-purple-50 p-4 rounded-lg border border-purple-200">
+                                    <div class="flex items-center space-x-2 mb-2">
+                                        <span class="bg-purple-100 text-purple-600 p-1 rounded text-sm">📈</span>
+                                        <span class="font-semibold text-purple-900">Growth Planning</span>
+                                    </div>
+                                    <p class="text-gray-700 text-sm">Identify areas where small investments could unlock new course opportunities</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">Understanding Partnership Maturity & Risk Scoring</h3>
+                            <p class="text-gray-700 mb-4">
+                                Each recommendation includes a risk score and partnership tier that reflects the maturity of your relationship with the relevant Awarding Organisation. This scoring helps both you and the AO understand your current standing and collaboration level.
+                            </p>
+                            
+                            <div class="bg-gray-50 p-4 rounded-lg">
+                                <h4 class="font-semibold text-gray-900 mb-3">Partnership Tier Levels</h4>
+                                <div class="space-y-3">
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-4 h-4 bg-red-500 rounded-full"></div>
+                                        <div>
+                                            <span class="font-medium text-gray-900">New Partner:</span>
+                                            <span class="text-gray-700">Early-stage relationship, higher risk score, may require additional oversight</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-4 h-4 bg-yellow-500 rounded-full"></div>
+                                        <div>
+                                            <span class="font-medium text-gray-900">Developing Partner:</span>
+                                            <span class="text-gray-700">Growing relationship, moderate risk score, building trust and capability</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-4 h-4 bg-green-500 rounded-full"></div>
+                                        <div>
+                                            <span class="font-medium text-gray-900">Established Partner:</span>
+                                            <span class="text-gray-700">Mature relationship, low risk score, proven track record of successful delivery</span>
+                                        </div>
+                                    </div>
+                                    <div class="flex items-center space-x-3">
+                                        <div class="w-4 h-4 bg-blue-500 rounded-full"></div>
+                                        <div>
+                                            <span class="font-medium text-gray-900">Strategic Partner:</span>
+                                            <span class="text-gray-700">Premium relationship, lowest risk score, maximum autonomy and support</span>
+                                        </div>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">How the Recommendation System Works</h3>
+                            
+                            <div class="space-y-4">
+                                <div class="flex items-start space-x-4">
+                                    <div class="bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">1</div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900 mb-2">Centre Profile Analysis</h4>
+                                        <p class="text-gray-700">The system analyses your centre's capabilities by examining your available laboratories, staff qualifications, technical expertise, and previous course delivery history.</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start space-x-4">
+                                    <div class="bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">2</div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900 mb-2">Course Requirements Mapping</h4>
+                                        <p class="text-gray-700">Each available course is mapped according to its specific requirements, including necessary laboratory facilities, prerequisite staff skills, technical equipment needs, and delivery methods.</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start space-x-4">
+                                    <div class="bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">3</div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900 mb-2">Smart Matching Algorithm</h4>
+                                        <p class="text-gray-700">The system calculates compatibility scores by comparing your centre's capabilities directly against course requirements. It focuses on objective resource matching rather than subjective preferences.</p>
+                                    </div>
+                                </div>
+
+                                <div class="flex items-start space-x-4">
+                                    <div class="bg-indigo-600 text-white rounded-full w-8 h-8 flex items-center justify-center font-bold text-sm">4</div>
+                                    <div>
+                                        <h4 class="font-semibold text-gray-900 mb-2">Results & Visualisation</h4>
+                                        <p class="text-gray-700">Recommendations are presented with interactive radar charts that visually compare your centre's capabilities against each course's requirements, making it easy to identify perfect matches and areas for development.</p>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">What Makes Our Approach Unique</h3>
+                            
+                            <div class="bg-blue-50 border border-blue-200 rounded-lg p-4">
+                                <h4 class="font-semibold text-blue-900 mb-2">Content-Based Matching</h4>
+                                <p class="text-gray-700 mb-3">
+                                    Our recommendation system uses content-based filtering, which means it matches centres to courses based on factual capability alignment rather than user behaviour patterns or preferences.
+                                </p>
+                                <p class="text-gray-700 mb-3">
+                                    This approach is particularly effective for educational providers because successful course delivery fundamentally depends on whether a centre has the correct physical infrastructure, qualified staff, and technical expertise required—not on subjective preferences.
+                                </p>
+                                <div class="bg-white p-3 rounded border-l-4 border-blue-400">
+                                    <p class="text-blue-900 font-medium text-sm">
+                                        💡 Key Question: "Can this centre deliver this course effectively?" The system answers this by quantifying how well your resources align with the course's specific technical and educational demands.
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div>
+                            <h3 class="text-xl font-semibold text-gray-900 mb-4">Using Your Recommendations Dashboard</h3>
+                            
+                            <div class="grid md:grid-cols-2 gap-4">
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-900 mb-2">📊 Visual Capability Mapping</h4>
+                                    <p class="text-gray-700 text-sm">Interactive radar charts show how your centre's capabilities overlay against course requirements, highlighting strengths and identifying gaps.</p>
+                                </div>
+                                
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-900 mb-2">🎯 Compatibility Scoring</h4>
+                                    <p class="text-gray-700 text-sm">Each recommendation includes a compatibility score showing how well-matched your centre is to deliver the course successfully.</p>
+                                </div>
+                                
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-900 mb-2">⚠️ Risk Assessment</h4>
+                                    <p class="text-gray-700 text-sm">Partnership maturity indicators help you understand your current relationship status with each Awarding Organisation.</p>
+                                </div>
+                                
+                                <div class="bg-gray-50 p-4 rounded-lg">
+                                    <h4 class="font-semibold text-gray-900 mb-2">📈 Development Opportunities</h4>
+                                    <p class="text-gray-700 text-sm">Identify specific areas where small investments in equipment or staff training could unlock new course opportunities.</p>
+                                </div>
+                            </div>
+                        </div>
+
+                        <div class="bg-green-50 border border-green-200 rounded-lg p-4">
+                            <div class="flex items-start space-x-3">
+                                <svg class="w-5 h-5 text-green-600 mt-1" fill="currentColor" viewBox="0 0 20 20">
+                                    <path fill-rule="evenodd" d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z" clip-rule="evenodd"/>
+                                </svg>
+                                <div>
+                                    <h4 class="font-semibold text-green-900 mb-1">Getting Started with Recommendations</h4>
+                                    <p class="text-gray-700 text-sm">
+                                        To access course recommendations, ensure your centre profile is complete with up-to-date information about your facilities, laboratory equipment, and staff qualifications. The more accurate your centre data, the more precise and useful your recommendations will be.
+                                    </p>
+                                </div>
                             </div>
                         </div>
                     </div>
@@ -334,10 +536,9 @@
                             <div>
                                 <h3 class="text-lg font-semibold text-gray-900 mb-2">Organisation Setup</h3>
                                 <ul class="text-gray-700 space-y-1">
-                                    <li>• Navigate to "Centre Approval"</li>
+                                    <li>• Navigate to "My Organisation"</li>
                                     <li>• Enter all required organisational details</li>
-                                    <li>• Generate your Licence to Operate (QR Code and Verification ID)</li>                                    
-                                    <li>• Upload supporting documentation to the Evidence locker</li>
+                                    <li>• Upload supporting documentation</li>
                                     <li>• Add delivery site information</li>
                                 </ul>
                             </div>
@@ -348,10 +549,11 @@
                             <div>
                                 <h3 class="text-lg font-semibold text-gray-900 mb-2">Application Submission</h3>
                                 <ul class="text-gray-700 space-y-1">
-                                    <li>• Go to "Qualification Approval" section</li>
-                                    <li>• Add the Verification ID from the Centre Approval step </li>
-                                    <li>• Search for the course using the OFQUAL Search tool, Select the course to add it to the Approval form</li>
-                                    <li>• Complete all remaining fields</li>                                
+                                    <li>• Go to "Applications" section</li>
+                                    <li>• Select "New Application"</li>
+                                    <li>• Choose application type (Centre or Qualification)</li>
+                                    <li>• Complete all required fields</li>
+                                    <li>• Upload necessary supporting documents</li>
                                     <li>• Review and submit application</li>
                                 </ul>
                             </div>
@@ -365,8 +567,8 @@
                                 <ul class="text-gray-700 space-y-1">
                                     <li>• Verify organisation against Companies House</li>
                                     <li>• Check Ofsted inspection records</li>
-                                    <li>• Validate UKPRN and URN identifiers</li>
-                                    <li>• Validate Postcode and other data</li>
+                                    <li>• Validate ESFA funding status</li>
+                                    <li>• Search Ofqual qualification databases</li>
                                     <li>• Calculate risk assessment score</li>
                                 </ul>
                             </div>

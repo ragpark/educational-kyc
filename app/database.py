@@ -6,7 +6,7 @@ from sqlalchemy.orm import sessionmaker
 
 from .models import mapper_registry
 
-DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://localhost/postgres")
+DATABASE_URL = os.getenv("DATABASE_URL", "postgresql://postgres:xROoUYtyUUPjYZpShDGdGFugZvsKzyFb@postgres.railway.internal:5432/railway")
 engine = create_engine(DATABASE_URL, echo=False)
 
 SessionLocal = sessionmaker(bind=engine)

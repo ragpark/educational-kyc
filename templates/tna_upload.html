@@ -1,0 +1,23 @@
+{% extends "base.html" %}
+{% block title %}Training Needs Analysis{% endblock %}
+{% block content %}
+<div class="max-w-3xl mx-auto px-4 py-12">
+  <h2 class="text-2xl font-bold mb-6">Upload Training Needs Analysis</h2>
+  <form method="post" enctype="multipart/form-data" class="mb-6">
+    <input type="file" name="file" required class="border rounded px-3 py-2"/>
+    <button type="submit" class="ml-2 bg-blue-600 text-white px-4 py-2 rounded">Upload</button>
+  </form>
+  {% if uploaded %}
+    <p class="mb-4 text-sm text-gray-600">Uploaded {{ filename }}. Suggested courses:</p>
+  {% endif %}
+  {% if suggestions %}
+    <ul class="list-disc pl-5 space-y-2">
+      {% for course in suggestions %}
+        <li>{{ course.title }} ({{ (course.score * 100)|round(0) }}% match)</li>
+      {% endfor %}
+    </ul>
+  {% elif uploaded %}
+    <p>No matching courses found.</p>
+  {% endif %}
+</div>
+{% endblock %}
