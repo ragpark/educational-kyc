@@ -11,6 +11,8 @@ from pydantic import BaseModel
 from contextlib import asynccontextmanager
 import os
 import base64
+import csv
+import io
 from typing import Dict, List, Optional
 from datetime import datetime
 import json
@@ -99,6 +101,8 @@ providers_db = []
 applications_db: List[Dict] = []
 centre_submissions: List[CentreSubmission] = []
 processing_queue = {}
+lms_mis_integrations: Dict[str, Dict] = {}
+lms_mis_assessment_runs: Dict[str, List[Dict]] = {}
 
 # Per-user document storage metadata
 documents_storage: Dict[str, List[Dict]] = {}
@@ -739,6 +743,57 @@ def suggest_courses_from_text(text: str) -> List[Dict[str, float]]:
         session.close()
 
 
+def _normalise_qualification(value: Optional[str]) -> str:
+    return (value or "").strip().lower()
+
+
+def get_approved_qualifications_for_user(user: Dict) -> Dict[str, set]:
+    """Build a set of approved qualification identifiers and titles for a centre."""
+    approved_ids = set()
+    approved_titles = set()
+
+    for application in applications_db:
+        if str(application.get("status", "")).strip().lower() == "approved":
+            approved_ids.add(_normalise_qualification(application.get("qualification_number")))
+            approved_titles.add(_normalise_qualification(application.get("qualification_title")))
+
+    # Include any onboarded qualifications for approved providers
+    for provider in providers_db:
+        if str(provider.get("status", "")).strip().lower() == "approved":
+            for qualification in provider.get("qualifications_offered", []):
+                approved_titles.add(_normalise_qualification(qualification))
+
+    approved_ids.discard("")
+    approved_titles.discard("")
+    return {"ids": approved_ids, "titles": approved_titles}
+
+
+def assess_lms_mis_rows(rows: List[Dict[str, str]], approved: Dict[str, set]) -> List[Dict]:
+    """Assess uploaded learner records against approved centre qualifications."""
+    assessed_rows = []
+    for row in rows:
+        qualification_id = _normalise_qualification(row.get("qualification_id"))
+        qualification_title = _normalise_qualification(row.get("qualification_title"))
+        is_approved = (
+            qualification_id in approved["ids"] if qualification_id else False
+        ) or (
+            qualification_title in approved["titles"] if qualification_title else False
+        )
+        assessed_rows.append(
+            {
+                "learner_id": (row.get("learner_id") or "").strip(),
+                "learner_name": (row.get("learner_name") or "").strip(),
+                "qualification_id": row.get("qualification_id"),
+                "qualification_title": row.get("qualification_title"),
+                "registration_status": row.get("registration_status"),
+                "assessment_result": (
+                    "eligible_for_delivery" if is_approved else "not_approved_for_centre"
+                ),
+            }
+        )
+    return assessed_rows
+
+
 @app.get("/tna", response_class=HTMLResponse)
 async def tna_form(request: Request):
     """Display Training Needs Analysis upload form."""
@@ -746,6 +801,101 @@ async def tna_form(request: Request):
     if not user:
         return RedirectResponse("/login", status_code=302)
     return templates.TemplateResponse("tna_upload.html", {"request": request, "suggestions": None})
+
+
+@app.get("/integrations/lms-mis", response_class=HTMLResponse)
+async def lms_mis_integration_page(request: Request):
+    """Configure LMS/MIS integration and assess learner records."""
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+
+    centre_key = user["name"]
+    integration = lms_mis_integrations.get(centre_key)
+    latest_run = (lms_mis_assessment_runs.get(centre_key) or [None])[-1]
+    approved = get_approved_qualifications_for_user(user)
+
+    return templates.TemplateResponse(
+        "lms_mis_integration.html",
+        {
+            "request": request,
+            "user": user,
+            "integration": integration,
+            "latest_run": latest_run,
+            "approved_count": len(approved["ids"]) + len(approved["titles"]),
+        },
+    )
+
+
+@app.post("/integrations/lms-mis/configure", response_class=HTMLResponse)
+async def configure_lms_mis_integration(
+    request: Request,
+    system_type: str = Form(...),
+    provider_name: str = Form(...),
+    endpoint_url: str = Form(...),
+    data_format: str = Form(...),
+    sync_frequency: str = Form(...),
+):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+
+    centre_key = user["name"]
+    lms_mis_integrations[centre_key] = {
+        "system_type": system_type,
+        "provider_name": provider_name,
+        "endpoint_url": endpoint_url,
+        "data_format": data_format,
+        "sync_frequency": sync_frequency,
+        "configured_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+    }
+    return RedirectResponse("/integrations/lms-mis", status_code=303)
+
+
+@app.post("/integrations/lms-mis/upload", response_class=HTMLResponse)
+async def upload_lms_mis_data(request: Request, file: UploadFile = File(...)):
+    user = get_current_user(request)
+    if not user:
+        return RedirectResponse("/login", status_code=302)
+
+    if not file.filename or not file.filename.lower().endswith(".csv"):
+        raise HTTPException(status_code=400, detail="Please upload a CSV file.")
+
+    payload = await file.read()
+    try:
+        text_data = payload.decode("utf-8")
+    except UnicodeDecodeError:
+        text_data = payload.decode("latin-1")
+
+    reader = csv.DictReader(io.StringIO(text_data))
+    rows = [row for row in reader]
+    approved = get_approved_qualifications_for_user(user)
+    assessed_rows = assess_lms_mis_rows(rows, approved)
+
+    matched = sum(1 for r in assessed_rows if r["assessment_result"] == "eligible_for_delivery")
+    unmatched = len(assessed_rows) - matched
+    run_summary = {
+        "uploaded_filename": file.filename,
+        "uploaded_at": datetime.utcnow().strftime("%Y-%m-%d %H:%M:%S"),
+        "total_rows": len(assessed_rows),
+        "matched_rows": matched,
+        "unmatched_rows": unmatched,
+        "assessed_rows": assessed_rows[:50],
+    }
+    centre_key = user["name"]
+    lms_mis_assessment_runs.setdefault(centre_key, []).append(run_summary)
+
+    return templates.TemplateResponse(
+        "lms_mis_integration.html",
+        {
+            "request": request,
+            "user": user,
+            "integration": lms_mis_integrations.get(centre_key),
+            "latest_run": run_summary,
+            "approved_count": len(approved["ids"]) + len(approved["titles"]),
+            "upload_success": True,
+        },
+    )
 
 
 @app.post("/tna", response_class=HTMLResponse)
